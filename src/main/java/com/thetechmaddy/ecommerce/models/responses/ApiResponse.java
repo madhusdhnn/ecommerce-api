@@ -1,7 +1,9 @@
 package com.thetechmaddy.ecommerce.models.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.thetechmaddy.ecommerce.models.JsonViews;
 import com.thetechmaddy.ecommerce.models.serializers.EnumSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,6 +16,7 @@ import static com.thetechmaddy.ecommerce.models.responses.ApiResponseStatus.SUCC
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonView(value = JsonViews.ProductResponse.class)
 public class ApiResponse<T> {
 
     @JsonSerialize(using = EnumSerializer.class)

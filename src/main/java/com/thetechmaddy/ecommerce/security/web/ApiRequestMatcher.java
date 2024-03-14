@@ -1,4 +1,4 @@
-package com.thetechmaddy.ecommerce.web;
+package com.thetechmaddy.ecommerce.security.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
