@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "categories")
-public class Category extends Timestamp {
+public class Category extends Audit {
 
     @Id
     @Column(name = "id")

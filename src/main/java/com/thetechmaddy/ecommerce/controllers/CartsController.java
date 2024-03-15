@@ -1,7 +1,7 @@
 package com.thetechmaddy.ecommerce.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.thetechmaddy.ecommerce.domains.Cart;
+import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.models.AppConstants;
 import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;

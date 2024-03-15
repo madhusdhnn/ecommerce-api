@@ -1,15 +1,15 @@
 package com.thetechmaddy.ecommerce.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.thetechmaddy.ecommerce.domains.Product;
+import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.models.JsonViews;
 import com.thetechmaddy.ecommerce.models.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 import com.thetechmaddy.ecommerce.services.ProductsService;
 import jakarta.websocket.server.PathParam;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,14 +19,10 @@ import java.math.BigDecimal;
 
 @RestController
 @RequestMapping(value = "/api/products")
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class ProductsController extends BaseController {
 
     private final ProductsService productsService;
-
-    @Autowired
-    public ProductsController(@Qualifier("productsServiceImpl") ProductsService productsService) {
-        this.productsService = productsService;
-    }
 
     @GetMapping("/search")
     @JsonView(value = JsonViews.ProductResponse.class)

@@ -1,5 +1,8 @@
 package com.thetechmaddy.ecommerce.domains;
 
+import com.thetechmaddy.ecommerce.domains.carts.Cart;
+import com.thetechmaddy.ecommerce.domains.carts.CartItem;
+import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.models.CartItemStatus;
 import org.junit.jupiter.api.Test;
 
@@ -44,6 +47,6 @@ public class CartTest {
 
         assertEquals(BigDecimal.ZERO, cart.getSubTotal());
         cart.calculateSubTotal();
-        assertEquals(new BigDecimal("5458.55"), cart.getSubTotal());
+        assertEquals(new BigDecimal("6113.57"), cart.getSubTotal());
     }
 }

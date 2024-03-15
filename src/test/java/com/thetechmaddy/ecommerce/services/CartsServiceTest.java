@@ -2,9 +2,9 @@ package com.thetechmaddy.ecommerce.services;
 
 
 import com.thetechmaddy.ecommerce.BaseIntegrationTest;
-import com.thetechmaddy.ecommerce.domains.Cart;
-import com.thetechmaddy.ecommerce.domains.CartItem;
-import com.thetechmaddy.ecommerce.domains.Product;
+import com.thetechmaddy.ecommerce.domains.carts.Cart;
+import com.thetechmaddy.ecommerce.domains.carts.CartItem;
+import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.*;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
 import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;

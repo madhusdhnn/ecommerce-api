@@ -1,10 +1,11 @@
-package com.thetechmaddy.ecommerce.domains;
+package com.thetechmaddy.ecommerce.domains.carts;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.thetechmaddy.ecommerce.domains.Audit;
 import com.thetechmaddy.ecommerce.models.CartStatus;
 import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
-import com.thetechmaddy.ecommerce.models.serializers.BigDecimalTwoDecimalPlacesSerializer;
+import com.thetechmaddy.ecommerce.models.serializers.BigDecimalToDoubleTwoDecimalPlacesNumberSerializer;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +24,7 @@ import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class Cart extends Timestamp {
+public class Cart extends Audit {
 
     @Id
     @Column(name = "id")
@@ -47,7 +48,7 @@ public class Cart extends Timestamp {
     @Transient
     @EqualsAndHashCode.Exclude
     @JsonView(CartResponse.class)
-    @JsonSerialize(using = BigDecimalTwoDecimalPlacesSerializer.class)
+    @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
     private BigDecimal subTotal = BigDecimal.ZERO;
 
     public Cart(String userId, CartStatus cartStatus) {
@@ -64,7 +65,7 @@ public class Cart extends Timestamp {
     public void calculateSubTotal() {
         this.subTotal = this.cartItems.stream()
                 .filter(CartItem::isSelected)
-                .map(ci -> ci.getProduct().getPrice().multiply(new BigDecimal(ci.getQuantity())))
+                .map(ci -> ci.getProduct().getGrossAmount().multiply(new BigDecimal(ci.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

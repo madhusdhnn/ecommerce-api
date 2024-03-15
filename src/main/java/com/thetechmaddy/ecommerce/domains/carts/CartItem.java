@@ -1,6 +1,8 @@
-package com.thetechmaddy.ecommerce.domains;
+package com.thetechmaddy.ecommerce.domains.carts;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.thetechmaddy.ecommerce.domains.products.Product;
+import com.thetechmaddy.ecommerce.domains.Audit;
 import com.thetechmaddy.ecommerce.models.CartItemStatus;
 import com.thetechmaddy.ecommerce.models.JsonViews;
 import jakarta.persistence.*;
@@ -16,7 +18,7 @@ import static com.thetechmaddy.ecommerce.models.CartItemStatus.SELECTED;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class CartItem extends Timestamp {
+public class CartItem extends Audit {
 
     @Id
     @Column(name = "id")

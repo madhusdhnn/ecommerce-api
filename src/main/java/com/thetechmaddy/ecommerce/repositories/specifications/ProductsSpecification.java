@@ -1,6 +1,6 @@
 package com.thetechmaddy.ecommerce.repositories.specifications;
 
-import com.thetechmaddy.ecommerce.domains.Product;
+import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.models.ProductFilters;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
@@ -38,16 +38,14 @@ public class ProductsSpecification implements Specification<Product> {
             }
 
             if (productFilters.hasMinPriceFilter()) {
-                Path<BigDecimal> price = root.get("price");
+                Path<BigDecimal> price = root.get("grossAmount");
                 if (productFilters.hasMaxPriceFilter()) {
                     predicates.add(cb.between(price, productFilters.getMinPrice(), productFilters.getMaxPrice()));
                 } else {
                     predicates.add(cb.greaterThanOrEqualTo(price, productFilters.getMinPrice()));
                 }
-            }
-
-            if (productFilters.hasMaxPriceFilter()) {
-                Path<BigDecimal> price = root.get("price");
+            } else if (productFilters.hasMaxPriceFilter()) {
+                Path<BigDecimal> price = root.get("grossAmount");
                 if (productFilters.hasMinPriceFilter()) {
                     predicates.add(cb.between(price, productFilters.getMinPrice(), productFilters.getMaxPrice()));
                 } else {

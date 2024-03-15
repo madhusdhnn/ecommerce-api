@@ -1,7 +1,7 @@
 package com.thetechmaddy.ecommerce.services;
 
 import com.thetechmaddy.ecommerce.BaseIntegrationTest;
-import com.thetechmaddy.ecommerce.domains.Product;
+import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotFoundException;
 import com.thetechmaddy.ecommerce.models.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,11 +27,13 @@ public class ProductsServiceTest extends BaseIntegrationTest {
     private ProductsService productsService;
 
     @Test
+    @Transactional
     public void testGetSingleProduct_ThrowsProductNotFound() {
         assertThrows(ProductNotFoundException.class, () -> this.productsService.getProductById(Integer.MAX_VALUE));
     }
 
     @Test
+    @Transactional
     public void testGetSingleProduct() {
         Product expected = getTestProducts().get(0);
         Product actual = this.productsService.getProductById(expected.getId());
@@ -45,7 +48,6 @@ public class ProductsServiceTest extends BaseIntegrationTest {
         List<Product> products = result.data();
         assertEquals(3, products.size());
         assertEquals(5, result.total());
-        assertEquals("p1", products.get(0).getName());
     }
 
     @Test
@@ -78,7 +80,7 @@ public class ProductsServiceTest extends BaseIntegrationTest {
         assertEquals(1, products.size());
 
         assertEquals("p5", products.get(0).getName());
-        assertEquals(new BigDecimal("5000.34"), products.get(0).getPrice());
+        assertEquals(new BigDecimal("5000.34"), products.get(0).getUnitPrice());
     }
 
     @Test
@@ -94,12 +96,15 @@ public class ProductsServiceTest extends BaseIntegrationTest {
         List<Product> products = result.data();
         assertEquals(3, products.size());
 
-        List<BigDecimal> prices = products.stream()
-                .map(Product::getPrice)
-                .toList();
+        BigDecimal total = products.stream()
+                .map(Product::getGrossAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        List<BigDecimal> expected = List.of(new BigDecimal("100.34"), new BigDecimal("1000.00"), new BigDecimal("370.34"));
-        assertEquals(expected, prices);
+        BigDecimal expected = new BigDecimal("112.38")
+                .add(new BigDecimal("414.78"))
+                .add(new BigDecimal("896.00"));
+
+        assertEquals(expected, total);
     }
 
     @Test

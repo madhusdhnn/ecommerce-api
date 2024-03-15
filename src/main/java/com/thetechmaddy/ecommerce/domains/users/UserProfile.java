@@ -1,5 +1,6 @@
-package com.thetechmaddy.ecommerce.domains;
+package com.thetechmaddy.ecommerce.domains.users;
 
+import com.thetechmaddy.ecommerce.domains.Audit;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "user_profile")
 @EqualsAndHashCode(callSuper = true)
-public class UserProfile extends Timestamp {
+public class UserProfile extends Audit {
 
     @Id
     @Column(name = "id")

@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 
 import static com.thetechmaddy.ecommerce.utils.NumberUtils.formatAsTwoDecimalPlaces;
 
-public class BigDecimalTwoDecimalPlacesSerializer extends JsonSerializer<BigDecimal> {
+public class BigDecimalToDoubleTwoDecimalPlacesNumberSerializer extends JsonSerializer<BigDecimal> {
     @Override
     public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
         double val = formatAsTwoDecimalPlaces(value).doubleValue();
