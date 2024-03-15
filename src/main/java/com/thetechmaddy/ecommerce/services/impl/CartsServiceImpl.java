@@ -92,9 +92,14 @@ public class CartsServiceImpl implements CartsService {
     @Override
     @Transactional
     public boolean clearCart(long cartId, String userId) {
+        int rowsUpdated = this.cartsRepository.unlockCartIfLocked(cartId, userId);
+        if (rowsUpdated > 0) {
+            log.info(String.format("Cart: (cartId - %d) unlocked by user: (userId - %s) due to clear cart request.", cartId, userId));
+        }
+
         int rowsDeleted = this.cartItemsRepository.clearCartItems(cartId, userId);
         if (rowsDeleted > 0) {
-            log.info(String.format("Cart: (cartId - %d) cleared by user: (userId - %s)", cartId, userId));
+            log.info(String.format("Cart: (cartId - %d) cleared by user: (userId - %s).", cartId, userId));
             return true;
         }
         return false;

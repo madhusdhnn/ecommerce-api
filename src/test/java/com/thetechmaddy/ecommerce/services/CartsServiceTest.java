@@ -219,8 +219,19 @@ public class CartsServiceTest extends BaseIntegrationTest {
         cartsService.addProductToCart(cartId, TEST_COGNITO_SUB, cartItemRequest);
 
         assertTrue(cartsService.clearCart(cartId, TEST_COGNITO_SUB));
+        assertCartUnlocked();
+
         assertFalse(cartsService.clearCart(cartId, TEST_COGNITO_SUB));
+        assertCartUnlocked();
+
         assertFalse(cartsService.clearCart(Integer.MAX_VALUE, TEST_COGNITO_SUB));
+        assertCartUnlocked();
+    }
+
+    private void assertCartUnlocked() {
+        Optional<Cart> cartOptional = cartsRepository.findByIdAndUserId(cartId, TEST_COGNITO_SUB);
+        assertTrue(cartOptional.isPresent());
+        assertTrue(cartOptional.get().isUnlocked());
     }
 
     @Test
