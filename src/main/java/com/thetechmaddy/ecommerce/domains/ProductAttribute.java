@@ -2,8 +2,6 @@ package com.thetechmaddy.ecommerce.domains;
 
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.thetechmaddy.ecommerce.models.JsonViews;
-import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
 import com.thetechmaddy.ecommerce.models.JsonViews.ProductResponse;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ProductAttribute extends Audit {
+public class ProductAttribute extends Timestamp {
 
     @Id
     @Column(name = "id")

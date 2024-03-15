@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @NamedEntityGraph(name = "Product.attributes", attributeNodes = @NamedAttributeNode("attributes"))
-public class Product extends Audit {
+public class Product extends Timestamp {
 
     @Id
     @Column(name = "id")

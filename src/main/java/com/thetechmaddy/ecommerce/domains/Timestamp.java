@@ -15,7 +15,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public abstract class Audit {
+public abstract class Timestamp {
 
     @TimeZoneStorage(value = TimeZoneStorageType.NORMALIZE)
     @CreationTimestamp

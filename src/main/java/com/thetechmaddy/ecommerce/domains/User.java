@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @Table(name = "user_pool")
 @EqualsAndHashCode(callSuper = true)
-public class User extends Audit {
+public class User extends Timestamp {
 
     @Id
     @Column(name = "id")

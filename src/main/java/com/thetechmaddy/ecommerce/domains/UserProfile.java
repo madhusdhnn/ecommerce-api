@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "user_profile")
 @EqualsAndHashCode(callSuper = true)
-public class UserProfile extends Audit {
+public class UserProfile extends Timestamp {
 
     @Id
     @Column(name = "id")
