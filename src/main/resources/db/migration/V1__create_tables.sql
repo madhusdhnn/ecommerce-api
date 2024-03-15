@@ -22,14 +22,14 @@ CREATE TABLE user_profile (
 
 CREATE INDEX idx_user_profile_user_id ON user_profile (user_id);
 
-CREATE TABLE category (
+CREATE TABLE categories (
   id BIGSERIAL PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO category (name) VALUES
+INSERT INTO categories (name) VALUES
 ('Electronics'),
 ('Apparel'),
 ('Home & Garden'),
@@ -49,9 +49,9 @@ INSERT INTO category (name) VALUES
 ('Industrial & Scientific'),
 ('Gifts & Specialty');
 
-CREATE TABLE product (
+CREATE TABLE products (
     id BIGSERIAL PRIMARY KEY,
-    category_id BIGINT REFERENCES category (id) NOT NULL,
+    category_id BIGINT REFERENCES categories (id) NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
     is_available boolean NOT NULL,
@@ -60,11 +60,11 @@ CREATE TABLE product (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_product_category_id ON product (category_id);
+CREATE INDEX idx_product_category_id ON products (category_id);
 
 CREATE TABLE product_attribute (
     id BIGSERIAL PRIMARY KEY,
-    product_id BIGINT REFERENCES product (id) NOT NULL,
+    product_id BIGINT REFERENCES products (id) NOT NULL,
     attribute_name TEXT,
     attribute_value TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

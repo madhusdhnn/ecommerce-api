@@ -17,8 +17,8 @@ public class UserProfile extends Audit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @OneToOne(targetEntity = User.class)
     private User user;
 
     @Column(name = "address_1")

@@ -4,4 +4,7 @@ public interface JsonViews {
 
     class ProductResponse {
     }
+
+    class CartResponse {
+    }
 }

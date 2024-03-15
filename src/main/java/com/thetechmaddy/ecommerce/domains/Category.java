@@ -1,6 +1,7 @@
 package com.thetechmaddy.ecommerce.domains;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
 import com.thetechmaddy.ecommerce.models.JsonViews.ProductResponse;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "category")
+@Table(name = "categories")
 public class Category extends Audit {
 
     @Id

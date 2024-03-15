@@ -3,11 +3,10 @@ package com.thetechmaddy.ecommerce.domains;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.models.JsonViews;
+import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
+import com.thetechmaddy.ecommerce.models.JsonViews.ProductResponse;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "product_attribute")
@@ -20,7 +19,7 @@ public class ProductAttribute extends Audit {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonView(value = JsonViews.ProductResponse.class)
+    @JsonView(value = {ProductResponse.class})
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,8 +28,11 @@ public class ProductAttribute extends Audit {
     private Product product;
 
     @Column(name = "attribute_name")
+    @JsonView(value = {ProductResponse.class})
     private String attributeName;
 
+    @Setter
     @Column(name = "attribute_value")
+    @JsonView(value = {ProductResponse.class})
     private String attributeValue;
 }

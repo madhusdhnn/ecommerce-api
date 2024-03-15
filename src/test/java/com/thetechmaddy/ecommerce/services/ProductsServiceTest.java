@@ -1,14 +1,11 @@
 package com.thetechmaddy.ecommerce.services;
 
+import com.thetechmaddy.ecommerce.BaseIntegrationTest;
 import com.thetechmaddy.ecommerce.domains.Product;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotFoundException;
 import com.thetechmaddy.ecommerce.models.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
-import com.thetechmaddy.ecommerce.repositories.CategoriesRepository;
-import com.thetechmaddy.ecommerce.repositories.ProductsRepository;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,43 +19,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ProductsServiceTest {
+public class ProductsServiceTest extends BaseIntegrationTest {
 
     @Autowired
     @Qualifier("productsServiceImpl")
     private ProductsService productsService;
 
-    @Autowired
-    private ProductsRepository productsRepository;
-
-    @Autowired
-    private CategoriesRepository categoriesRepository;
-
-    private List<Product> testProducts;
-
-    @BeforeAll
-    public void setup() {
-        productsRepository.deleteAll();
-
-        List<Product> input = List.of(
-                new Product("p1", "pdesc1", new BigDecimal("100.34"), true, categoriesRepository.findByNameIgnoreCase("Electronics")),
-                new Product("p2", "pdesc2", new BigDecimal("1000"), true, categoriesRepository.findByNameIgnoreCase("Apparel")),
-                new Product("p3", "pdesc3", new BigDecimal("10100.56"), true, categoriesRepository.findByNameIgnoreCase("Apparel")),
-                new Product("p4", "pdesc4", new BigDecimal("370.34"), false, categoriesRepository.findByNameIgnoreCase("Home & Garden")),
-                new Product("p5", "pdesc5", new BigDecimal("5000.34"), true, categoriesRepository.findByNameIgnoreCase("Home & Garden"))
-        );
-        testProducts = productsRepository.saveAll(input);
-    }
-
     @Test
     public void testGetSingleProduct_ThrowsProductNotFound() {
-        assertThrows(ProductNotFoundException.class, () -> this.productsService.getProductById(1));
+        assertThrows(ProductNotFoundException.class, () -> this.productsService.getProductById(Integer.MAX_VALUE));
     }
 
     @Test
     public void testGetSingleProduct() {
-        Product expected = testProducts.get(0);
+        Product expected = getTestProducts().get(0);
         Product actual = this.productsService.getProductById(expected.getId());
         assertEquals(expected, actual);
     }
