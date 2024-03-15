@@ -1,27 +1,28 @@
 package com.thetechmaddy.ecommerce.security.web;
 
+import com.thetechmaddy.ecommerce.models.PathAndHttpMethod;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
 @Component
-public final class AdminRoleApiRequestMatcher implements RequestMatcher {
+public final class AdminRoleApiRequestMatcher extends PathAndHttpMethodMatcher {
 
+    @Getter
     private final String apiBasePath;
-    private final Set<String> adminRoleApiPaths;
+    private final Set<PathAndHttpMethod> adminRoleApiPaths;
 
     public AdminRoleApiRequestMatcher(@Value("${server.servlet.context-path}") String contextPath) {
         this.apiBasePath = contextPath + "/api";
-        this.adminRoleApiPaths = Set.of("/products");
+        this.adminRoleApiPaths = Set.of(PathAndHttpMethod.of(HttpMethod.POST, "/products"));
     }
 
     @Override
     public boolean matches(HttpServletRequest request) {
-        return adminRoleApiPaths
-                .stream()
-                .anyMatch(adminRoleApiPath -> request.getRequestURI().startsWith(apiBasePath + adminRoleApiPath));
+        return adminRoleApiPaths.stream().anyMatch(pm -> super.matches(request, pm));
     }
 }

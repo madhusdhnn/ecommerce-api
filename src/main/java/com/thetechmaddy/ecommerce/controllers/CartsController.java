@@ -45,15 +45,17 @@ public class CartsController extends BaseController {
     }
 
     @PatchMapping("/{cartId}/lock")
-    public ApiResponse<Boolean> lockCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
-                                         @PathVariable("cartId") long cartId) {
-        return ApiResponse.success(this.cartsService.lockCart(cartId, cognitoUser.getCognitoSub()));
+    public ApiResponse<?> lockCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
+                                   @PathVariable("cartId") long cartId) {
+        this.cartsService.lockCart(cartId, cognitoUser.getCognitoSub());
+        return ApiResponse.success();
     }
 
     @PatchMapping("/{cartId}/lock/release")
-    public ApiResponse<Boolean> unlockCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
-                                           @PathVariable("cartId") long cartId) {
-        return ApiResponse.success(this.cartsService.unlockCart(cartId, cognitoUser.getCognitoSub()));
+    public ApiResponse<?> unlockCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
+                                     @PathVariable("cartId") long cartId) {
+        this.cartsService.unlockCart(cartId, cognitoUser.getCognitoSub());
+        return ApiResponse.success();
     }
 
     @DeleteMapping("/{cartId}/items/{productId}")

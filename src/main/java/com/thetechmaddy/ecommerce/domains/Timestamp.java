@@ -1,5 +1,6 @@
 package com.thetechmaddy.ecommerce.domains;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.*;
@@ -20,11 +21,13 @@ public abstract class Timestamp {
     @TimeZoneStorage(value = TimeZoneStorageType.NORMALIZE)
     @CreationTimestamp
     @Column(name = "created_at")
+    @JsonIgnore
     private OffsetDateTime createdAt;
 
     @TimeZoneStorage(value = TimeZoneStorageType.NORMALIZE)
     @UpdateTimestamp
     @Column(name = "updated_at")
+    @JsonIgnore
     private OffsetDateTime updatedAt;
 }
 

@@ -48,7 +48,7 @@ public class Cart extends Timestamp {
     @EqualsAndHashCode.Exclude
     @JsonView(CartResponse.class)
     @JsonSerialize(using = BigDecimalTwoDecimalPlacesSerializer.class)
-    private BigDecimal subTotal = new BigDecimal("0.0");
+    private BigDecimal subTotal = BigDecimal.ZERO;
 
     public Cart(String userId, CartStatus cartStatus) {
         super(OffsetDateTime.now(), OffsetDateTime.now());
@@ -65,7 +65,7 @@ public class Cart extends Timestamp {
         this.subTotal = this.cartItems.stream()
                 .filter(CartItem::isSelected)
                 .map(ci -> ci.getProduct().getPrice().multiply(new BigDecimal(ci.getQuantity())))
-                .reduce(new BigDecimal("0.0"), BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public boolean isLocked() {

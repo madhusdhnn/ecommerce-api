@@ -42,7 +42,7 @@ public class CartTest {
         );
         cart.setCartItems(cartItems);
 
-        assertEquals(new BigDecimal("0.0"), cart.getSubTotal());
+        assertEquals(BigDecimal.ZERO, cart.getSubTotal());
         cart.calculateSubTotal();
         assertEquals(new BigDecimal("5458.55"), cart.getSubTotal());
     }
