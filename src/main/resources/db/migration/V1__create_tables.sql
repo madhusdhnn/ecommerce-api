@@ -8,9 +8,10 @@ CREATE TABLE user_pool (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE user_profile (
+CREATE TABLE user_addresses (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES user_pool (id) NOT NULL,
+    is_default BOOLEAN NOT NULL,
     address_1 TEXT,
     address_2 TEXT,
     city TEXT,
@@ -20,7 +21,7 @@ CREATE TABLE user_profile (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_user_profile_user_id ON user_profile (user_id);
+CREATE INDEX idx_user_address_user_id ON user_addresses (user_id);
 
 CREATE TABLE categories (
   id BIGSERIAL PRIMARY KEY,
@@ -55,6 +56,8 @@ CREATE TABLE products (
     name TEXT NOT NULL,
     description TEXT,
     is_available boolean NOT NULL,
+    sku_code TEXT NOT NULL UNIQUE,
+    stock_quantity INT NOT NULL DEFAULT 0,
     unit_price DOUBLE PRECISION NOT NULL DEFAULT 0.00,
     gross_amount DOUBLE PRECISION NOT NULL DEFAULT 0.00,
     tax_percentage DOUBLE PRECISION NOT NULL DEFAULT 0.00,
@@ -65,7 +68,7 @@ CREATE TABLE products (
 
 CREATE INDEX idx_product_category_id ON products (category_id);
 
-CREATE TABLE product_attribute (
+CREATE TABLE product_attributes (
     id BIGSERIAL PRIMARY KEY,
     product_id BIGINT REFERENCES products (id) NOT NULL,
     attribute_name TEXT,
@@ -74,4 +77,4 @@ CREATE TABLE product_attribute (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_product_attribute_product_id ON product_attribute (product_id);
+CREATE INDEX idx_product_attributes_product_id ON product_attributes (product_id);

@@ -28,7 +28,12 @@ public class BaseController {
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> apiException(ApiException ex) {
         log.error(ex.getMessage(), ex);
-        var response = ApiResponse.error(new ErrorResponse(ex.getMessage()));
+
+        String message = ex.getStatus().equals(INTERNAL_SERVER_ERROR)
+                ? "Something went wrong!"
+                : ex.getMessage();
+
+        var response = ApiResponse.error(new ErrorResponse(message));
         return ResponseEntity.status(ex.getStatus()).body(response);
     }
 

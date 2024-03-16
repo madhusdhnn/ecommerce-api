@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "user_profile")
+@Table(name = "user_addresses")
 @EqualsAndHashCode(callSuper = true)
-public class UserProfile extends Audit {
+public class UserAddress extends Audit {
 
     @Id
     @Column(name = "id")
@@ -21,6 +21,9 @@ public class UserProfile extends Audit {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(name = "is_default")
+    private boolean defaultAddress;
 
     @Column(name = "address_1")
     private String addressOne;

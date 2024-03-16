@@ -5,8 +5,10 @@ import com.thetechmaddy.ecommerce.domains.Audit;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.OffsetDateTime;
+
 @Entity
-@Table(name = "product_attribute")
+@Table(name = "product_attributes")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,4 +31,11 @@ public class ProductAttribute extends Audit {
     @Setter
     @Column(name = "attribute_value")
     private String attributeValue;
+
+    public ProductAttribute(String key, String value, Product product) {
+        super(OffsetDateTime.now(), OffsetDateTime.now());
+        this.attributeName = key;
+        this.attributeValue = value;
+        this.product = product;
+    }
 }

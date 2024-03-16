@@ -2,6 +2,7 @@ package com.thetechmaddy.ecommerce.domains.products;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.thetechmaddy.ecommerce.controllers.ProductsController;
 import com.thetechmaddy.ecommerce.domains.Audit;
 import com.thetechmaddy.ecommerce.domains.Category;
 import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
@@ -11,6 +12,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +41,10 @@ public class Product extends Audit {
     @JsonView(value = {ProductResponse.class, CartResponse.class})
     private String description;
 
+    @Column(name = "sku_code")
+    @JsonView(value = {ProductResponse.class, CartResponse.class})
+    private String skuCode;
+
     @Setter
     @Column(name = "unit_price")
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
@@ -65,11 +71,16 @@ public class Product extends Audit {
     @Column(name = "is_available")
     private boolean available;
 
+    @JsonView(value = {ProductResponse.class, CartResponse.class})
+    @Column(name = "stock_quantity")
+    private int stockQuantity;
+
     @OneToOne(optional = false)
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     @JsonView(value = ProductResponse.class)
     private Category category;
 
+    @Setter
     @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "product")
     private List<ProductAttribute> attributes = new ArrayList<>();
@@ -78,16 +89,21 @@ public class Product extends Audit {
         this.name = name;
         this.description = description;
         this.unitPrice = unitPrice;
+        this.skuCode = name;
         this.taxPercentage = new BigDecimal("12");
         this.taxAmount = formatAsTwoDecimalPlaces(this.unitPrice.multiply(new BigDecimal("0.12")));
         this.grossAmount = formatAsTwoDecimalPlaces(this.unitPrice.add(this.taxAmount));
         this.available = available;
+        this.stockQuantity = available ? 10 : 0;
         this.category = category;
     }
 
     public Product(String name, BigDecimal unitPrice) {
         this.name = name;
         this.unitPrice = unitPrice;
+        this.skuCode = name;
+        this.stockQuantity = 5;
+        this.available = true;
         this.taxPercentage = new BigDecimal("12");
         this.taxAmount = formatAsTwoDecimalPlaces(this.unitPrice.multiply(new BigDecimal("0.12")));
         this.grossAmount = formatAsTwoDecimalPlaces(this.unitPrice.add(this.taxAmount));

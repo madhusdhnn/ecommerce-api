@@ -30,27 +30,20 @@ public class ProductsSpecification implements Specification<Product> {
 
         if (productFilters != null) {
             if (productFilters.hasAvailableFilter()) {
-                predicates.add(cb.equal(root.get("available"), productFilters.getAvailable()));
+                predicates.add(cb.greaterThan(root.get("stockQuantity"), 0));
             }
 
             if (productFilters.hasCategoryFilter()) {
                 predicates.add(cb.equal(root.get("category").get("name"), productFilters.getCategory()));
             }
 
-            if (productFilters.hasMinPriceFilter()) {
-                Path<BigDecimal> price = root.get("grossAmount");
-                if (productFilters.hasMaxPriceFilter()) {
-                    predicates.add(cb.between(price, productFilters.getMinPrice(), productFilters.getMaxPrice()));
-                } else {
-                    predicates.add(cb.greaterThanOrEqualTo(price, productFilters.getMinPrice()));
-                }
-            } else if (productFilters.hasMaxPriceFilter()) {
-                Path<BigDecimal> price = root.get("grossAmount");
-                if (productFilters.hasMinPriceFilter()) {
-                    predicates.add(cb.between(price, productFilters.getMinPrice(), productFilters.getMaxPrice()));
-                } else {
-                    predicates.add(cb.lessThanOrEqualTo(price, productFilters.getMaxPrice()));
-                }
+            Path<BigDecimal> price = root.get("grossAmount");
+            if (productFilters.hasMinPriceFilter() && productFilters.hasMaxPriceFilter()) {
+                predicates.add(cb.between(price, productFilters.getMinPrice(), productFilters.getMaxPrice()));
+            } else if (productFilters.hasMinPriceFilter()) {
+                predicates.add(cb.greaterThanOrEqualTo(price, productFilters.getMinPrice()));
+            } else if (productFilters.hasMaxPriceFilter()){
+                predicates.add(cb.lessThanOrEqualTo(price, productFilters.getMaxPrice()));
             }
         }
 

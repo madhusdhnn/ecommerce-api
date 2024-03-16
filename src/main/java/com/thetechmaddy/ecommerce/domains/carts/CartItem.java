@@ -1,8 +1,8 @@
 package com.thetechmaddy.ecommerce.domains.carts;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.domains.Audit;
+import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.models.CartItemStatus;
 import com.thetechmaddy.ecommerce.models.JsonViews;
 import jakarta.persistence.*;
