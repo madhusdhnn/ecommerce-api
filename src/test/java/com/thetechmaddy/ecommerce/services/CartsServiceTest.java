@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.thetechmaddy.ecommerce.models.CartItemStatus.SELECTED;
+import static com.thetechmaddy.ecommerce.models.CartItemStatus.UN_SELECTED;
 import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -75,13 +77,14 @@ public class CartsServiceTest extends BaseIntegrationTest {
     public void testAddProductToCartError() {
         assertThrows(ProductNotFoundException.class, () -> cartsService.addProductToCart(cartId, TEST_COGNITO_SUB, new CartItemRequest(Integer.MAX_VALUE, 2)));
 
-        Optional<Product> productOptional = getTestProducts().stream().filter(pr -> !pr.isAvailable()).findFirst();
+        Optional<Product> productOptional = getTestProducts().stream().filter(pr -> !pr.isInStock()).findFirst();
         assertTrue(productOptional.isPresent());
 
         Product product = productOptional.get();
         assertThrows(ProductOutOfStockException.class, () -> cartsService.addProductToCart(cartId, TEST_COGNITO_SUB, new CartItemRequest(product.getId(), 3)));
 
-        assertThrows(CartNotFoundException.class, () -> cartsService.addProductToCart(cartId, "some-other-user", new CartItemRequest(getTestProducts().get(2).getId(), 2)));
+        assertThrows(CartNotFoundException.class, () -> cartsService.addProductToCart(Integer.MAX_VALUE, TEST_COGNITO_SUB, new CartItemRequest(getTestProducts().get(2).getId(), 2)));
+        assertThrows(CartNotBelongsToUserException.class, () -> cartsService.addProductToCart(cartId, "some-other-user", new CartItemRequest(getTestProducts().get(2).getId(), 2)));
     }
 
     @Test
@@ -102,7 +105,7 @@ public class CartsServiceTest extends BaseIntegrationTest {
 
         // 1. Add item for the first time. Expected: Must be saved
         cartsService.addProductToCart(cartId, TEST_COGNITO_SUB, cartItemRequest);
-        List<CartItem> items = cartItemsRepository.findAllByCart_IdAndCart_UserId(cartId, TEST_COGNITO_SUB);
+        List<CartItem> items = cartItemsRepository.findAllByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB);
         assertEquals(1, items.size());
 
         CartItem cartItem = items.get(0);
@@ -111,7 +114,7 @@ public class CartsServiceTest extends BaseIntegrationTest {
 
         // 2. Add the same item. Expected: Just update quantity
         cartsService.addProductToCart(cartId, TEST_COGNITO_SUB, cartItemRequest);
-        items = cartItemsRepository.findAllByCart_IdAndCart_UserId(cartId, TEST_COGNITO_SUB);
+        items = cartItemsRepository.findAllByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB);
         assertEquals(1, items.size());
 
         cartItem = items.get(0);
@@ -120,7 +123,7 @@ public class CartsServiceTest extends BaseIntegrationTest {
 
         // 2. Add different item. Expected: Increase total items count and quantities
         cartsService.addProductToCart(cartId, TEST_COGNITO_SUB, new CartItemRequest(getTestProducts().get(1).getId(), 2));
-        items = cartItemsRepository.findAllByCart_IdAndCart_UserId(cartId, TEST_COGNITO_SUB);
+        items = cartItemsRepository.findAllByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB);
         assertEquals(2, items.size());
 
         int actualQuantity = items.stream()
@@ -131,21 +134,22 @@ public class CartsServiceTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void testUpdateProductToCartError() {
+    public void testUpdateProductInCartError() {
         assertThrows(ProductNotFoundException.class, () -> cartsService.updateProductInCart(cartId, Integer.MAX_VALUE, TEST_COGNITO_SUB, new CartItemUpdateRequest(3)));
 
-        Optional<Product> productOptional = getTestProducts().stream().filter(pr -> !pr.isAvailable()).findFirst();
+        Optional<Product> productOptional = getTestProducts().stream().filter(pr -> !pr.isInStock()).findFirst();
         assertTrue(productOptional.isPresent());
 
         Product product = productOptional.get();
 
         assertThrows(ProductOutOfStockException.class, () -> cartsService.updateProductInCart(cartId, product.getId(), TEST_COGNITO_SUB, new CartItemUpdateRequest(3)));
-        assertThrows(CartNotFoundException.class, () -> cartsService.updateProductInCart(cartId, getTestProducts().get(2).getId(), "some-other-user", new CartItemUpdateRequest(2)));
+        assertThrows(CartNotFoundException.class, () -> cartsService.updateProductInCart(Integer.MAX_VALUE, getTestProducts().get(2).getId(), "some-other-user", new CartItemUpdateRequest(2)));
+        assertThrows(CartNotBelongsToUserException.class, () -> cartsService.updateProductInCart(cartId, getTestProducts().get(2).getId(), "some-other-user", new CartItemUpdateRequest(2)));
         assertThrows(ProductNotInCartException.class, () -> cartsService.updateProductInCart(cartId, getTestProducts().get(2).getId(), TEST_COGNITO_SUB, new CartItemUpdateRequest(3)));
     }
 
     @Test
-    public void testUpdateProductToLockedCart() {
+    public void testUpdateProductInLockedCart() {
         cartsService.lockCart(cartId, TEST_COGNITO_SUB);
 
         CartItemUpdateRequest cartItemUpdateRequest = new CartItemUpdateRequest(2);
@@ -156,28 +160,73 @@ public class CartsServiceTest extends BaseIntegrationTest {
 
     @Test
     @Transactional
-    public void testUpdateProductToCart() {
+    public void testUpdateProductQuantityInCart() {
         Product product = getTestProducts().get(2);
 
         cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 2, cartId);
 
-        List<CartItem> items = cartItemsRepository.findAllByCart_IdAndCart_UserId(cartId, TEST_COGNITO_SUB);
+        // Before
+        List<CartItem> items = cartItemsRepository.findAllByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB);
         assertEquals(1, items.size());
         CartItem cartItem = items.get(0);
         assertNotNull(cartItem);
         assertEquals(2, cartItem.getQuantity());
 
-        CartItemUpdateRequest cartItemUpdateRequest = new CartItemUpdateRequest(3);
+        CartItemUpdateRequest cartItemUpdateRequest = new CartItemUpdateRequest(null);
         cartsService.updateProductInCart(cartId, product.getId(), TEST_COGNITO_SUB, cartItemUpdateRequest);
 
-        items = cartItemsRepository.findAllByCart_IdAndCart_UserId(cartId, TEST_COGNITO_SUB);
+        // No Change
+        items = cartItemsRepository.findAllByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB);
+        assertEquals(1, items.size());
+
+        cartItem = items.get(0);
+        assertNotNull(cartItem);
+        assertEquals(2, cartItem.getQuantity());
+
+        // Updated
+        cartItemUpdateRequest = new CartItemUpdateRequest(3);
+        cartsService.updateProductInCart(cartId, product.getId(), TEST_COGNITO_SUB, cartItemUpdateRequest);
+
+        items = cartItemsRepository.findAllByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB);
         assertEquals(1, items.size());
 
         cartItem = items.get(0);
         assertNotNull(cartItem);
         assertEquals(3, cartItem.getQuantity());
+    }
 
-        Optional<Product> productOptional = getTestProducts().stream().filter(pr -> !pr.isAvailable()).findFirst();
+    @Test
+    @Transactional
+    public void testUpdateProductSelectionInCart() {
+        Product product = getTestProducts().get(2);
+
+        cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 2, cartId);
+
+        CartItemUpdateRequest cartItemUpdateRequest = new CartItemUpdateRequest(false);
+        cartsService.updateProductInCart(cartId, product.getId(), TEST_COGNITO_SUB, cartItemUpdateRequest);
+
+        List<CartItem> items = cartItemsRepository.findAllByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB);
+        assertEquals(1, items.size());
+
+        CartItem cartItem = items.get(0);
+        assertNotNull(cartItem);
+        assertEquals(UN_SELECTED, cartItem.getStatus());
+
+        cartItemUpdateRequest = new CartItemUpdateRequest(true);
+        cartsService.updateProductInCart(cartId, product.getId(), TEST_COGNITO_SUB, cartItemUpdateRequest);
+
+        items = cartItemsRepository.findAllByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB);
+        assertEquals(1, items.size());
+
+        cartItem = items.get(0);
+        assertNotNull(cartItem);
+        assertEquals(SELECTED, cartItem.getStatus());
+    }
+
+    @Test
+    @Transactional
+    public void testUpdateProductInCartRemoveIfOutOfStock() {
+        Optional<Product> productOptional = getTestProducts().stream().filter(pr -> !pr.isInStock()).findFirst();
         assertTrue(productOptional.isPresent());
 
         cartItemsRepository.saveOnConflictUpdateQuantity(productOptional.get().getId(), 2, cartId);
@@ -186,7 +235,7 @@ public class CartsServiceTest extends BaseIntegrationTest {
                 () -> cartsService.updateProductInCart(cartId, productOptional.get().getId(), TEST_COGNITO_SUB, new CartItemUpdateRequest(3))
         );
 
-        assertTrue(cartItemsRepository.findByCart_IdAndProductId(cartId, productOptional.get().getId()).isEmpty());
+        assertTrue(cartItemsRepository.findByCartIdAndProductId(cartId, productOptional.get().getId()).isEmpty());
     }
 
     @Test
@@ -214,6 +263,15 @@ public class CartsServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testClearCart() {
+        assertThrows(CartNotFoundException.class, () -> cartsService.clearCart(Integer.MAX_VALUE, TEST_COGNITO_SUB));
+        assertThrows(CartNotBelongsToUserException.class, () -> cartsService.clearCart(cartId, "some-other-user"));
+
+        cartsService.lockCart(cartId, TEST_COGNITO_SUB);
+        assertThrows(CartLockedException.class, () -> cartsService.clearCart(cartId, TEST_COGNITO_SUB));
+
+        cartsService.unlockCart(cartId, TEST_COGNITO_SUB);
+        assertCartUnlocked();
+
         Product product = getTestProducts().get(2);
         CartItemRequest cartItemRequest = new CartItemRequest(product.getId(), 3);
         cartsService.addProductToCart(cartId, TEST_COGNITO_SUB, cartItemRequest);
@@ -221,10 +279,8 @@ public class CartsServiceTest extends BaseIntegrationTest {
         assertTrue(cartsService.clearCart(cartId, TEST_COGNITO_SUB));
         assertCartUnlocked();
 
+        // try to clear already empty cart
         assertFalse(cartsService.clearCart(cartId, TEST_COGNITO_SUB));
-        assertCartUnlocked();
-
-        assertFalse(cartsService.clearCart(Integer.MAX_VALUE, TEST_COGNITO_SUB));
         assertCartUnlocked();
     }
 

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+import static com.thetechmaddy.ecommerce.models.DbConstants.UN_LOCK_CARTIF_LOCKED_QUERY;
+
 @Repository
 public interface CartsRepository extends JpaRepository<Cart, Long> {
 
@@ -17,6 +19,6 @@ public interface CartsRepository extends JpaRepository<Cart, Long> {
     Optional<Cart> findByIdAndUserId(long cartId, String userId);
 
     @Modifying
-    @Query("UPDATE Cart c SET c.cartStatus = 'UN_LOCKED' WHERE c.id = :cartId AND c.userId = :userId AND c.cartStatus = 'LOCKED'")
+    @Query(UN_LOCK_CARTIF_LOCKED_QUERY)
     int unlockCartIfLocked(@Param("cartId") long cartId, @Param("userId") String userId);
 }

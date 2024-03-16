@@ -45,6 +45,7 @@ public class Cart extends Audit {
     @JsonView(CartResponse.class)
     private Set<CartItem> cartItems = new HashSet<>();
 
+    @Setter
     @Transient
     @EqualsAndHashCode.Exclude
     @JsonView(CartResponse.class)
@@ -60,13 +61,6 @@ public class Cart extends Audit {
 
     public boolean belongsTo(String userId) {
         return Objects.equals(this.userId, userId);
-    }
-
-    public void calculateSubTotal() {
-        this.subTotal = this.cartItems.stream()
-                .filter(CartItem::isSelected)
-                .map(ci -> ci.getProduct().getGrossAmount().multiply(new BigDecimal(ci.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public boolean isLocked() {

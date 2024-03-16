@@ -1,13 +1,17 @@
 package com.thetechmaddy.ecommerce.services.impl;
 
-import com.thetechmaddy.ecommerce.domains.Cart;
-import com.thetechmaddy.ecommerce.domains.CartItem;
-import com.thetechmaddy.ecommerce.domains.Product;
+import com.thetechmaddy.ecommerce.domains.carts.Cart;
+import com.thetechmaddy.ecommerce.domains.carts.CartItem;
+import com.thetechmaddy.ecommerce.domains.orders.Order;
+import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.*;
+import com.thetechmaddy.ecommerce.models.CheckoutData;
+import com.thetechmaddy.ecommerce.models.OrderStatus;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
 import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;
 import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
 import com.thetechmaddy.ecommerce.repositories.CartsRepository;
+import com.thetechmaddy.ecommerce.repositories.OrdersRepository;
 import com.thetechmaddy.ecommerce.repositories.ProductsRepository;
 import com.thetechmaddy.ecommerce.services.CartsService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +21,11 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Optional;
+
+import static com.thetechmaddy.ecommerce.models.CartItemStatus.SELECTED;
+import static com.thetechmaddy.ecommerce.models.CartItemStatus.UN_SELECTED;
 
 @Log4j2
 @Primary
@@ -26,6 +34,7 @@ import java.util.Optional;
 public class CartsServiceImpl implements CartsService {
 
     private final CartsRepository cartsRepository;
+    private final OrdersRepository ordersRepository;
     private final ProductsRepository productsRepository;
     private final CartItemsRepository cartItemsRepository;
 
@@ -38,7 +47,7 @@ public class CartsServiceImpl implements CartsService {
             throw new CartNotBelongsToUserException(String.format("Cart with id %d does not belong to the user - %s", cartId, userId));
         }
 
-        cart.calculateSubTotal();
+        calculateSubTotal(cart);
         return cart;
     }
 
@@ -48,7 +57,8 @@ public class CartsServiceImpl implements CartsService {
         long productId = cartItemRequest.getProductId();
 
         ensureProductExistsAndAlsoInStock(productId);
-        this.ensureCartExistsAndNotLocked(cartId, userId);
+
+        ensureCartExistsAndNotLocked(cartId, userId);
 
         int rowsAffected = this.cartItemsRepository.saveOnConflictUpdateQuantity(productId, cartItemRequest.getQuantity(), cartId);
         log.info(String.format("Product: (productId - %d) added/ updated in the cart: (cartId - %d) by the user: (userId - %s). Affected rows: %d", productId, cartId, userId, rowsAffected));
@@ -59,12 +69,20 @@ public class CartsServiceImpl implements CartsService {
     public void updateProductInCart(long cartId, long productId, String userId, CartItemUpdateRequest cartItemUpdateRequest) {
         try {
             ensureProductExistsAndAlsoInStock(productId);
-            this.ensureCartExistsAndNotLocked(cartId, userId);
+            ensureCartExistsAndNotLocked(cartId, userId);
 
-            CartItem cartItem = this.cartItemsRepository.findByCart_IdAndProductId(cartId, productId)
+            CartItem cartItem = this.cartItemsRepository.findByCartIdAndProductId(cartId, productId) // TODO: Also fetch by attribute
                     .orElseThrow(() -> new ProductNotInCartException(productId));
 
-            cartItem.setQuantity(cartItemUpdateRequest.getQuantity());
+            Integer quantity = cartItemUpdateRequest.getQuantity();
+            if (quantity != null) {
+                cartItem.setQuantity(quantity);
+            }
+
+            Boolean isSelected = cartItemUpdateRequest.getIsSelected();
+            if (isSelected != null) {
+                cartItem.setStatus(isSelected ? SELECTED : UN_SELECTED);
+            }
 
             this.cartItemsRepository.save(cartItem);
         } catch (ProductOutOfStockException ex) {
@@ -79,10 +97,10 @@ public class CartsServiceImpl implements CartsService {
     @Override
     @Transactional
     public boolean removeProductFromCart(long cartId, long productId, String userId) {
-        this.ensureCartExistsAndNotLocked(cartId, userId);
+        ensureCartExistsAndNotLocked(cartId, userId);
 
         int rowsDeleted = this.cartItemsRepository.removeItem(cartId, productId, userId);
-        if (rowsDeleted > 0) {
+        if (rowsDeleted == 1) {
             log.info(String.format("Deleted product: (productId - %d) from cart: (cartId - %d) by user: (userId - %s)", productId, cartId, userId));
             return true;
         }
@@ -92,10 +110,7 @@ public class CartsServiceImpl implements CartsService {
     @Override
     @Transactional
     public boolean clearCart(long cartId, String userId) {
-        int rowsUpdated = this.cartsRepository.unlockCartIfLocked(cartId, userId);
-        if (rowsUpdated > 0) {
-            log.info(String.format("Cart: (cartId - %d) unlocked by user: (userId - %s) due to clear cart request.", cartId, userId));
-        }
+        ensureCartExistsAndNotLocked(cartId, userId);
 
         int rowsDeleted = this.cartItemsRepository.clearCartItems(cartId, userId);
         if (rowsDeleted > 0) {
@@ -119,6 +134,8 @@ public class CartsServiceImpl implements CartsService {
 
         cart.lock();
         cartsRepository.save(cart);
+
+        log.info(String.format("Cart locked by userId %s for cartId %d", userId, cartId));
         return true;
     }
 
@@ -135,6 +152,9 @@ public class CartsServiceImpl implements CartsService {
         }
         cart.unlock();
         cartsRepository.save(cart);
+
+        log.info(String.format("Cart unlocked by userId %s for cartId %d", userId, cartId));
+
         return true;
     }
 
@@ -146,21 +166,33 @@ public class CartsServiceImpl implements CartsService {
         }
     }
 
+    private void calculateSubTotal(Cart cart) {
+        BigDecimal subTotal = cart.getCartItems().stream()
+                .filter(CartItem::isSelected)
+                .map(ci -> ci.getProduct().getGrossAmount().multiply(new BigDecimal(ci.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        cart.setSubTotal(subTotal);
+    }
+
     private void ensureProductExistsAndAlsoInStock(long productId) {
         Optional<Product> productOptional = this.productsRepository.findById(productId);
         if (productOptional.isEmpty()) {
             throw new ProductNotFoundException(String.format("Product not found: (productId - %d)", productId));
         }
 
-        if (productOptional.filter(Product::isAvailable).isEmpty()) {
+        if (productOptional.filter(Product::isInStock).isEmpty()) {
             throw new ProductOutOfStockException(productId);
         }
     }
 
     private void ensureCartExistsAndNotLocked(long cartId, String userId) {
-        Optional<Cart> cartOptional = this.cartsRepository.findByIdAndUserId(cartId, userId);
+        Optional<Cart> cartOptional = this.cartsRepository.findById(cartId);
         if (cartOptional.isEmpty()) {
             throw new CartNotFoundException(String.format("Cart not found: (cartId - %d) for user: (userId - %s)", cartId, userId));
+        }
+
+        if (cartOptional.filter(c -> c.belongsTo(userId)).isEmpty()) {
+            throw new CartNotBelongsToUserException(String.format("Cart: (cartId - %d) does not belong to the user: (userId - %s)", cartId, userId));
         }
 
         if (cartOptional.filter(c -> !c.isLocked()).isEmpty()) {

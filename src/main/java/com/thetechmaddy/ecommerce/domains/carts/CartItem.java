@@ -37,6 +37,7 @@ public class CartItem extends Audit {
     @Column(name = "quantity")
     private int quantity;
 
+    @Setter
     @JsonView(JsonViews.CartResponse.class)
     @Column(name = "status")
     @Enumerated(EnumType.STRING)

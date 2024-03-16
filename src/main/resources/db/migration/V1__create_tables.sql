@@ -55,7 +55,6 @@ CREATE TABLE products (
     category_id BIGINT REFERENCES categories (id) NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
-    is_available boolean NOT NULL,
     sku_code TEXT NOT NULL UNIQUE,
     stock_quantity INT NOT NULL DEFAULT 0,
     unit_price DOUBLE PRECISION NOT NULL DEFAULT 0.00,
