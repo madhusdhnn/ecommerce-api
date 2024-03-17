@@ -9,4 +9,6 @@ public interface ProductsService {
     Product getProductById(long productId);
 
     Paged<Product> getAllProducts(Integer page, Integer size, String search, ProductFilters productFilters);
+
+    void ensureProductInStock(long productId);
 }

@@ -1,7 +1,7 @@
 package com.thetechmaddy.ecommerce.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thetechmaddy.ecommerce.exceptions.ApiException;
+import com.thetechmaddy.ecommerce.exceptions.BusinessException;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.models.responses.ErrorResponse;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,7 +29,7 @@ public class HttpUtils {
         if ((ex = exSupplier.get()) != null) {
             errorResponse.setMessage(ex.getMessage());
 
-            if (ex instanceof ApiException apiEx) {
+            if (ex instanceof BusinessException apiEx) {
                 response.setStatus(apiEx.getStatus().value());
             }
         }

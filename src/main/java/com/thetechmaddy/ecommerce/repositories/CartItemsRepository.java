@@ -1,9 +1,6 @@
 package com.thetechmaddy.ecommerce.repositories;
 
 import com.thetechmaddy.ecommerce.domains.carts.CartItem;
-import com.thetechmaddy.ecommerce.models.CartItemStatus;
-import com.thetechmaddy.ecommerce.models.CheckoutData;
-import com.thetechmaddy.ecommerce.models.DbConstants;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -34,9 +31,4 @@ public interface CartItemsRepository extends JpaRepository<CartItem, Long> {
 
     List<CartItem> findAllByCartIdAndCartUserId(long cartId, String userId);
 
-    @Query(value = DbConstants.ORDER_SUMMARY_GROUP_BY_TAX_PERCENTAGE_QUERY)
-    List<CheckoutData> prepareCheckoutData(@Param("cartId") long cartId, @Param("userId") String userId, @Param("status") CartItemStatus cartItemStatus);
-
-    @Query(value = DbConstants.ORDER_SUMMARY_QUERY)
-    CheckoutData total(@Param("cartId") long cartId, @Param("userId") String userId, @Param("status") CartItemStatus cartItemStatus);
 }

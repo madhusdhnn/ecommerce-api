@@ -1,11 +1,11 @@
 package com.thetechmaddy.ecommerce.exceptions;
 
-import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-public class  ProductNotFoundException extends ApiException {
+public class ProductNotFoundException extends BusinessException {
 
     public ProductNotFoundException(String message) {
-        super(message, NO_CONTENT);
+        super(message, NOT_FOUND);
     }
 
 }

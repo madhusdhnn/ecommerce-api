@@ -7,13 +7,9 @@ import com.thetechmaddy.ecommerce.models.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 import com.thetechmaddy.ecommerce.services.ProductsService;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
@@ -24,7 +20,7 @@ public class ProductsController extends BaseController {
 
     private final ProductsService productsService;
 
-    @GetMapping("/search")
+    @GetMapping
     @JsonView(value = JsonViews.ProductResponse.class)
     public Paged<Product> getAllProducts(
             @RequestParam(name = "page") Integer page,
@@ -40,8 +36,8 @@ public class ProductsController extends BaseController {
     }
 
     @GetMapping("/{productId}")
-    @JsonView(value = JsonViews.ProductResponse.class)
-    public ApiResponse<Product> getProductById(@PathParam("productId") long productId) {
+    @JsonView(value = JsonViews.ProductDetailResponse.class)
+    public ApiResponse<Product> getProductById(@PathVariable("productId") long productId) {
         return ApiResponse.success(this.productsService.getProductById(productId));
     }
 }

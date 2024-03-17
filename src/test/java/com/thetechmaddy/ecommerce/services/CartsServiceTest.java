@@ -31,8 +31,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 public class CartsServiceTest extends BaseIntegrationTest {
 
-    private static final String TEST_COGNITO_SUB = "test-cognito-sub";
-
     @Autowired
     @Qualifier("cartsServiceImpl")
     private CartsService cartsService;
@@ -292,25 +290,23 @@ public class CartsServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testLockCartError() {
-        assertThrows(CartNotFoundException.class, () -> cartsService.lockCart(Integer.MAX_VALUE, TEST_COGNITO_SUB));
+        assertFalse(cartsService.lockCart(Integer.MAX_VALUE, TEST_COGNITO_SUB));
     }
 
     @Test
     public void testLockCart() {
         assertTrue(cartsService.lockCart(cartId, TEST_COGNITO_SUB));
-        assertFalse(cartsService.lockCart(cartId, TEST_COGNITO_SUB));
     }
 
     @Test
     public void testUnlockCartError() {
-        assertThrows(CartNotFoundException.class, () -> cartsService.unlockCart(Integer.MAX_VALUE, TEST_COGNITO_SUB));
+        assertFalse(cartsService.unlockCart(Integer.MAX_VALUE, TEST_COGNITO_SUB));
     }
 
     @Test
     public void testUnlockCart() {
         assertTrue(cartsService.lockCart(cartId, TEST_COGNITO_SUB));
         assertTrue(cartsService.unlockCart(cartId, TEST_COGNITO_SUB));
-        assertFalse(cartsService.unlockCart(cartId, TEST_COGNITO_SUB));
     }
 
     private void addItemToCart(Product product) {

@@ -24,11 +24,11 @@ public class CognitoUser {
     private String email;
 
     @NotNull(message = "First Name" + " " + NOT_NULL_MESSAGE_SUFFIX)
-    @Min(value = 1, message = FIRST_NAME_MIN_LENGTH_MESSAGE)
+    @Min(value = 1, message = "First Name" + " " + NAME_MIN_LENGTH_MESSAGE)
     private String firstName;
 
     @NotNull(message = "Last Name" + " " + NOT_NULL_MESSAGE_SUFFIX)
-    @Min(value = 1, message = LAST_NAME_MIN_LENGTH_MESSAGE)
+    @Min(value = 1, message = "Last Name" + " " + NAME_MIN_LENGTH_MESSAGE)
     private String lastName;
 
 }

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thetechmaddy.ecommerce.domains.Audit;
 import com.thetechmaddy.ecommerce.domains.Category;
 import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
+import com.thetechmaddy.ecommerce.models.JsonViews.OrderInitiateResponse;
+import com.thetechmaddy.ecommerce.models.JsonViews.ProductDetailResponse;
 import com.thetechmaddy.ecommerce.models.JsonViews.ProductResponse;
 import com.thetechmaddy.ecommerce.models.serializers.BigDecimalToDoubleTwoDecimalPlacesNumberSerializer;
 import jakarta.persistence.*;
@@ -28,44 +30,44 @@ public class Product extends Audit {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonView(value = {ProductResponse.class, CartResponse.class})
+    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     private long id;
 
     @Column(name = "name", nullable = false)
-    @JsonView(value = {ProductResponse.class, CartResponse.class})
+    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     private String name;
 
     @Column(name = "description")
-    @JsonView(value = {ProductResponse.class, CartResponse.class})
+    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     private String description;
 
     @Column(name = "sku_code")
-    @JsonView(value = {ProductResponse.class, CartResponse.class})
+    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     private String skuCode;
 
     @Setter
     @Column(name = "unit_price")
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
-    @JsonView(value = {ProductResponse.class, CartResponse.class})
+    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     private BigDecimal unitPrice;
 
     @Setter
     @Column(name = "gross_amount")
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
-    @JsonView(value = {ProductResponse.class, CartResponse.class})
+    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     private BigDecimal grossAmount;
 
     @Column(name = "tax_percentage")
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
-    @JsonView(value = {ProductResponse.class, CartResponse.class})
+    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     private BigDecimal taxPercentage;
 
     @Column(name = "tax_amount")
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
-    @JsonView(value = {ProductResponse.class, CartResponse.class})
+    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     private BigDecimal taxAmount;
 
-    @JsonView(value = {ProductResponse.class, CartResponse.class})
+    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     @Column(name = "stock_quantity")
     private int stockQuantity;
 
@@ -76,6 +78,7 @@ public class Product extends Audit {
 
     @Setter
     @EqualsAndHashCode.Exclude
+    @JsonView(value = {ProductDetailResponse.class})
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "product")
     private List<ProductAttribute> attributes = new ArrayList<>();
 
@@ -89,16 +92,6 @@ public class Product extends Audit {
         this.grossAmount = formatAsTwoDecimalPlaces(this.unitPrice.add(this.taxAmount));
         this.stockQuantity = available ? 10 : 0;
         this.category = category;
-    }
-
-    public Product(String name, BigDecimal unitPrice) {
-        this.name = name;
-        this.unitPrice = unitPrice;
-        this.skuCode = name;
-        this.stockQuantity = 5;
-        this.taxPercentage = new BigDecimal("12");
-        this.taxAmount = formatAsTwoDecimalPlaces(this.unitPrice.multiply(new BigDecimal("0.12")));
-        this.grossAmount = formatAsTwoDecimalPlaces(this.unitPrice.add(this.taxAmount));
     }
 
     public boolean isInStock() {

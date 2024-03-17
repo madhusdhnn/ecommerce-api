@@ -20,6 +20,8 @@ import java.util.List;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BaseIntegrationTest {
 
+    public static final String TEST_COGNITO_SUB = "test-cognito-sub";
+
     @Getter
     private List<Product> testProducts;
 

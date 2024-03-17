@@ -5,6 +5,11 @@ public interface JsonViews {
     class ProductResponse {
     }
 
+    class ProductDetailResponse {
+    }
+
     class CartResponse {
     }
+
+    class OrderInitiateResponse {}
 }

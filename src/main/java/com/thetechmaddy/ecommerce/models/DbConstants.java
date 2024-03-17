@@ -22,21 +22,8 @@ public class DbConstants {
                 USING carts c
                 WHERE c.id = :cartId AND c.user_id = :userId AND ci.product_id = :productId
             """;
-    public static final String ORDER_SUMMARY_GROUP_BY_TAX_PERCENTAGE_QUERY = """
-            SELECT new com.thetechmaddy.ecommerce.models.CheckoutData(
-                SUM(ci.quantity * ci.product.unitPrice),
-                SUM(ci.quantity * ci.product.grossAmount),
-                SUM(ci.product.taxAmount),
-                ci.product.taxPercentage)
-            FROM CartItem ci
-            WHERE ci.cart.id = :cartId AND ci.cart.userId = :userId AND ci.status = :status
-            GROUP BY ci.product.taxPercentage
-            """;
-    public static final String ORDER_SUMMARY_QUERY = """
-            SELECT new com.thetechmaddy.ecommerce.models.CheckoutData(
-                SUM(ci.quantity * ci.product.unitPrice),
-                SUM(ci.quantity * ci.product.grossAmount))
-            FROM CartItem ci
-            WHERE ci.cart.id = :cartId AND ci.cart.userId = :userId AND ci.status = :status
+    public static final String UPDATE_ORDER_LAST_ACCESS_TIME_QUERY = "UPDATE orders SET updated_at = CURRENT_TIMESTAMP WHERE id = :cartId";
+    public static final String IS_CART_UNLOCKED_QUERY = """
+                SELECT EXISTS(SELECT 1 FROM carts WHERE id = :cartId AND user_id = :userId AND status = 'UN_LOCKED')
             """;
 }

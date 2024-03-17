@@ -2,6 +2,7 @@ package com.thetechmaddy.ecommerce.services.impl;
 
 import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotFoundException;
+import com.thetechmaddy.ecommerce.exceptions.ProductOutOfStockException;
 import com.thetechmaddy.ecommerce.models.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 import com.thetechmaddy.ecommerce.repositories.ProductsRepository;
@@ -35,5 +36,14 @@ public class ProductsServiceImpl implements ProductsService {
 
         Page<Product> products = this.productsRepository.findAll(specification, pageRequest);
         return new Paged<>(products.getContent(), page, products.getTotalElements(), products.getNumberOfElements());
+    }
+
+    @Override
+    public void ensureProductInStock(long productId) {
+        Product product = getProductById(productId);
+
+        if (!product.isInStock()) {
+            throw new ProductOutOfStockException(productId);
+        }
     }
 }

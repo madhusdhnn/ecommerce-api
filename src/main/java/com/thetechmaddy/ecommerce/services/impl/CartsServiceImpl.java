@@ -2,18 +2,14 @@ package com.thetechmaddy.ecommerce.services.impl;
 
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.domains.carts.CartItem;
-import com.thetechmaddy.ecommerce.domains.orders.Order;
-import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.*;
-import com.thetechmaddy.ecommerce.models.CheckoutData;
-import com.thetechmaddy.ecommerce.models.OrderStatus;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
 import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;
 import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
 import com.thetechmaddy.ecommerce.repositories.CartsRepository;
-import com.thetechmaddy.ecommerce.repositories.OrdersRepository;
-import com.thetechmaddy.ecommerce.repositories.ProductsRepository;
+import com.thetechmaddy.ecommerce.services.CartLockApplierService;
 import com.thetechmaddy.ecommerce.services.CartsService;
+import com.thetechmaddy.ecommerce.services.ProductsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +30,14 @@ import static com.thetechmaddy.ecommerce.models.CartItemStatus.UN_SELECTED;
 public class CartsServiceImpl implements CartsService {
 
     private final CartsRepository cartsRepository;
-    private final OrdersRepository ordersRepository;
-    private final ProductsRepository productsRepository;
+    private final ProductsService productsService;
     private final CartItemsRepository cartItemsRepository;
+
+    private final CartLockApplierService cartLockApplierService;
 
     @Override
     public Cart getCart(long cartId, String userId) {
-        Cart cart = this.cartsRepository.findById(cartId)
+        Cart cart = cartsRepository.findById(cartId)
                 .orElseThrow(() -> new CartNotFoundException(String.format("Cart not found with id %d", cartId)));
 
         if (!cart.belongsTo(userId)) {
@@ -56,11 +53,11 @@ public class CartsServiceImpl implements CartsService {
     public void addProductToCart(long cartId, String userId, CartItemRequest cartItemRequest) {
         long productId = cartItemRequest.getProductId();
 
-        ensureProductExistsAndAlsoInStock(productId);
+        productsService.ensureProductInStock(productId);
 
         ensureCartExistsAndNotLocked(cartId, userId);
 
-        int rowsAffected = this.cartItemsRepository.saveOnConflictUpdateQuantity(productId, cartItemRequest.getQuantity(), cartId);
+        int rowsAffected = cartItemsRepository.saveOnConflictUpdateQuantity(productId, cartItemRequest.getQuantity(), cartId);
         log.info(String.format("Product: (productId - %d) added/ updated in the cart: (cartId - %d) by the user: (userId - %s). Affected rows: %d", productId, cartId, userId, rowsAffected));
     }
 
@@ -68,10 +65,10 @@ public class CartsServiceImpl implements CartsService {
     @Transactional
     public void updateProductInCart(long cartId, long productId, String userId, CartItemUpdateRequest cartItemUpdateRequest) {
         try {
-            ensureProductExistsAndAlsoInStock(productId);
+            productsService.ensureProductInStock(productId);
             ensureCartExistsAndNotLocked(cartId, userId);
 
-            CartItem cartItem = this.cartItemsRepository.findByCartIdAndProductId(cartId, productId) // TODO: Also fetch by attribute
+            CartItem cartItem = cartItemsRepository.findByCartIdAndProductId(cartId, productId) // TODO: Also fetch by attribute
                     .orElseThrow(() -> new ProductNotInCartException(productId));
 
             Integer quantity = cartItemUpdateRequest.getQuantity();
@@ -84,9 +81,9 @@ public class CartsServiceImpl implements CartsService {
                 cartItem.setStatus(isSelected ? SELECTED : UN_SELECTED);
             }
 
-            this.cartItemsRepository.save(cartItem);
+            cartItemsRepository.save(cartItem);
         } catch (ProductOutOfStockException ex) {
-            boolean removed = this.removeProductFromCart(cartId, productId, userId);
+            boolean removed = removeProductFromCart(cartId, productId, userId);
             if (removed) {
                 log.info(String.format("Product: (productId - %d) removed from cart as it went out of stock", productId));
             }
@@ -99,7 +96,7 @@ public class CartsServiceImpl implements CartsService {
     public boolean removeProductFromCart(long cartId, long productId, String userId) {
         ensureCartExistsAndNotLocked(cartId, userId);
 
-        int rowsDeleted = this.cartItemsRepository.removeItem(cartId, productId, userId);
+        int rowsDeleted = cartItemsRepository.removeItem(cartId, productId, userId);
         if (rowsDeleted == 1) {
             log.info(String.format("Deleted product: (productId - %d) from cart: (cartId - %d) by user: (userId - %s)", productId, cartId, userId));
             return true;
@@ -112,7 +109,7 @@ public class CartsServiceImpl implements CartsService {
     public boolean clearCart(long cartId, String userId) {
         ensureCartExistsAndNotLocked(cartId, userId);
 
-        int rowsDeleted = this.cartItemsRepository.clearCartItems(cartId, userId);
+        int rowsDeleted = cartItemsRepository.clearCartItems(cartId, userId);
         if (rowsDeleted > 0) {
             log.info(String.format("Cart: (cartId - %d) cleared by user: (userId - %s).", cartId, userId));
             return true;
@@ -124,69 +121,49 @@ public class CartsServiceImpl implements CartsService {
     public boolean lockCart(long cartId, String userId) {
         log.info(String.format("Cart lock requested by userId %s for cartId %d", userId, cartId));
 
-        Cart cart = cartsRepository.findByIdAndUserId(cartId, userId)
-                .orElseThrow(() -> new CartNotFoundException(String.format("Cart not found: (cartId - %d)", cartId)));
+        try {
+            Cart cart = cartsRepository.findByIdAndUserId(cartId, userId)
+                    .orElseThrow(() -> new CartNotFoundException(String.format("Cart not found: (cartId - %d)", cartId)));
 
-        if (cart.isLocked()) {
-            log.info(String.format("Cart already locked: (cartId - %d). Skipping..", cartId));
+            cartLockApplierService.acquireLock(cart);
+
+            log.info(String.format("Cart locked by userId %s for cartId %d", userId, cartId));
+            return true;
+        } catch (Exception ex) {
+            log.error(String.format("Cart lock failed: (cartId - %d)..", cartId), ex);
             return false;
         }
-
-        cart.lock();
-        cartsRepository.save(cart);
-
-        log.info(String.format("Cart locked by userId %s for cartId %d", userId, cartId));
-        return true;
     }
 
     @Override
     public boolean unlockCart(long cartId, String userId) {
         log.info(String.format("Cart unlock requested by userId %s for cartId %d", userId, cartId));
 
-        Cart cart = cartsRepository.findByIdAndUserId(cartId, userId)
-                .orElseThrow(() -> new CartNotFoundException(String.format("Cart not found: (cartId - %d)", cartId)));
+        try {
+            Cart cart = cartsRepository.findByIdAndUserId(cartId, userId)
+                    .orElseThrow(() -> new CartNotFoundException(String.format("Cart not found: (cartId - %d)", cartId)));
 
-        if (cart.isUnlocked()) {
-            log.info(String.format("Cart already unlocked: (cartId - %d). Skipping..", cartId));
+            cartLockApplierService.releaseLock(cart);
+
+            log.info(String.format("Cart unlocked by userId %s for cartId %d", userId, cartId));
+            return true;
+        } catch (Exception ex) {
+            log.info(String.format("Cart unlocked failed: (cartId - %d)..", cartId), ex);
             return false;
-        }
-        cart.unlock();
-        cartsRepository.save(cart);
-
-        log.info(String.format("Cart unlocked by userId %s for cartId %d", userId, cartId));
-
-        return true;
-    }
-
-    @Override
-    public void initiateCheckout(long cartId, String userId) {
-        boolean locked = this.lockCart(cartId, userId);
-        if (locked) {
-            //TODO: create pending order
         }
     }
 
     private void calculateSubTotal(Cart cart) {
-        BigDecimal subTotal = cart.getCartItems().stream()
+        BigDecimal subTotal = cart.getCartItems()
+                .stream()
                 .filter(CartItem::isSelected)
                 .map(ci -> ci.getProduct().getGrossAmount().multiply(new BigDecimal(ci.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         cart.setSubTotal(subTotal);
     }
 
-    private void ensureProductExistsAndAlsoInStock(long productId) {
-        Optional<Product> productOptional = this.productsRepository.findById(productId);
-        if (productOptional.isEmpty()) {
-            throw new ProductNotFoundException(String.format("Product not found: (productId - %d)", productId));
-        }
-
-        if (productOptional.filter(Product::isInStock).isEmpty()) {
-            throw new ProductOutOfStockException(productId);
-        }
-    }
-
     private void ensureCartExistsAndNotLocked(long cartId, String userId) {
-        Optional<Cart> cartOptional = this.cartsRepository.findById(cartId);
+        Optional<Cart> cartOptional = cartsRepository.findById(cartId);
         if (cartOptional.isEmpty()) {
             throw new CartNotFoundException(String.format("Cart not found: (cartId - %d) for user: (userId - %s)", cartId, userId));
         }

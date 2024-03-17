@@ -11,9 +11,9 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import static com.thetechmaddy.ecommerce.models.CartStatus.LOCKED;
 import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
@@ -43,7 +43,7 @@ public class Cart extends Audit {
     @Setter
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "cart")
     @JsonView(CartResponse.class)
-    private Set<CartItem> cartItems = new HashSet<>();
+    private List<CartItem> cartItems = new ArrayList<>();
 
     @Setter
     @Transient
@@ -56,7 +56,7 @@ public class Cart extends Audit {
         super(OffsetDateTime.now(), OffsetDateTime.now());
         this.userId = userId;
         this.cartStatus = cartStatus;
-        this.cartItems = new HashSet<>();
+        this.cartItems = new ArrayList<>();
     }
 
     public boolean belongsTo(String userId) {

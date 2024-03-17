@@ -1,6 +1,6 @@
 package com.thetechmaddy.ecommerce.controllers;
 
-import com.thetechmaddy.ecommerce.exceptions.ApiException;
+import com.thetechmaddy.ecommerce.exceptions.BusinessException;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.models.responses.ErrorResponse;
 import lombok.extern.log4j.Log4j2;
@@ -25,8 +25,8 @@ public class BaseController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
-    @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ApiResponse<ErrorResponse>> apiException(ApiException ex) {
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> businessException(BusinessException ex) {
         log.error(ex.getMessage(), ex);
 
         String message = ex.getStatus().equals(INTERNAL_SERVER_ERROR)

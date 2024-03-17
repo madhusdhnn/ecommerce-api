@@ -57,6 +57,11 @@ public class CartItem extends Audit {
         this.cart = cart;
     }
 
+    public CartItem(int quantity, Product product) {
+        this.quantity = quantity;
+        this.product = product;
+    }
+
     public boolean isSelected() {
         return SELECTED.equals(this.status);
     }

@@ -3,6 +3,7 @@ package com.thetechmaddy.ecommerce.services;
 import com.thetechmaddy.ecommerce.BaseIntegrationTest;
 import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotFoundException;
+import com.thetechmaddy.ecommerce.exceptions.ProductOutOfStockException;
 import com.thetechmaddy.ecommerce.models.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -121,5 +123,18 @@ public class ProductsServiceTest extends BaseIntegrationTest {
 
         assertEquals("p2", products.get(0).getName());
         assertEquals("p3", products.get(1).getName());
+    }
+
+    @Test
+    public void testEnsureProductStock() {
+        Optional<Product> productOptional = getTestProducts().stream().filter(Product::isInStock).findFirst();
+        assertTrue(productOptional.isPresent());
+
+        assertDoesNotThrow(() -> this.productsService.ensureProductInStock(productOptional.get().getId()));
+
+        Optional<Product> outOfStockProductOptional = getTestProducts().stream().filter(product -> !product.isInStock()).findFirst();
+        assertTrue(outOfStockProductOptional.isPresent());
+
+        assertThrows(ProductOutOfStockException.class, () -> this.productsService.ensureProductInStock(outOfStockProductOptional.get().getId()));
     }
 }
