@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
 
+@Setter
 @Getter
 @MappedSuperclass
 @NoArgsConstructor
@@ -22,14 +23,12 @@ public abstract class Audit {
     @CreationTimestamp
     @Column(name = "created_at")
     @JsonIgnore
-    @Setter
     private OffsetDateTime createdAt;
 
     @TimeZoneStorage(value = TimeZoneStorageType.NORMALIZE)
     @UpdateTimestamp
     @Column(name = "updated_at")
     @JsonIgnore
-    @Setter
     private OffsetDateTime updatedAt;
 }
 

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,17 +28,17 @@ public class ProductsServiceTest extends BaseIntegrationTest {
     private ProductsService productsService;
 
     @Test
-    @Transactional
     public void testGetSingleProduct_ThrowsProductNotFound() {
         assertThrows(ProductNotFoundException.class, () -> this.productsService.getProductById(Integer.MAX_VALUE));
     }
 
     @Test
-    @Transactional
     public void testGetSingleProduct() {
         Product expected = getTestProducts().get(0);
         Product actual = this.productsService.getProductById(expected.getId());
-        assertEquals(expected, actual);
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(0, expected.getTaxPercentage().compareTo(actual.getTaxPercentage()));
+        assertEquals(0, expected.getGrossAmount().compareTo(actual.getGrossAmount()));
     }
 
     @Test

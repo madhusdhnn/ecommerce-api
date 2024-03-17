@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @EqualsAndHashCode(callSuper = true)
 @Builder(toBuilder = true)
 public class Order extends Audit {
