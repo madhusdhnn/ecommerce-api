@@ -51,10 +51,17 @@ public class Payment extends Audit {
     @JsonView(value = {ProcessPaymentResponse.class, PlaceOrderResponse.class})
     private OffsetDateTime paymentDateTime;
 
+    @Setter
     @EqualsAndHashCode.Exclude
     @OneToOne(optional = false)
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Order order;
+
+    public Payment(PaymentStatus paymentStatus, PaymentMode paymentMode) {
+        this.status = paymentStatus;
+        this.paymentMode = paymentMode;
+        this.amount = new BigDecimal("1000");
+    }
 
     @JsonIgnore
     public boolean isSuccess() {

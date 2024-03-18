@@ -31,6 +31,10 @@ public class CognitoUser {
     @Size(min = 1, message = "Last Name" + " " + NAME_MIN_LENGTH_MESSAGE)
     private String lastName;
 
+    public CognitoUser(String cognitoSub) {
+        this.cognitoSub = cognitoSub;
+    }
+
     public String getFullName() {
         return firstName + " " + lastName;
     }

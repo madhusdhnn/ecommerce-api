@@ -61,16 +61,23 @@ public class Order extends Audit {
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @Setter
-    @OneToOne(mappedBy = "order")
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     @JsonAlias("paymentInfo")
     private Payment payment;
 
     @Setter
-    @OneToOne(mappedBy = "order")
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     @JsonAlias("deliveryInfo")
     private DeliveryDetails deliveryDetails;
+
+    public Order(OrderStatus orderStatus, String userId) {
+        this.userId = userId;
+        this.grossTotal = new BigDecimal("120");
+        this.netTotal = new BigDecimal("100");
+        this.status = orderStatus;
+    }
 
     public Order(Order order) {
         super(order.getCreatedAt(), order.getUpdatedAt());
@@ -83,10 +90,5 @@ public class Order extends Audit {
 
     public boolean isPending() {
         return OrderStatus.PENDING == this.status;
-    }
-
-    public void clearAndAddAllOrderItems(List<OrderItem> orderItems) {
-        this.orderItems.clear();
-        this.orderItems.addAll(orderItems);
     }
 }

@@ -37,6 +37,7 @@ public class Cart extends Audit {
     @Column(name = "user_id", unique = true)
     private String userId;
 
+    @Setter
     @Column(name = "status")
     @JsonView(CartResponse.class)
     @Enumerated(EnumType.STRING)

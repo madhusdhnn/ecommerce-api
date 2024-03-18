@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.thetechmaddy.ecommerce.models.DbConstants.UPDATE_ORDER_LAST_ACCESS_TIME_QUERY;
+import static com.thetechmaddy.ecommerce.models.QueryConstants.UPDATE_ORDER_LAST_ACCESS_TIME_QUERY;
 
 @Repository
 public interface OrdersRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {

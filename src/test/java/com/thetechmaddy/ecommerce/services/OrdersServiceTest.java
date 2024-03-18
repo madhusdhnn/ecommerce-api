@@ -8,21 +8,22 @@ import com.thetechmaddy.ecommerce.domains.orders.Order;
 import com.thetechmaddy.ecommerce.domains.orders.OrderItem;
 import com.thetechmaddy.ecommerce.domains.payments.Payment;
 import com.thetechmaddy.ecommerce.domains.products.Product;
-import com.thetechmaddy.ecommerce.exceptions.CartNotBelongsToUserException;
-import com.thetechmaddy.ecommerce.exceptions.CartNotFoundException;
-import com.thetechmaddy.ecommerce.exceptions.DuplicatePendingOrderException;
-import com.thetechmaddy.ecommerce.exceptions.EmptyCartException;
+import com.thetechmaddy.ecommerce.exceptions.*;
 import com.thetechmaddy.ecommerce.models.DeliveryInfo;
 import com.thetechmaddy.ecommerce.models.OrderItemStatus;
+import com.thetechmaddy.ecommerce.models.OrderStatus;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.payments.PaymentMode;
 import com.thetechmaddy.ecommerce.models.payments.PaymentStatus;
+import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
 import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
 import com.thetechmaddy.ecommerce.repositories.CartsRepository;
 import com.thetechmaddy.ecommerce.repositories.OrdersRepository;
+import com.thetechmaddy.ecommerce.repositories.PaymentsRepository;
 import lombok.Builder;
 import lombok.Getter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
 import static com.thetechmaddy.ecommerce.models.OrderStatus.CONFIRMED;
@@ -61,6 +63,9 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     @Autowired
     private OrdersRepository ordersRepository;
 
+    @Autowired
+    private PaymentsRepository paymentsRepository;
+
     private long cartId;
 
     @BeforeAll
@@ -80,39 +85,47 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     @Test
     public void testNewOrderInitiateCartNotFoundException() {
         assertThrows(CartNotFoundException.class, () ->
-                ordersService.initiateOrder(TEST_COGNITO_SUB,
+                ordersService.createNewOrder(TEST_COGNITO_SUB,
                         getOrderRequest(Integer.MAX_VALUE, TestOrderRequestOptions.builder().build())));
     }
 
     @Test
     public void testNewOrderInitiateCartNotBelongsToUserException() {
         assertThrows(CartNotBelongsToUserException.class, () ->
-                ordersService.initiateOrder("some-other-user",
+                ordersService.createNewOrder("some-other-user",
                         getOrderRequest(cartId, TestOrderRequestOptions.builder().build())));
     }
 
     @Test
-    @Transactional
     public void testNewOrderInitiateCartIsEmptyException() {
+        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
+                .paymentMode(CREDIT_CARD)
+                .createPaymentInfo(true)
+                .cartAmount(new BigDecimal("0")).build();
+
         assertThrows(EmptyCartException.class, () ->
-                ordersService.initiateOrder(TEST_COGNITO_SUB,
-                        getOrderRequest(cartId, TestOrderRequestOptions.builder().build())));
+                ordersService.createNewOrder(TEST_COGNITO_SUB, getOrderRequest(cartId, options)));
     }
 
     @Test
     @Transactional
     public void testNewOrderInitiateCashOnDelivery() {
-        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
-                .createDeliveryInfo(true)
-                .createPaymentInfo(true)
-                .paymentMode(CASH_ON_DELIVERY)
-                .build();
-
         getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
             cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
         });
 
-        Order order = ordersService.initiateOrder(TEST_COGNITO_SUB, getOrderRequest(cartId, options));
+        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
+
+        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
+                .createDeliveryInfo(true)
+                .createPaymentInfo(true)
+                .cartAmount(cartTotal)
+                .paymentMode(CASH_ON_DELIVERY)
+                .build();
+
+        OrderRequest orderRequest = getOrderRequest(cartId, options);
+
+        Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
         assertNotNull(order);
 
         assertEquals(CONFIRMED, order.getStatus());
@@ -144,35 +157,44 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     @Test
     @Transactional
     public void testInitiateOrderReturnExisting() {
-        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
-                .createDeliveryInfo(true)
-                .createPaymentInfo(true)
-                .paymentMode(CREDIT_CARD)
-                .build();
+        assertNull(ordersService.getPendingOrder(TEST_COGNITO_SUB));
 
         getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
             cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
         });
 
+        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
+
+        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
+                .createDeliveryInfo(true)
+                .createPaymentInfo(true)
+                .cartAmount(cartTotal)
+                .paymentMode(CREDIT_CARD)
+                .build();
+
         OrderRequest orderRequest = getOrderRequest(cartId, options);
         Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
 
-        // Request for same order
-        Order actual = ordersService.initiateOrder(TEST_COGNITO_SUB, orderRequest);
+        Order actual = ordersService.getPendingOrder(TEST_COGNITO_SUB);
         assertEquals(order, actual);
     }
 
     @Test
     @Transactional
     public void testCreateOrderDuplicateError() {
+        getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
+            cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
+        });
+
+        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
+
         TestOrderRequestOptions options = TestOrderRequestOptions.builder()
                 .createDeliveryInfo(true)
                 .createPaymentInfo(true)
+                .cartAmount(cartTotal)
                 .paymentMode(CREDIT_CARD)
                 .build();
 
-        getTestProducts().stream().filter(Product::isInStock).forEach(product ->
-                cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId));
 
         OrderRequest orderRequest = getOrderRequest(cartId, options);
         ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
@@ -181,19 +203,24 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     }
 
     @Test
-    @Transactional
     public void testNewOrderInitiateOtherPaymentModes() {
-        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
-                .createDeliveryInfo(true)
-                .createPaymentInfo(true)
-                .paymentMode(CREDIT_CARD)
-                .build();
-
         getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
             cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
         });
 
-        Order order = ordersService.initiateOrder(TEST_COGNITO_SUB, getOrderRequest(cartId, options));
+        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
+
+        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
+                .createDeliveryInfo(true)
+                .createPaymentInfo(true)
+                .cartAmount(cartTotal)
+                .paymentMode(CREDIT_CARD)
+                .build();
+
+
+        OrderRequest orderRequest = getOrderRequest(cartId, options);
+
+        Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
         assertNotNull(order);
 
         assertEquals(PENDING, order.getStatus());
@@ -219,29 +246,116 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         assertEquals(PaymentStatus.PENDING, payment.getStatus());
 
         assertFalse(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
+        assertEquals(
+                getTestProducts().stream().filter(Product::isInStock).toList().size(),
+                cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB)
+        );
     }
 
     @Test
     @Transactional
     public void testDuplicateOrderException() {
+        getTestProducts().stream().filter(Product::isInStock)
+                .forEach(product -> cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId));
+
+        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
+
         TestOrderRequestOptions options = TestOrderRequestOptions.builder()
                 .createDeliveryInfo(true)
                 .createPaymentInfo(true)
+                .cartAmount(cartTotal)
                 .paymentMode(CREDIT_CARD)
                 .build();
 
-        getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
-            cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
-        });
 
         OrderRequest orderRequest = getOrderRequest(cartId, options);
+
         Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
 
         Order order2 = new Order(order);
 
-        ordersRepository.saveAndFlush(order2);
+        ordersRepository.save(order2);
 
-        assertThrows(DuplicatePendingOrderException.class, () -> ordersService.initiateOrder(TEST_COGNITO_SUB, orderRequest));
+        assertThrows(DuplicatePendingOrderException.class, () -> ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest));
+    }
+
+    @Test
+    public void testPlaceOrderUnprocessableOrderException() {
+        Order order = ordersRepository.save(new Order(OrderStatus.COMPLETED, TEST_COGNITO_SUB));
+        assertThrows(UnprocessableOrderException.class, () -> ordersService.placeOrder(order.getId(), new CognitoUser(TEST_COGNITO_SUB)));
+        ordersRepository.deleteAll();
+    }
+
+    @Test
+    public void testPlaceOrderPaymentRequiredException() {
+        Order testOrder = new Order(PENDING, TEST_COGNITO_SUB);
+        Payment payment = new Payment(PaymentStatus.PENDING, CREDIT_CARD);
+        payment.setOrder(testOrder);
+        testOrder.setPayment(payment);
+
+        Order order = ordersRepository.save(testOrder);
+        assertThrows(PaymentRequiredException.class, () -> ordersService.placeOrder(order.getId(), new CognitoUser(TEST_COGNITO_SUB)));
+        ordersRepository.deleteAll();
+    }
+
+    @Test
+    public void testPlaceOrderPaymentNotInSuccessException() {
+        Order testOrder = new Order(PENDING, TEST_COGNITO_SUB);
+        Payment payment = new Payment(PaymentStatus.FAILED, CREDIT_CARD);
+        payment.setOrder(testOrder);
+        testOrder.setPayment(payment);
+
+        Order order = ordersRepository.save(testOrder);
+        assertThrows(PaymentNotInSuccessException.class, () -> ordersService.placeOrder(order.getId(), new CognitoUser(TEST_COGNITO_SUB)));
+        ordersRepository.deleteAll();
+    }
+
+    @Test
+    @Transactional
+    public void testPlaceOrder() {
+        getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
+            cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
+        });
+
+        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
+
+        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
+                .createDeliveryInfo(true)
+                .createPaymentInfo(true)
+                .cartAmount(cartTotal)
+                .paymentMode(CREDIT_CARD)
+                .build();
+
+
+        OrderRequest orderRequest = getOrderRequest(cartId, options);
+
+        Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
+
+        Payment payment = order.getPayment();
+        payment.setStatus(PaymentStatus.SUCCESS);
+        paymentsRepository.save(payment);
+
+        Order placedOrder = ordersService.placeOrder(order.getId(), new CognitoUser(TEST_COGNITO_SUB));
+        assertNotNull(placedOrder);
+        assertEquals(CONFIRMED, placedOrder.getStatus());
+
+        order.getOrderItems().forEach(oi -> assertEquals(OrderItemStatus.CONFIRMED, oi.getStatus()));
+
+        assertTrue(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
+        assertEquals(0, cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB));
+    }
+
+    @AfterEach
+    public void clearOrdersAndCartItems() {
+        ordersRepository.deleteAll();
+        cartItemsRepository.deleteAll();
+        Optional<Cart> cartOptional = cartsRepository.findByUserId(TEST_COGNITO_SUB)
+                .map(c -> {
+                    c.setCartStatus(UN_LOCKED);
+                    return c;
+                });
+
+        cartOptional.ifPresent(cart -> cartsRepository.save(cart));
     }
 
     private OrderRequest getOrderRequest(long cartId, TestOrderRequestOptions options) {
@@ -268,12 +382,11 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         }
 
         if (options.isCreatePaymentInfo()) {
-            paymentInfo = new PaymentInfo(new BigDecimal("140500"), options.getPaymentMode());
+            paymentInfo = new PaymentInfo(options.getCartAmount(), options.getPaymentMode());
         }
 
         return new OrderRequest(cartId, deliveryInfo, paymentInfo);
     }
-
 
     @Getter
     @Builder
@@ -281,6 +394,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         private boolean createDeliveryInfo;
         private boolean shippingSameAsBilling;
         private boolean createPaymentInfo;
+        private BigDecimal cartAmount;
         private PaymentMode paymentMode;
     }
 

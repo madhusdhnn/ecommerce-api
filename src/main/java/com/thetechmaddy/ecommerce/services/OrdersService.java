@@ -6,9 +6,10 @@ import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
 
 public interface OrdersService {
 
-    Order initiateOrder(String userId, OrderRequest orderRequest);
+    Order getPendingOrder(String userId);
 
     Order createNewOrder(String userId, OrderRequest orderRequest);
 
     Order placeOrder(long orderId, CognitoUser customer);
+
 }

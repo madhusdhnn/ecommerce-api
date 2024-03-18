@@ -1,21 +1,23 @@
 package com.thetechmaddy.ecommerce.repositories;
 
 import com.thetechmaddy.ecommerce.domains.carts.CartItem;
-import com.thetechmaddy.ecommerce.models.DbConstants;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static com.thetechmaddy.ecommerce.models.DbConstants.*;
+import static com.thetechmaddy.ecommerce.models.QueryConstants.*;
 
 @Repository
 public interface CartItemsRepository extends JpaRepository<CartItem, Long> {
 
+    @Transactional
     @Modifying
     @Query(value = UPSERT_CART_ITEM_QUERY, nativeQuery = true)
     void saveOnConflictUpdateQuantity(@Param("productId") long productId, @Param("quantity") int quantity, @Param("cartId") long cartId);
@@ -34,4 +36,7 @@ public interface CartItemsRepository extends JpaRepository<CartItem, Long> {
 
     @Query(value = COUNT_CART_ITEMS_BY_USER_CART_QUERY, nativeQuery = true)
     int countByCartIdAndCartUserId(@Param("cartId") long cartId, @Param("userId") String userId);
+
+    @Query(value = GROSS_TOTAL_FOR_SELECTED_CART_ITEMS_QUERY)
+    BigDecimal getTotal(@Param("cartId") long cartId, @Param("userId") String userId);
 }

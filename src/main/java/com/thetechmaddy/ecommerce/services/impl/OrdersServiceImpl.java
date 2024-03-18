@@ -51,14 +51,8 @@ public class OrdersServiceImpl implements OrdersService {
     private final CartItemToOrderItemMapper cartItemToOrderItemMapper;
 
     @Override
-    public Order initiateOrder(String userId, OrderRequest orderRequest) {
-        Order order = getOrderInPendingStatus(userId);
-
-        if (order == null) {
-            order = createNewOrder(userId, orderRequest);
-        }
-
-        return order;
+    public Order getPendingOrder(String userId) {
+        return getOrderInPendingStatus(userId);
     }
 
     @Override
@@ -68,13 +62,20 @@ public class OrdersServiceImpl implements OrdersService {
 
         Cart cart = cartsService.getCart(orderRequest.getCartId(), userId);
 
+        PaymentInfo paymentInfo = orderRequest.getPaymentInfo();
+        if (paymentInfo.getAmount().compareTo(cart.getSubTotal()) != 0) {
+            throw new CartItemsTotalMismatchException(
+                    String.format("Cart items total and payment request amount do not match. Cart Total: %s. Payment requested: %s",
+                            cart.getSubTotal(), paymentInfo.getAmount())
+            );
+        }
+
         List<CartItem> cartItems = cart.getCartItems();
         ensureCartNotEmpty(cart.getId(), cartItems);
 
         cartLockApplierService.acquireLock(cart);
 
-        PaymentInfo paymentInfo = orderRequest.getPaymentInfo();
-        Order newOrder = createOrder(userId, paymentInfo, cartItems);
+        Order newOrder = createOrder(userId, paymentInfo, cart.getCartItems());
 
         DeliveryDetails deliveryDetails = deliveryDetailsService.saveDeliveryInfo(orderRequest.getDeliveryInfo(), newOrder);
         newOrder.setDeliveryDetails(deliveryDetails);
@@ -95,6 +96,7 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
+    @Transactional
     public Order placeOrder(long orderId, CognitoUser customer) {
         Order order = this.ordersRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
@@ -107,8 +109,8 @@ public class OrdersServiceImpl implements OrdersService {
 
         if (payment.isPending()) {
             throw new PaymentRequiredException(
-                    String.format("Payment: (paymentId - %d) is not completed for the order: (orderId - %d)",
-                            payment.getId(), order.getId())
+                    String.format("Payment: (paymentId - %d) is not completed for the order: (orderId - %d). Required amount: %s",
+                            payment.getId(), order.getId(), payment.getAmount())
             );
         }
 
@@ -145,7 +147,6 @@ public class OrdersServiceImpl implements OrdersService {
         Order.OrderBuilder builder = Order.builder();
 
         builder.userId(userId);
-
         builder.status(paymentInfo.isCashOnDeliveryMode() ? CONFIRMED : PENDING);
 
         NetTotalCalculator netTotalCalculator = new NetTotalCalculator();
@@ -188,12 +189,6 @@ public class OrdersServiceImpl implements OrdersService {
         throw new DuplicatePendingOrderException(String.format("Found more than one PENDING order for user: (userId - %s)", userId));
     }
 
-    private static void ensureCartNotEmpty(long cartId, List<CartItem> cartItems) {
-        if (cartItems.isEmpty()) {
-            throw new EmptyCartException(String.format("Can not create order: cart is empty: (cartId - %d)", cartId));
-        }
-    }
-
     private void ensureNoPendingOrderExists(String userId) {
         long totalPendingOrders = ordersRepository.countByUserIdAndStatusEquals(userId, PENDING);
 
@@ -202,13 +197,20 @@ public class OrdersServiceImpl implements OrdersService {
         }
     }
 
-    private static OrderItemStatus getOrderItemStatus(boolean cashOnDeliveryMode) {
-        return cashOnDeliveryMode ? OrderItemStatus.CONFIRMED : PENDING_ORDER_CONFIRMATION;
-    }
-
     private void updateProductsStock(List<CartItem> cartItems) {
         Map<Long, Integer> productIdQuantityMap = cartItems.stream()
                 .collect(Collectors.toMap(cartItem -> cartItem.getProduct().getId(), CartItem::getQuantity));
         inventoryService.updateProductsStock(productIdQuantityMap);
+    }
+
+    private static OrderItemStatus getOrderItemStatus(boolean cashOnDeliveryMode) {
+        return cashOnDeliveryMode ? OrderItemStatus.CONFIRMED : PENDING_ORDER_CONFIRMATION;
+    }
+
+
+    private static void ensureCartNotEmpty(long cartId, List<CartItem> cartItems) {
+        if (cartItems != null && cartItems.isEmpty()) {
+            throw new EmptyCartException(String.format("Can not create order: cart is empty: (cartId - %d)", cartId));
+        }
     }
 }

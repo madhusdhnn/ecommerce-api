@@ -26,7 +26,13 @@ public class OrdersController extends BaseController {
     public ApiResponse<Order> initiateOrder(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
                                             @RequestBody @Valid OrderRequest orderRequest) {
 
-        return ApiResponse.success(ordersService.initiateOrder(cognitoUser.getCognitoSub(), orderRequest));
+        Order pendingOrder = ordersService.getPendingOrder(cognitoUser.getCognitoSub());
+
+        if (pendingOrder == null) {
+            pendingOrder = ordersService.createNewOrder(cognitoUser.getCognitoSub(), orderRequest);
+        }
+
+        return ApiResponse.success(pendingOrder);
     }
 
     @PutMapping("/{orderId}/place")

@@ -1,11 +1,7 @@
 package com.thetechmaddy.ecommerce.models;
 
-public class DbConstants {
+public class QueryConstants {
 
-    public static final String UN_LOCK_CARTIF_LOCKED_QUERY = """
-                UPDATE Cart c SET c.cartStatus = 'UN_LOCKED'
-                WHERE c.id = :cartId AND c.userId = :userId AND c.cartStatus = 'LOCKED'
-            """;
     public static final String UPSERT_CART_ITEM_QUERY = """
                 INSERT INTO cart_items (product_id, status, quantity, cart_id)
                 VALUES (:productId, 'SELECTED', :quantity, :cartId)
@@ -30,5 +26,13 @@ public class DbConstants {
                 SELECT COUNT(ci.*) FROM cart_items ci JOIN carts c
                 ON c.id = ci.cart_id
                 WHERE c.id = :cartId AND c.user_id = :userId
+            """;
+    public static final String GROSS_TOTAL_FOR_CURRENT_ORDER_QUERY = """
+                SELECT SUM(oi.grossAmount) FROM OrderItem oi JOIN Order o ON o.id = oi.order.id
+                WHERE o.userId = :userId AND o.status = :orderStatus
+            """;
+    public static final String GROSS_TOTAL_FOR_SELECTED_CART_ITEMS_QUERY = """
+                SELECT SUM(ci.product.grossAmount * ci.quantity) FROM CartItem ci JOIN Cart c ON c.id = ci.cart.id
+                WHERE c.id = :cartId AND c.userId = :userId AND ci.status = 'SELECTED'
             """;
 }

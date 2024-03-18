@@ -156,7 +156,6 @@ public class CartsServiceTest extends BaseIntegrationTest {
     }
 
     @Test
-    @Transactional
     public void testUpdateProductQuantityInCart() {
         Product product = getTestProducts().get(2);
 
@@ -193,7 +192,6 @@ public class CartsServiceTest extends BaseIntegrationTest {
     }
 
     @Test
-    @Transactional
     public void testUpdateProductSelectionInCart() {
         Product product = getTestProducts().get(2);
 
