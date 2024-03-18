@@ -20,6 +20,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -53,6 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public Payment processPayment(long idempotencyId, PaymentInfo paymentInfo, CognitoUser user) {
         Payment payment = paymentsRepository.findById(idempotencyId)
                 .orElseThrow(() -> new PaymentNotFoundException(idempotencyId));

@@ -104,46 +104,30 @@ public class OrdersServiceImpl implements OrdersService {
         Order order = this.ordersRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
 
-        if (!order.isPending()) {
-            throw new UnprocessableOrderException(String.format("Order: (orderId - %d) not in pending status", orderId));
+        if (order.isPending()) {
+            ensurePaymentIsSuccess(order);
+
+            order.setStatus(CONFIRMED);
+            log.info(String.format("Order: (orderId - %d) is confirmed for user: (userId - %s)", order.getId(), customer.getCognitoSub()));
+
+            List<OrderItem> orderItems = order.getOrderItems()
+                    .stream()
+                    .peek(oi -> {
+                        oi.setStatus(OrderItemStatus.CONFIRMED);
+                        oi.setOrder(order);
+                    })
+                    .collect(Collectors.toList());
+            orderItemsRepository.saveAll(orderItems);
+
+            Cart cart = cartsService.getUserCart(customer.getCognitoSub());
+
+            cartLockApplierService.releaseLock(cart);
+            cartsService.clearCart(cart.getId(), customer.getCognitoSub());
+
+            updateProductsStock(cart.getCartItems());
+            return order;
         }
-
-        Payment payment = order.getPayment();
-
-        if (payment.isPending()) {
-            throw new PaymentRequiredException(
-                    String.format("Payment: (paymentId - %d) is not completed for the order: (orderId - %d). Required amount: %s",
-                            payment.getId(), order.getId(), payment.getAmount())
-            );
-        }
-
-        if (!payment.isSuccess()) {
-            throw new PaymentNotInSuccessException(
-                    String.format("Payment: (paymentId - %d) not in success status for the order: (orderId - %d)",
-                            payment.getId(), order.getId())
-            );
-        }
-
-        order.setStatus(CONFIRMED);
-        log.info(String.format("Order: (orderId - %d) is confirmed for user: (userId - %s)", order.getId(), customer.getCognitoSub()));
-
-        List<OrderItem> orderItems = order.getOrderItems()
-                .stream()
-                .peek(oi -> {
-                    oi.setStatus(OrderItemStatus.CONFIRMED);
-                    oi.setOrder(order);
-                })
-                .collect(Collectors.toList());
-        orderItemsRepository.saveAll(orderItems);
-
-        Cart cart = cartsService.getUserCart(customer.getCognitoSub());
-
-        cartLockApplierService.releaseLock(cart);
-        cartsService.clearCart(cart.getId(), customer.getCognitoSub());
-
-        updateProductsStock(cart.getCartItems());
-
-        return order;
+        throw new UnprocessableOrderException(String.format("Order: (orderId - %d) not in pending status", orderId));
     }
 
     @Override
@@ -216,6 +200,24 @@ public class OrdersServiceImpl implements OrdersService {
         Map<Long, Integer> productIdQuantityMap = cartItems.stream()
                 .collect(Collectors.toMap(cartItem -> cartItem.getProduct().getId(), CartItem::getQuantity));
         inventoryService.updateProductsStock(productIdQuantityMap);
+    }
+
+    private static void ensurePaymentIsSuccess(Order order) {
+        Payment payment = order.getPayment();
+
+        if (payment.isPending()) {
+            throw new PaymentRequiredException(
+                    String.format("Payment: (paymentId - %d) is not completed for the order: (orderId - %d). Required amount: %s",
+                            payment.getId(), order.getId(), payment.getAmount())
+            );
+        }
+
+        if (!payment.isSuccess()) {
+            throw new PaymentNotInSuccessException(
+                    String.format("Payment: (paymentId - %d) not in success status for the order: (orderId - %d)",
+                            payment.getId(), order.getId())
+            );
+        }
     }
 
     private static OrderItemStatus getOrderItemStatus(boolean cashOnDeliveryMode) {
