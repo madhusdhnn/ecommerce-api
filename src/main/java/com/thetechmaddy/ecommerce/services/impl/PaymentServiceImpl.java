@@ -54,11 +54,10 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Payment processPayment(long idempotencyId, PaymentInfo paymentInfo, CognitoUser user) {
-        BigDecimal grossTotal = orderItemsRepository.getTotal(user.getCognitoSub(), OrderStatus.PENDING);
-
         Payment payment = paymentsRepository.findById(idempotencyId)
                 .orElseThrow(() -> new PaymentNotFoundException(idempotencyId));
 
+        BigDecimal grossTotal = orderItemsRepository.getTotal(user.getCognitoSub(), OrderStatus.PENDING);
         if (paymentInfo.getAmount().compareTo(grossTotal) != 0) {
             throw new OrderItemsTotalMismatchException(
                     String.format("Order items total and payment process request amount do not match. Order Total: %s. Payment requested: %s",

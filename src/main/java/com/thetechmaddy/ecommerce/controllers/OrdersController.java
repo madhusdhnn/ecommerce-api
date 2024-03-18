@@ -6,6 +6,7 @@ import com.thetechmaddy.ecommerce.models.JsonViews;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
+import com.thetechmaddy.ecommerce.models.responses.Paged;
 import com.thetechmaddy.ecommerce.services.OrdersService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,5 +48,13 @@ public class OrdersController extends BaseController {
     public ApiResponse<Order> getOrder(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
                                        @PathVariable("orderId") long orderId) {
         return ApiResponse.success(ordersService.getOrder(orderId, cognitoUser.getCognitoSub()));
+    }
+
+    @GetMapping
+    @JsonView(JsonViews.GetOrderResponse.class)
+    public Paged<Order> getOrders(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
+                                  @RequestParam(name = "page") Integer page,
+                                  @RequestParam(name = "size") Integer size) {
+        return ordersService.getUserOrders(page, size, cognitoUser.getCognitoSub());
     }
 }

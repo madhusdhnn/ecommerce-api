@@ -21,19 +21,6 @@ CREATE INDEX idx_delivery_details_order_id ON delivery_details (order_id);
 
 ALTER TABLE delivery_details ADD CONSTRAINT delivery_details_order_id UNIQUE (order_id);
 
-CREATE TABLE shipments (
-    id BIGSERIAL PRIMARY KEY,
-    order_id BIGINT REFERENCES orders (id) NOT NULL,
-    order_item_id BIGINT REFERENCES order_items (id) NOT NULL,
-    shipment_date TIMESTAMPTZ,
-    delivery_date TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_shipments_order_id ON shipments (order_id);
-CREATE INDEX idx_shipments_order_item_id ON shipments (order_item_id);
-
 CREATE TABLE payments (
     id BIGSERIAL PRIMARY KEY,
     order_id BIGINT REFERENCES orders (id) NOT NULL,

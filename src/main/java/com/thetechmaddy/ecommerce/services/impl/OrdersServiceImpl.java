@@ -14,6 +14,7 @@ import com.thetechmaddy.ecommerce.models.mappers.CartItemToOrderItemMapper;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
+import com.thetechmaddy.ecommerce.models.responses.Paged;
 import com.thetechmaddy.ecommerce.repositories.OrderItemsRepository;
 import com.thetechmaddy.ecommerce.repositories.OrdersRepository;
 import com.thetechmaddy.ecommerce.services.*;
@@ -22,6 +23,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -147,6 +150,12 @@ public class OrdersServiceImpl implements OrdersService {
     public Order getOrder(long orderId, String userId) {
         return ordersRepository.findByIdAndUserId(orderId, userId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
+    }
+
+    @Override
+    public Paged<Order> getUserOrders(Integer page, Integer size, String userId) {
+        Page<Order> pagedOrders = ordersRepository.findAll(PageRequest.of(page, size));
+        return new Paged<>(pagedOrders.getContent(), page, pagedOrders.getTotalElements(), pagedOrders.getNumberOfElements());
     }
 
     private Order createOrder(String userId, PaymentInfo paymentInfo, List<CartItem> cartItems) {
