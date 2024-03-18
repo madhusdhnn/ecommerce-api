@@ -31,7 +31,7 @@ public class UPIPaymentProvider implements PaymentProvider {
                     currency, amount, senderAccount, receiverAccount, upiPaymentInfo));
             return new PaymentGatewayResponse(false, TRANSACTION_ID);
         }
-        throw new UnsupportedPaymentInfoTypeException("NetBankingInfo type required");
+        throw new UnsupportedPaymentInfoTypeException("UPIPaymentInfo type required");
     }
 
 }

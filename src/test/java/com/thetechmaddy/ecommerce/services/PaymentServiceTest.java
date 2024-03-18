@@ -7,6 +7,7 @@ import com.thetechmaddy.ecommerce.domains.payments.Payment;
 import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.PaymentNotFoundException;
 import com.thetechmaddy.ecommerce.models.payments.CardPaymentInfo;
+import com.thetechmaddy.ecommerce.models.payments.UPIPaymentInfo;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
 import com.thetechmaddy.ecommerce.repositories.CartsRepository;
@@ -113,11 +114,11 @@ public class PaymentServiceTest extends BaseIntegrationTest {
         assertNotNull(newOrder);
         assertTrue(newOrder.isPending());
 
-        Payment payment = paymentService.processPayment(newOrder.getPayment().getId(), new CardPaymentInfo(), new CognitoUser(TEST_COGNITO_SUB));
+        Payment payment = paymentService.processPayment(newOrder.getPayment().getId(), new UPIPaymentInfo(), new CognitoUser(TEST_COGNITO_SUB));
         assertNotNull(payment);
         assertFalse(payment.isSuccess());
 
-        Payment idempotentPayment = paymentService.processPayment(newOrder.getPayment().getId(), new CardPaymentInfo(), new CognitoUser(TEST_COGNITO_SUB));
+        Payment idempotentPayment = paymentService.processPayment(newOrder.getPayment().getId(), new UPIPaymentInfo(), new CognitoUser(TEST_COGNITO_SUB));
         assertEquals(payment, idempotentPayment);
     }
 
