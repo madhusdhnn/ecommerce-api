@@ -1,7 +1,6 @@
 package com.thetechmaddy.ecommerce.services;
 
 import com.thetechmaddy.ecommerce.BaseIntegrationTest;
-import com.thetechmaddy.ecommerce.domains.Address;
 import com.thetechmaddy.ecommerce.domains.DeliveryDetails;
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.domains.orders.Order;
@@ -9,11 +8,8 @@ import com.thetechmaddy.ecommerce.domains.orders.OrderItem;
 import com.thetechmaddy.ecommerce.domains.payments.Payment;
 import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.*;
-import com.thetechmaddy.ecommerce.models.DeliveryInfo;
 import com.thetechmaddy.ecommerce.models.OrderItemStatus;
 import com.thetechmaddy.ecommerce.models.OrderStatus;
-import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
-import com.thetechmaddy.ecommerce.models.payments.PaymentMode;
 import com.thetechmaddy.ecommerce.models.payments.PaymentStatus;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
@@ -21,8 +17,7 @@ import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
 import com.thetechmaddy.ecommerce.repositories.CartsRepository;
 import com.thetechmaddy.ecommerce.repositories.OrdersRepository;
 import com.thetechmaddy.ecommerce.repositories.PaymentsRepository;
-import lombok.Builder;
-import lombok.Getter;
+import com.thetechmaddy.ecommerce.utils.TestUtils.TestOrderRequestOptions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +37,7 @@ import static com.thetechmaddy.ecommerce.models.OrderStatus.CONFIRMED;
 import static com.thetechmaddy.ecommerce.models.OrderStatus.PENDING;
 import static com.thetechmaddy.ecommerce.models.payments.PaymentMode.CASH_ON_DELIVERY;
 import static com.thetechmaddy.ecommerce.models.payments.PaymentMode.CREDIT_CARD;
+import static com.thetechmaddy.ecommerce.utils.TestUtils.getOrderRequest;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -357,45 +353,4 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
         cartOptional.ifPresent(cart -> cartsRepository.save(cart));
     }
-
-    private OrderRequest getOrderRequest(long cartId, TestOrderRequestOptions options) {
-        DeliveryInfo deliveryInfo = null;
-        PaymentInfo paymentInfo = null;
-
-        if (options.isCreateDeliveryInfo()) {
-            Address shippingAddress = Address.builder()
-                    .addressOne("Wall St")
-                    .zipCode("567234")
-                    .build();
-
-            Address billingAddress = Address.builder()
-                    .addressOne("Journal St")
-                    .zipCode("567244")
-                    .build();
-
-            deliveryInfo = new DeliveryInfo(
-                    "Jane Doe",
-                    "jane.doe@example.com",
-                    options.isShippingSameAsBilling() ? billingAddress : shippingAddress,
-                    billingAddress
-            );
-        }
-
-        if (options.isCreatePaymentInfo()) {
-            paymentInfo = new PaymentInfo(options.getCartAmount(), options.getPaymentMode());
-        }
-
-        return new OrderRequest(cartId, deliveryInfo, paymentInfo);
-    }
-
-    @Getter
-    @Builder
-    private static class TestOrderRequestOptions {
-        private boolean createDeliveryInfo;
-        private boolean shippingSameAsBilling;
-        private boolean createPaymentInfo;
-        private BigDecimal cartAmount;
-        private PaymentMode paymentMode;
-    }
-
 }

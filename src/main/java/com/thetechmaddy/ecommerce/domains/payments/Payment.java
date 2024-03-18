@@ -9,6 +9,8 @@ import com.thetechmaddy.ecommerce.models.payments.PaymentMode;
 import com.thetechmaddy.ecommerce.models.payments.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.TimeZoneStorage;
+import org.hibernate.annotations.TimeZoneStorageType;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -20,6 +22,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Builder(toBuilder = true)
+@ToString
 public class Payment extends Audit {
 
     @Id
@@ -45,9 +48,11 @@ public class Payment extends Audit {
 
     @Setter
     @Column(name = "payment_date")
+    @TimeZoneStorage(value = TimeZoneStorageType.NORMALIZE)
     @JsonView(value = {ProcessPaymentResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
     private OffsetDateTime paymentDateTime;
 
+    @ToString.Exclude
     @Setter
     @EqualsAndHashCode.Exclude
     @OneToOne(optional = false)
