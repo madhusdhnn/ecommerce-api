@@ -67,11 +67,12 @@ public class Product extends Audit {
     @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     private BigDecimal taxAmount;
 
+    @Setter
     @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     @Column(name = "stock_quantity")
     private int stockQuantity;
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     @JsonView(value = ProductResponse.class)
     private Category category;
@@ -94,7 +95,25 @@ public class Product extends Audit {
         this.category = category;
     }
 
+    public Product(String name, String description, BigDecimal unitPrice, int quantity) {
+        this.name = name;
+        this.description = description;
+        this.unitPrice = unitPrice;
+        this.stockQuantity = quantity;
+    }
+
     public boolean isInStock() {
         return this.stockQuantity > 0;
+    }
+
+    public void decrementStockQuantity(Integer reductionCount) {
+        int quantity = this.stockQuantity;
+
+        int newQuantity;
+        this.stockQuantity = (newQuantity = quantity - reductionCount) <= 0 ? 0 : newQuantity;
+    }
+
+    public boolean hasInsufficientQuantity(int quantity) {
+        return this.stockQuantity < quantity;
     }
 }

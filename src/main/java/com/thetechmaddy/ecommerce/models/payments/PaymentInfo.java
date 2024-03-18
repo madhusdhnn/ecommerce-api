@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-import static com.thetechmaddy.ecommerce.models.ValidationConstants.NOT_NULL_MESSAGE_SUFFIX;
+import static com.thetechmaddy.ecommerce.models.payments.PaymentMode.CASH_ON_DELIVERY;
+import static com.thetechmaddy.ecommerce.models.validations.ValidationConstants.NOT_NULL_MESSAGE_SUFFIX;
 
 @Getter
 @NoArgsConstructor
@@ -19,5 +20,9 @@ public class PaymentInfo {
 
     @NotNull(message = "paymentMode" + " " + NOT_NULL_MESSAGE_SUFFIX)
     private PaymentMode paymentMode;
+
+    public boolean isCashOnDeliveryMode() {
+        return CASH_ON_DELIVERY == paymentMode;
+    }
 
 }

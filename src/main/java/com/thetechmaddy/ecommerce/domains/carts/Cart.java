@@ -1,5 +1,6 @@
 package com.thetechmaddy.ecommerce.domains.carts;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thetechmaddy.ecommerce.domains.Audit;
@@ -24,6 +25,7 @@ import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@NamedEntityGraph(name = "Cart.cartItems", attributeNodes = @NamedAttributeNode("cartItems"))
 public class Cart extends Audit {
 
     @Id
@@ -59,10 +61,12 @@ public class Cart extends Audit {
         this.cartItems = new ArrayList<>();
     }
 
+    @JsonIgnore
     public boolean belongsTo(String userId) {
         return Objects.equals(this.userId, userId);
     }
 
+    @JsonIgnore
     public boolean isLocked() {
         return LOCKED.equals(cartStatus);
     }
@@ -75,7 +79,13 @@ public class Cart extends Audit {
         this.cartStatus = UN_LOCKED;
     }
 
+    @JsonIgnore
     public boolean isUnlocked() {
         return UN_LOCKED.equals(cartStatus);
     }
+
+    public void addProduct(CartItem cartItem) {
+        this.cartItems.add(cartItem);
+    }
+
 }

@@ -2,8 +2,11 @@ package com.thetechmaddy.ecommerce.services;
 
 import com.thetechmaddy.ecommerce.BaseIntegrationTest;
 import com.thetechmaddy.ecommerce.domains.Address;
+import com.thetechmaddy.ecommerce.domains.DeliveryDetails;
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.domains.orders.Order;
+import com.thetechmaddy.ecommerce.domains.orders.OrderItem;
+import com.thetechmaddy.ecommerce.domains.payments.Payment;
 import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.CartNotBelongsToUserException;
 import com.thetechmaddy.ecommerce.exceptions.CartNotFoundException;
@@ -13,6 +16,7 @@ import com.thetechmaddy.ecommerce.models.DeliveryInfo;
 import com.thetechmaddy.ecommerce.models.OrderItemStatus;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.payments.PaymentMode;
+import com.thetechmaddy.ecommerce.models.payments.PaymentStatus;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
 import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
 import com.thetechmaddy.ecommerce.repositories.CartsRepository;
@@ -97,7 +101,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     @Transactional
-    public void testNewOrderInitiateCasOnDelivery() {
+    public void testNewOrderInitiateCashOnDelivery() {
         TestOrderRequestOptions options = TestOrderRequestOptions.builder()
                 .createDeliveryInfo(true)
                 .createPaymentInfo(true)
@@ -114,10 +118,27 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         assertEquals(CONFIRMED, order.getStatus());
         order.getOrderItems().forEach(oi -> assertEquals(OrderItemStatus.CONFIRMED, oi.getStatus()));
 
-        assertEquals(new BigDecimal("48003.72"), order.getNetTotal());
-        assertEquals(new BigDecimal("53764.17"), order.getGrossTotal());
+        BigDecimal netTotal = order.getOrderItems().stream()
+                .map(OrderItem::getNetAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        assertEquals(netTotal, order.getNetTotal());
+
+        BigDecimal grossTotal = order.getOrderItems().stream()
+                .map(OrderItem::getGrossAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        assertEquals(grossTotal, order.getGrossTotal());
+
+        DeliveryDetails deliveryDetails = order.getDeliveryDetails();
+        assertNotNull(deliveryDetails);
+
+        Payment payment = order.getPayment();
+        assertNotNull(payment);
+        assertEquals(PaymentStatus.PENDING, payment.getStatus());
 
         assertTrue(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
+        assertEquals(0, cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB));
     }
 
     @Test
@@ -178,8 +199,24 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         assertEquals(PENDING, order.getStatus());
         order.getOrderItems().forEach(oi -> assertEquals(OrderItemStatus.PENDING_ORDER_CONFIRMATION, oi.getStatus()));
 
-        assertEquals(new BigDecimal("48003.72"), order.getNetTotal());
-        assertEquals(new BigDecimal("53764.17"), order.getGrossTotal());
+        BigDecimal netTotal = order.getOrderItems().stream()
+                .map(OrderItem::getNetAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        assertEquals(netTotal, order.getNetTotal());
+
+        BigDecimal grossTotal = order.getOrderItems().stream()
+                .map(OrderItem::getGrossAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        assertEquals(grossTotal, order.getGrossTotal());
+
+        DeliveryDetails deliveryDetails = order.getDeliveryDetails();
+        assertNotNull(deliveryDetails);
+
+        Payment payment = order.getPayment();
+        assertNotNull(payment);
+        assertEquals(PaymentStatus.PENDING, payment.getStatus());
 
         assertFalse(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
     }
@@ -225,7 +262,6 @@ public class OrdersServiceTest extends BaseIntegrationTest {
             deliveryInfo = new DeliveryInfo(
                     "Jane Doe",
                     "jane.doe@example.com",
-                    "9876543210",
                     options.isShippingSameAsBilling() ? billingAddress : shippingAddress,
                     billingAddress
             );

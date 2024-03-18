@@ -1,6 +1,7 @@
 package com.thetechmaddy.ecommerce.services.impl;
 
 import com.thetechmaddy.ecommerce.domains.products.Product;
+import com.thetechmaddy.ecommerce.exceptions.InsufficientProductQuantityException;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotFoundException;
 import com.thetechmaddy.ecommerce.exceptions.ProductOutOfStockException;
 import com.thetechmaddy.ecommerce.models.ProductFilters;
@@ -27,6 +28,15 @@ public class ProductsServiceImpl implements ProductsService {
     public Product getProductById(long productId) {
         return productsRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(String.format("Product not found with id : %d", productId)));
+    }
+
+    @Override
+    public Product checkQuantityAndGetProduct(long productId, int requestedQuantity) {
+        Product product = getProductById(productId);
+        if (product.hasInsufficientQuantity(requestedQuantity)) {
+            throw new InsufficientProductQuantityException(productId, product.getStockQuantity(), requestedQuantity);
+        }
+        return product;
     }
 
     @Override

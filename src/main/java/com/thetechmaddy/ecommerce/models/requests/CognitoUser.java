@@ -1,14 +1,14 @@
 package com.thetechmaddy.ecommerce.models.requests;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static com.thetechmaddy.ecommerce.models.ValidationConstants.*;
+import static com.thetechmaddy.ecommerce.models.validations.ValidationConstants.*;
 
 @Getter
 @NoArgsConstructor
@@ -24,11 +24,14 @@ public class CognitoUser {
     private String email;
 
     @NotNull(message = "First Name" + " " + NOT_NULL_MESSAGE_SUFFIX)
-    @Min(value = 1, message = "First Name" + " " + NAME_MIN_LENGTH_MESSAGE)
+    @Size(min = 1, message = "First Name" + " " + NAME_MIN_LENGTH_MESSAGE)
     private String firstName;
 
     @NotNull(message = "Last Name" + " " + NOT_NULL_MESSAGE_SUFFIX)
-    @Min(value = 1, message = "Last Name" + " " + NAME_MIN_LENGTH_MESSAGE)
+    @Size(min = 1, message = "Last Name" + " " + NAME_MIN_LENGTH_MESSAGE)
     private String lastName;
 
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 }

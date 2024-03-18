@@ -26,4 +26,9 @@ public class DbConstants {
     public static final String IS_CART_UNLOCKED_QUERY = """
                 SELECT EXISTS(SELECT 1 FROM carts WHERE id = :cartId AND user_id = :userId AND status = 'UN_LOCKED')
             """;
+    public static final String COUNT_CART_ITEMS_BY_USER_CART_QUERY = """
+                SELECT COUNT(ci.*) FROM cart_items ci JOIN carts c
+                ON c.id = ci.cart_id
+                WHERE c.id = :cartId AND c.user_id = :userId
+            """;
 }

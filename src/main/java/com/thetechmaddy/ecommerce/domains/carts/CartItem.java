@@ -27,7 +27,7 @@ public class CartItem extends Audit {
     private long id;
 
     @Setter
-    @OneToOne(targetEntity = Product.class)
+    @OneToOne(fetch = FetchType.LAZY, targetEntity = Product.class, optional = false)
     @JsonView(JsonViews.CartResponse.class)
     @JoinColumn(name = "product_id")
     private Product product;
@@ -64,5 +64,9 @@ public class CartItem extends Audit {
 
     public boolean isSelected() {
         return SELECTED.equals(this.status);
+    }
+
+    public void incrementQuantity(int quantity) {
+        this.quantity += quantity;
     }
 }

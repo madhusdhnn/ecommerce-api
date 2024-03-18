@@ -30,6 +30,6 @@ public interface CartItemToOrderItemMapper {
     @Mapping(source = "product.taxPercentage", target = "taxPercentage")
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "order", ignore = true)
-    OrderItem cartItemToOrderItem(CartItem cartItem);
+    OrderItem mapCartItemToOrderItem(CartItem cartItem);
 
 }

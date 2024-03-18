@@ -12,4 +12,10 @@ public interface JsonViews {
     }
 
     class OrderInitiateResponse {}
+
+    class ProcessPaymentResponse {}
+
+    class PlaceOrderResponse {}
+
+    class PaymentStatusResponse {}
 }

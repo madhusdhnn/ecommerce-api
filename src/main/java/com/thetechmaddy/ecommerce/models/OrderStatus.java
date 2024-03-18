@@ -20,6 +20,16 @@ public enum OrderStatus {
     /**
      * Represents order has been completed. This includes the return window as well
      */
-    COMPLETED
+    COMPLETED,
+
+    /**
+     * Represents order cancellation
+     */
+    CANCELLED,
+
+    /**
+     * Reprents the pending order was cancelled due to change in order items or user navigated away
+     */
+    DRAFT_CANCELLED
 
 }

@@ -2,7 +2,11 @@ package com.thetechmaddy.ecommerce.services.impl;
 
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.domains.carts.CartItem;
-import com.thetechmaddy.ecommerce.exceptions.*;
+import com.thetechmaddy.ecommerce.domains.products.Product;
+import com.thetechmaddy.ecommerce.exceptions.CartNotBelongsToUserException;
+import com.thetechmaddy.ecommerce.exceptions.CartNotFoundException;
+import com.thetechmaddy.ecommerce.exceptions.ProductNotInCartException;
+import com.thetechmaddy.ecommerce.exceptions.ProductOutOfStockException;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
 import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;
 import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
@@ -22,6 +26,7 @@ import java.util.Optional;
 
 import static com.thetechmaddy.ecommerce.models.CartItemStatus.SELECTED;
 import static com.thetechmaddy.ecommerce.models.CartItemStatus.UN_SELECTED;
+import static com.thetechmaddy.ecommerce.utils.CartUtils.verifyCartOwnerAndLockStatus;
 
 @Log4j2
 @Primary
@@ -41,7 +46,7 @@ public class CartsServiceImpl implements CartsService {
                 .orElseThrow(() -> new CartNotFoundException(String.format("Cart not found with id %d", cartId)));
 
         if (!cart.belongsTo(userId)) {
-            throw new CartNotBelongsToUserException(String.format("Cart with id %d does not belong to the user - %s", cartId, userId));
+            throw new CartNotBelongsToUserException(String.format("Cart:(cartId - %d) does not belong to the user - %s", cartId, userId));
         }
 
         calculateSubTotal(cart);
@@ -49,16 +54,32 @@ public class CartsServiceImpl implements CartsService {
     }
 
     @Override
-    @Transactional
     public void addProductToCart(long cartId, String userId, CartItemRequest cartItemRequest) {
         long productId = cartItemRequest.getProductId();
 
-        productsService.ensureProductInStock(productId);
+        Cart cart = getUserCart(cartId, userId);
+        verifyCartOwnerAndLockStatus(userId, cart);
 
-        ensureCartExistsAndNotLocked(cartId, userId);
+        Product product = productsService.checkQuantityAndGetProduct(productId, cartItemRequest.getQuantity());
 
-        int rowsAffected = cartItemsRepository.saveOnConflictUpdateQuantity(productId, cartItemRequest.getQuantity(), cartId);
-        log.info(String.format("Product: (productId - %d) added/ updated in the cart: (cartId - %d) by the user: (userId - %s). Affected rows: %d", productId, cartId, userId, rowsAffected));
+        Optional<CartItem> cartItemOptional = cart.getCartItems().stream()
+                .filter(ci -> ci.getProduct().getId() == productId)
+                .findFirst();
+
+        CartItem cartItem;
+        if (cartItemOptional.isPresent()) {
+            cartItem = cartItemOptional.get();
+            cartItem.incrementQuantity(cartItemRequest.getQuantity());
+        } else {
+            cartItem = new CartItem(product, cartItemRequest.getQuantity(), SELECTED, cart);
+        }
+
+        cart.addProduct(cartItem);
+        cartsRepository.save(cart);
+
+        log.info(String.format("Product: (productId - %d) added/ updated in the cart: (cartId - %d) by the user: (userId - %s)",
+                productId, cart.getId(), userId)
+        );
     }
 
     @Override
@@ -68,7 +89,7 @@ public class CartsServiceImpl implements CartsService {
             productsService.ensureProductInStock(productId);
             ensureCartExistsAndNotLocked(cartId, userId);
 
-            CartItem cartItem = cartItemsRepository.findByCartIdAndProductId(cartId, productId) // TODO: Also fetch by attribute
+            CartItem cartItem = cartItemsRepository.findByCartIdAndProductId(cartId, productId)
                     .orElseThrow(() -> new ProductNotInCartException(productId));
 
             Integer quantity = cartItemUpdateRequest.getQuantity();
@@ -98,7 +119,11 @@ public class CartsServiceImpl implements CartsService {
 
         int rowsDeleted = cartItemsRepository.removeItem(cartId, productId, userId);
         if (rowsDeleted == 1) {
-            log.info(String.format("Deleted product: (productId - %d) from cart: (cartId - %d) by user: (userId - %s)", productId, cartId, userId));
+            log.info(
+                    String.format("Deleted product: (productId - %d) from cart: (cartId - %d) by user: (userId - %s)",
+                            productId, cartId, userId
+                    )
+            );
             return true;
         }
         return false;
@@ -119,38 +144,30 @@ public class CartsServiceImpl implements CartsService {
 
     @Override
     public boolean lockCart(long cartId, String userId) {
-        log.info(String.format("Cart lock requested by userId %s for cartId %d", userId, cartId));
+        Cart cart = getUserCart(cartId, userId);
 
-        try {
-            Cart cart = cartsRepository.findByIdAndUserId(cartId, userId)
-                    .orElseThrow(() -> new CartNotFoundException(String.format("Cart not found: (cartId - %d)", cartId)));
+        log.info(String.format("Cart lock requested by userId %s for cartId %d", userId, cart.getId()));
+        cartLockApplierService.acquireLock(cart);
 
-            cartLockApplierService.acquireLock(cart);
-
-            log.info(String.format("Cart locked by userId %s for cartId %d", userId, cartId));
-            return true;
-        } catch (Exception ex) {
-            log.error(String.format("Cart lock failed: (cartId - %d)..", cartId), ex);
-            return false;
-        }
+        log.info(String.format("Cart locked by userId %s for cartId %d", userId, cart.getId()));
+        return cart.isLocked();
     }
 
     @Override
     public boolean unlockCart(long cartId, String userId) {
-        log.info(String.format("Cart unlock requested by userId %s for cartId %d", userId, cartId));
+        Cart cart = getUserCart(cartId, userId);
 
-        try {
-            Cart cart = cartsRepository.findByIdAndUserId(cartId, userId)
-                    .orElseThrow(() -> new CartNotFoundException(String.format("Cart not found: (cartId - %d)", cartId)));
+        log.info(String.format("Cart unlock requested by userId %s for cartId %d", userId, cart.getId()));
+        cartLockApplierService.releaseLock(cart);
 
-            cartLockApplierService.releaseLock(cart);
+        log.info(String.format("Cart unlocked by userId %s for cartId %d", userId, cart.getId()));
+        return cart.isUnlocked();
+    }
 
-            log.info(String.format("Cart unlocked by userId %s for cartId %d", userId, cartId));
-            return true;
-        } catch (Exception ex) {
-            log.info(String.format("Cart unlocked failed: (cartId - %d)..", cartId), ex);
-            return false;
-        }
+    @Override
+    public Cart getUserCart(String userId) {
+        return cartsRepository.findByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException(String.format("Cart for user: (userId - %s) not found", userId)));
     }
 
     private void calculateSubTotal(Cart cart) {
@@ -162,18 +179,13 @@ public class CartsServiceImpl implements CartsService {
         cart.setSubTotal(subTotal);
     }
 
+    private Cart getUserCart(long cartId, String userId) {
+        return cartsRepository.findByIdAndUserId(cartId, userId)
+                .orElseThrow(() -> new CartNotFoundException(String.format("Cart: (cartId - %d) not found", cartId)));
+    }
+
     private void ensureCartExistsAndNotLocked(long cartId, String userId) {
-        Optional<Cart> cartOptional = cartsRepository.findById(cartId);
-        if (cartOptional.isEmpty()) {
-            throw new CartNotFoundException(String.format("Cart not found: (cartId - %d) for user: (userId - %s)", cartId, userId));
-        }
-
-        if (cartOptional.filter(c -> c.belongsTo(userId)).isEmpty()) {
-            throw new CartNotBelongsToUserException(String.format("Cart: (cartId - %d) does not belong to the user: (userId - %s)", cartId, userId));
-        }
-
-        if (cartOptional.filter(c -> !c.isLocked()).isEmpty()) {
-            throw new CartLockedException(cartId);
-        }
+        Cart cart = getUserCart(cartId, userId);
+        verifyCartOwnerAndLockStatus(userId, cart);
     }
 }

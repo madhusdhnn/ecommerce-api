@@ -3,6 +3,10 @@ package com.thetechmaddy.ecommerce.exceptions;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 @Getter
 public class BusinessException extends RuntimeException {
 
@@ -21,6 +25,9 @@ public class BusinessException extends RuntimeException {
     public BusinessException(String message, HttpStatus statusCode, Throwable cause) {
         super(message, cause);
         this.status = statusCode;
+    }
 
+    public Map<String, Object> getAdditionalInfo() {
+        return new HashMap<>(Collections.emptyMap());
     }
 }

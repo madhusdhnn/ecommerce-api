@@ -1,6 +1,7 @@
 package com.thetechmaddy.ecommerce.repositories;
 
 import com.thetechmaddy.ecommerce.domains.carts.CartItem;
+import com.thetechmaddy.ecommerce.models.DbConstants;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +18,7 @@ public interface CartItemsRepository extends JpaRepository<CartItem, Long> {
 
     @Modifying
     @Query(value = UPSERT_CART_ITEM_QUERY, nativeQuery = true)
-    int saveOnConflictUpdateQuantity(@Param("productId") long productId, @Param("quantity") int quantity, @Param("cartId") long cartId);
+    void saveOnConflictUpdateQuantity(@Param("productId") long productId, @Param("quantity") int quantity, @Param("cartId") long cartId);
 
     Optional<CartItem> findByCartIdAndProductId(long cartId, long productId);
 
@@ -31,4 +32,6 @@ public interface CartItemsRepository extends JpaRepository<CartItem, Long> {
 
     List<CartItem> findAllByCartIdAndCartUserId(long cartId, String userId);
 
+    @Query(value = COUNT_CART_ITEMS_BY_USER_CART_QUERY, nativeQuery = true)
+    int countByCartIdAndCartUserId(@Param("cartId") long cartId, @Param("userId") String userId);
 }

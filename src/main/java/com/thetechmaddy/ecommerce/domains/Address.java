@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import static com.thetechmaddy.ecommerce.models.ValidationConstants.NOT_NULL_MESSAGE_SUFFIX;
+import static com.thetechmaddy.ecommerce.models.validations.ValidationConstants.NOT_NULL_MESSAGE_SUFFIX;
 
 @Getter
 @MappedSuperclass
@@ -19,7 +19,7 @@ import static com.thetechmaddy.ecommerce.models.ValidationConstants.NOT_NULL_MES
 public class Address extends Audit {
 
     @NotNull(message = "address1" + " " + NOT_NULL_MESSAGE_SUFFIX)
-    @Min(value = 1, message = "address1 should have at least 1 character")
+    @Size(min = 1, message = "address1 should have at least 1 character")
     @Column(name = "address_1")
     private String addressOne;
 
@@ -34,7 +34,6 @@ public class Address extends Audit {
 
     @NotNull(message = "zipCode" + " " + NOT_NULL_MESSAGE_SUFFIX)
     @Pattern(regexp = "^[0-9]{6}$", message = "zipCode must have 6 digits")
-    @Size(min = 6, max = 6, message = "zipCode must be 6 digit length")
     @Column(name = "zip_code")
     private String zipCode;
 }

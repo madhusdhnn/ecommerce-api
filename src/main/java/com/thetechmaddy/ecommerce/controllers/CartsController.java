@@ -11,6 +11,7 @@ import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.services.CartsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -36,6 +37,7 @@ public class CartsController extends BaseController {
     }
 
     @PatchMapping("/{cartId}/items/{productId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<?> updateProductInCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
                                               @PathVariable("cartId") long cartId,
                                               @PathVariable("productId") long productId,
@@ -45,6 +47,7 @@ public class CartsController extends BaseController {
     }
 
     @PatchMapping("/{cartId}/lock")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<?> lockCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
                                    @PathVariable("cartId") long cartId) {
         boolean result = this.cartsService.lockCart(cartId, cognitoUser.getCognitoSub());
@@ -52,6 +55,7 @@ public class CartsController extends BaseController {
     }
 
     @PatchMapping("/{cartId}/lock/release")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<?> unlockCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
                                      @PathVariable("cartId") long cartId) {
         this.cartsService.unlockCart(cartId, cognitoUser.getCognitoSub());
@@ -59,6 +63,7 @@ public class CartsController extends BaseController {
     }
 
     @DeleteMapping("/{cartId}/items/{productId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<?> removeProductFromCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
                                                 @PathVariable("cartId") long cartId,
                                                 @PathVariable("productId") long productId) {
@@ -67,6 +72,7 @@ public class CartsController extends BaseController {
     }
 
     @DeleteMapping("/{cartId}/items")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<?> clearCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
                                     @PathVariable("cartId") long cartId) {
         this.cartsService.clearCart(cartId, cognitoUser.getCognitoSub());

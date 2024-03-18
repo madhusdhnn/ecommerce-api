@@ -19,4 +19,6 @@ public interface CartsService {
     boolean lockCart(long cartId, String userId);
 
     boolean unlockCart(long cartId, String userId);
+
+    Cart getUserCart(String userId);
 }

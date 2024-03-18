@@ -1,4 +1,4 @@
-package com.thetechmaddy.ecommerce.models;
+package com.thetechmaddy.ecommerce.models.validations;
 
 public class ValidationConstants {
 

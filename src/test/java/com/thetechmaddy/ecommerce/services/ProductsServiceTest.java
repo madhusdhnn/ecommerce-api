@@ -2,6 +2,7 @@ package com.thetechmaddy.ecommerce.services;
 
 import com.thetechmaddy.ecommerce.BaseIntegrationTest;
 import com.thetechmaddy.ecommerce.domains.products.Product;
+import com.thetechmaddy.ecommerce.exceptions.InsufficientProductQuantityException;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotFoundException;
 import com.thetechmaddy.ecommerce.exceptions.ProductOutOfStockException;
 import com.thetechmaddy.ecommerce.models.ProductFilters;
@@ -136,4 +137,18 @@ public class ProductsServiceTest extends BaseIntegrationTest {
 
         assertThrows(ProductOutOfStockException.class, () -> this.productsService.ensureProductInStock(outOfStockProductOptional.get().getId()));
     }
+
+    @Test
+    public void testCheckQuantityAndGetProduct() {
+        Optional<Product> productOptional = getTestProducts().stream().filter(Product::isInStock).findFirst();
+        assertTrue(productOptional.isPresent());
+
+        Product product = productOptional.get();
+        assertThrows(InsufficientProductQuantityException.class, () -> productsService.checkQuantityAndGetProduct(product.getId(), product.getStockQuantity() + 3));
+
+        Product actual = productsService.checkQuantityAndGetProduct(product.getId(), product.getStockQuantity() - 1);
+        assertNotNull(actual);
+        assertEquals(product.getId(), actual.getId());
+    }
+
 }

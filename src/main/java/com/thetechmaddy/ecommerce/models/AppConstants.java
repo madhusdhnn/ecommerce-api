@@ -12,4 +12,6 @@ public class AppConstants {
     public static final String JWT_TOKEN_FIRST_NAME_ATTRIBUTE_NAME = "custom:first_name";
     public static final String JWT_TOKEN_LAST_NAME_ATTRIBUTE_NAME = "custom:last_name";
 
+    public static final String PAYMENT_ID_HEADER_NAME = "X-Payment-ID";
+
 }
