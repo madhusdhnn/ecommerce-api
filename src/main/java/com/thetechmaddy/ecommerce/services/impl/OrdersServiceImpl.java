@@ -143,6 +143,12 @@ public class OrdersServiceImpl implements OrdersService {
         return order;
     }
 
+    @Override
+    public Order getOrder(long orderId, String userId) {
+        return ordersRepository.findByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+    }
+
     private Order createOrder(String userId, PaymentInfo paymentInfo, List<CartItem> cartItems) {
         Order.OrderBuilder builder = Order.builder();
 

@@ -18,7 +18,7 @@ import static com.thetechmaddy.ecommerce.models.responses.ApiResponseStatus.SUCC
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class,
         OrderInitiateResponse.class, ProcessPaymentResponse.class, PlaceOrderResponse.class,
-        PaymentStatusResponse.class
+        PaymentStatusResponse.class, GetOrderResponse.class
 })
 public class ApiResponse<T> {
 

@@ -12,4 +12,5 @@ public interface OrdersService {
 
     Order placeOrder(long orderId, CognitoUser customer);
 
+    Order getOrder(long orderId, String userId);
 }

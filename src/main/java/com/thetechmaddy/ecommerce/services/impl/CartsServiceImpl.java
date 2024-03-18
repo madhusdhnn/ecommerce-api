@@ -49,11 +49,11 @@ public class CartsServiceImpl implements CartsService {
             throw new CartNotBelongsToUserException(String.format("Cart:(cartId - %d) does not belong to the user - %s", cartId, userId));
         }
 
-        calculateSubTotal(cart);
-        return cart;
+        return withSubTotalCalculated(cart);
     }
 
     @Override
+    @Transactional
     public void addProductToCart(long cartId, String userId, CartItemRequest cartItemRequest) {
         long productId = cartItemRequest.getProductId();
 
@@ -170,13 +170,14 @@ public class CartsServiceImpl implements CartsService {
                 .orElseThrow(() -> new CartNotFoundException(String.format("Cart for user: (userId - %s) not found", userId)));
     }
 
-    private void calculateSubTotal(Cart cart) {
+    private Cart withSubTotalCalculated(Cart cart) {
         BigDecimal subTotal = cart.getCartItems()
                 .stream()
                 .filter(CartItem::isSelected)
                 .map(ci -> ci.getProduct().getGrossAmount().multiply(new BigDecimal(ci.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         cart.setSubTotal(subTotal);
+        return cart;
     }
 
     private Cart getUserCart(long cartId, String userId) {

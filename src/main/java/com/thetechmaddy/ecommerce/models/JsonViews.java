@@ -11,11 +11,18 @@ public interface JsonViews {
     class CartResponse {
     }
 
-    class OrderInitiateResponse {}
+    class OrderInitiateResponse {
+    }
 
-    class ProcessPaymentResponse {}
+    class ProcessPaymentResponse {
+    }
 
-    class PlaceOrderResponse {}
+    class PlaceOrderResponse {
+    }
 
-    class PaymentStatusResponse {}
+    class PaymentStatusResponse {
+    }
+
+    class GetOrderResponse {
+    }
 }

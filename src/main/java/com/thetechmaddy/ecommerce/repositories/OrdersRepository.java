@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.thetechmaddy.ecommerce.models.QueryConstants.UPDATE_ORDER_LAST_ACCESS_TIME_QUERY;
 
@@ -18,6 +19,8 @@ import static com.thetechmaddy.ecommerce.models.QueryConstants.UPDATE_ORDER_LAST
 public interface OrdersRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
 
     List<Order> findByUserIdAndStatusEquals(String userId, OrderStatus orderStatus);
+
+    Optional<Order> findByIdAndUserId(long orderId, String userId);
 
     @Transactional
     @Modifying
