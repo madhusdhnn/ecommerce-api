@@ -1,5 +1,6 @@
 package com.thetechmaddy.ecommerce.models.payments;
 
+import com.thetechmaddy.ecommerce.exceptions.PaymentModeRequiredException;
 import com.thetechmaddy.ecommerce.exceptions.PaymentProviderNotImplementedException;
 import com.thetechmaddy.ecommerce.providers.CardPaymentProvider;
 import com.thetechmaddy.ecommerce.providers.NetBankingProvider;
@@ -18,6 +19,9 @@ public class PaymentProviderFactory {
     private static final Map<PaymentMode, PaymentProvider> PAYMENT_PROVIDERS = getPaymentProviders();
 
     public PaymentProvider getPaymentProvider(PaymentMode paymentMode) {
+        if (paymentMode == null) {
+            throw new PaymentModeRequiredException("PaymentProvider can not be identified with the null PaymentMode");
+        }
         PaymentProvider paymentProvider;
         if ((paymentProvider = PAYMENT_PROVIDERS.get(paymentMode)) == null) {
             throw new PaymentProviderNotImplementedException(paymentMode);

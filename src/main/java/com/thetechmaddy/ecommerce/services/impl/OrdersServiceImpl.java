@@ -84,7 +84,10 @@ public class OrdersServiceImpl implements OrdersService {
         newOrder.setDeliveryDetails(deliveryDetails);
         log.info(String.format("Saved delivery information for order: (orderId - %d) and user: (userId - %s)", newOrder.getId(), userId));
 
-        Payment newPayment = paymentService.savePaymentInfo(paymentInfo, newOrder);
+        Payment newPayment = paymentService.savePaymentInfo(paymentInfo, payment -> {
+            payment.setOrder(newOrder);
+            return payment;
+        });
         newOrder.setPayment(newPayment);
         log.info(String.format("Saved payment information for order: (orderId - %d) and user: (userId - %s)", newOrder.getId(), userId));
 
