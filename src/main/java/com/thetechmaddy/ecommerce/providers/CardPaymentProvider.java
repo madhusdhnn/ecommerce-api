@@ -21,17 +21,14 @@ public class CardPaymentProvider implements PaymentProvider {
             throw new PaymentInfoRequiredException("paymentInfo == null");
         }
 
-        if (paymentInfo instanceof CardPaymentInfo cardPaymentInfo) {
-            BigDecimal amount = cardPaymentInfo.getAmount();
-            String senderAccount = paymentGatewayRequest.getSender();
-            String receiverAccount = paymentGatewayRequest.getReceiver();
-            String currency = paymentGatewayRequest.getCurrency();
+        BigDecimal amount = paymentInfo.getAmount();
+        String senderAccount = paymentGatewayRequest.getSender();
+        String receiverAccount = paymentGatewayRequest.getReceiver();
+        String currency = paymentGatewayRequest.getCurrency();
 
-            log.info(String.format("Sending money %s %s from %s to %s using card details - %s",
-                    currency, amount, senderAccount, receiverAccount, cardPaymentInfo));
-            return new PaymentGatewayResponse(true, TRANSACTION_ID);
-        }
-        throw new UnsupportedPaymentInfoTypeException("CardPaymentInfo type required");
+        log.info(String.format("Sending money %s %s from %s to %s using card details - %s",
+                currency, amount, senderAccount, receiverAccount, paymentInfo));
+        return new PaymentGatewayResponse(true, TRANSACTION_ID);
     }
 
 }

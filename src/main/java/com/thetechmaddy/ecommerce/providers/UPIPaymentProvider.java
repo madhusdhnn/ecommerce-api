@@ -1,9 +1,7 @@
 package com.thetechmaddy.ecommerce.providers;
 
 import com.thetechmaddy.ecommerce.exceptions.PaymentInfoRequiredException;
-import com.thetechmaddy.ecommerce.exceptions.UnsupportedPaymentInfoTypeException;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
-import com.thetechmaddy.ecommerce.models.payments.UPIPaymentInfo;
 import com.thetechmaddy.ecommerce.models.payments.gateway.PaymentGatewayRequest;
 import com.thetechmaddy.ecommerce.models.payments.gateway.PaymentGatewayResponse;
 import lombok.extern.log4j.Log4j2;
@@ -21,17 +19,14 @@ public class UPIPaymentProvider implements PaymentProvider {
             throw new PaymentInfoRequiredException("paymentInfo == null");
         }
 
-        if (paymentInfo instanceof UPIPaymentInfo upiPaymentInfo) {
-            BigDecimal amount = upiPaymentInfo.getAmount();
-            String senderAccount = paymentGatewayRequest.getSender();
-            String receiverAccount = paymentGatewayRequest.getReceiver();
-            String currency = paymentGatewayRequest.getCurrency();
+        BigDecimal amount = paymentInfo.getAmount();
+        String senderAccount = paymentGatewayRequest.getSender();
+        String receiverAccount = paymentGatewayRequest.getReceiver();
+        String currency = paymentGatewayRequest.getCurrency();
 
-            log.info(String.format("Sending money %s %s from %s to %s using UPI ID - %s",
-                    currency, amount, senderAccount, receiverAccount, upiPaymentInfo));
-            return new PaymentGatewayResponse(false, TRANSACTION_ID);
-        }
-        throw new UnsupportedPaymentInfoTypeException("UPIPaymentInfo type required");
+        log.info(String.format("Sending money %s %s from %s to %s using UPI ID - %s",
+                currency, amount, senderAccount, receiverAccount, paymentInfo));
+        return new PaymentGatewayResponse(false, TRANSACTION_ID);
     }
 
 }

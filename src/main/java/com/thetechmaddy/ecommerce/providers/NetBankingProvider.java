@@ -1,8 +1,6 @@
 package com.thetechmaddy.ecommerce.providers;
 
 import com.thetechmaddy.ecommerce.exceptions.PaymentInfoRequiredException;
-import com.thetechmaddy.ecommerce.exceptions.UnsupportedPaymentInfoTypeException;
-import com.thetechmaddy.ecommerce.models.payments.NetBankingPaymentInfo;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.payments.gateway.PaymentGatewayRequest;
 import com.thetechmaddy.ecommerce.models.payments.gateway.PaymentGatewayResponse;
@@ -21,16 +19,13 @@ public class NetBankingProvider implements PaymentProvider {
             throw new PaymentInfoRequiredException("paymentInfo == null");
         }
 
-        if (paymentInfo instanceof NetBankingPaymentInfo netBankingPaymentInfo) {
-            BigDecimal amount = netBankingPaymentInfo.getAmount();
-            String senderAccount = paymentGatewayRequest.getSender();
-            String receiverAccount = paymentGatewayRequest.getReceiver();
-            String currency = paymentGatewayRequest.getCurrency();
+        BigDecimal amount = paymentInfo.getAmount();
+        String senderAccount = paymentGatewayRequest.getSender();
+        String receiverAccount = paymentGatewayRequest.getReceiver();
+        String currency = paymentGatewayRequest.getCurrency();
 
-            log.info(String.format("Sending money %s %s from %s to %s using bank details - %s",
-                    currency, amount, senderAccount, receiverAccount, netBankingPaymentInfo));
-            return new PaymentGatewayResponse(true, TRANSACTION_ID);
-        }
-        throw new UnsupportedPaymentInfoTypeException("NetBankingInfo type required");
+        log.info(String.format("Sending money %s %s from %s to %s using bank details - %s",
+                currency, amount, senderAccount, receiverAccount, paymentInfo));
+        return new PaymentGatewayResponse(true, TRANSACTION_ID);
     }
 }
