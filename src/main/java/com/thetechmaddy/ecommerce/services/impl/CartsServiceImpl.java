@@ -7,6 +7,7 @@ import com.thetechmaddy.ecommerce.exceptions.CartNotBelongsToUserException;
 import com.thetechmaddy.ecommerce.exceptions.CartNotFoundException;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotInCartException;
 import com.thetechmaddy.ecommerce.exceptions.ProductOutOfStockException;
+import com.thetechmaddy.ecommerce.models.CheckoutData;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
 import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;
 import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
@@ -49,7 +50,8 @@ public class CartsServiceImpl implements CartsService {
             throw new CartNotBelongsToUserException(String.format("Cart:(cartId - %d) does not belong to the user - %s", cartId, userId));
         }
 
-        return withSubTotalCalculated(cart);
+        calculateSubTotal(cart);
+        return cart;
     }
 
     @Override
@@ -170,14 +172,21 @@ public class CartsServiceImpl implements CartsService {
                 .orElseThrow(() -> new CartNotFoundException(String.format("Cart for user: (userId - %s) not found", userId)));
     }
 
-    private Cart withSubTotalCalculated(Cart cart) {
+    @Override
+    public CheckoutData checkoutCart(long cartId, String userId) {
+        ensureCartExistsAndNotLocked(cartId, userId);
+
+        BigDecimal grossTotal = cartItemsRepository.getTotal(cartId, userId);
+        return new CheckoutData(cartId, grossTotal);
+    }
+
+    private void calculateSubTotal(Cart cart) {
         BigDecimal subTotal = cart.getCartItems()
                 .stream()
                 .filter(CartItem::isSelected)
                 .map(ci -> ci.getProduct().getGrossAmount().multiply(new BigDecimal(ci.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         cart.setSubTotal(subTotal);
-        return cart;
     }
 
     private Cart getUserCart(long cartId, String userId) {

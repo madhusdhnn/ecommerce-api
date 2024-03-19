@@ -3,6 +3,7 @@ package com.thetechmaddy.ecommerce.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.models.AppConstants;
+import com.thetechmaddy.ecommerce.models.CheckoutData;
 import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
 import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;
@@ -61,5 +62,12 @@ public class CartsController extends BaseController {
                                     @PathVariable("cartId") long cartId) {
         this.cartsService.clearCart(cartId, cognitoUser.getCognitoSub());
         return ApiResponse.success();
+    }
+
+    @PutMapping("/{cartId}/checkout")
+    public ApiResponse<CheckoutData> checkoutCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
+                                                  @PathVariable("cartId") long cartId) {
+        CheckoutData checkoutData = this.cartsService.checkoutCart(cartId, cognitoUser.getCognitoSub());
+        return ApiResponse.success(checkoutData);
     }
 }

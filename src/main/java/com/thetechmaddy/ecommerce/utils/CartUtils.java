@@ -1,13 +1,34 @@
 package com.thetechmaddy.ecommerce.utils;
 
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
+import com.thetechmaddy.ecommerce.domains.carts.CartItem;
+import com.thetechmaddy.ecommerce.exceptions.CartItemsTotalMismatchException;
 import com.thetechmaddy.ecommerce.exceptions.CartLockedException;
 import com.thetechmaddy.ecommerce.exceptions.CartNotBelongsToUserException;
+import com.thetechmaddy.ecommerce.exceptions.EmptyCartException;
+import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CartUtils {
+
+    public static void ensureCartTotalAndPaymentMatches(PaymentInfo paymentInfo, Cart cart) {
+        if (paymentInfo.getAmount().compareTo(cart.getSubTotal()) != 0) {
+            throw new CartItemsTotalMismatchException(
+                    String.format("Cart items total and payment request amount do not match. Cart Total: %s. Payment requested: %s",
+                            cart.getSubTotal(), paymentInfo.getAmount())
+            );
+        }
+    }
+
+    public static void ensureCartNotEmpty(long cartId, List<CartItem> cartItems) {
+        if (cartItems != null && cartItems.isEmpty()) {
+            throw new EmptyCartException(String.format("cart is empty: (cartId - %d)", cartId));
+        }
+    }
 
     public static void verifyCartOwnerAndLockStatus(String userId, Cart cart) {
         if (cart == null) {

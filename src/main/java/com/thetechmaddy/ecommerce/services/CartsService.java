@@ -1,6 +1,7 @@
 package com.thetechmaddy.ecommerce.services;
 
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
+import com.thetechmaddy.ecommerce.models.CheckoutData;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
 import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;
 
@@ -21,4 +22,7 @@ public interface CartsService {
     boolean unlockCart(long cartId, String userId);
 
     Cart getUserCart(String userId);
+
+    CheckoutData checkoutCart(long cartId, String userId);
+
 }

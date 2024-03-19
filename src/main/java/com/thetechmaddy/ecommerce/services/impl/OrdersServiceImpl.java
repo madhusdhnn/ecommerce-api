@@ -17,6 +17,7 @@ import com.thetechmaddy.ecommerce.models.responses.Paged;
 import com.thetechmaddy.ecommerce.repositories.OrderItemsRepository;
 import com.thetechmaddy.ecommerce.repositories.OrdersRepository;
 import com.thetechmaddy.ecommerce.services.*;
+import com.thetechmaddy.ecommerce.utils.CartUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 import static com.thetechmaddy.ecommerce.models.OrderItemStatus.PENDING_ORDER_CONFIRMATION;
 import static com.thetechmaddy.ecommerce.models.OrderStatus.CONFIRMED;
 import static com.thetechmaddy.ecommerce.models.OrderStatus.PENDING;
+import static com.thetechmaddy.ecommerce.utils.CartUtils.ensureCartNotEmpty;
 
 @Log4j2
 @Primary
@@ -74,7 +76,7 @@ public class OrdersServiceImpl implements OrdersService {
         Cart cart = cartsService.getCart(orderRequest.getCartId(), userId);
 
         PaymentInfo paymentInfo = orderRequest.getPaymentInfo();
-        ensureCartTotalAndPaymentMatches(paymentInfo, cart);
+        CartUtils.ensureCartTotalAndPaymentMatches(paymentInfo, cart);
 
         List<CartItem> cartItems = cart.getCartItems();
         ensureCartNotEmpty(cart.getId(), cartItems);
@@ -190,15 +192,6 @@ public class OrdersServiceImpl implements OrdersService {
         productsService.reserveProducts(productIdQuantityMap);
     }
 
-    private static void ensureCartTotalAndPaymentMatches(PaymentInfo paymentInfo, Cart cart) {
-        if (paymentInfo.getAmount().compareTo(cart.getSubTotal()) != 0) {
-            throw new CartItemsTotalMismatchException(
-                    String.format("Cart items total and payment request amount do not match. Cart Total: %s. Payment requested: %s",
-                            cart.getSubTotal(), paymentInfo.getAmount())
-            );
-        }
-    }
-
     private static void ensurePaymentIsSuccess(Order order) {
         Payment payment = order.getPayment();
 
@@ -219,12 +212,5 @@ public class OrdersServiceImpl implements OrdersService {
 
     private static OrderItemStatus getOrderItemStatus(boolean cashOnDeliveryMode) {
         return cashOnDeliveryMode ? OrderItemStatus.CONFIRMED : PENDING_ORDER_CONFIRMATION;
-    }
-
-
-    private static void ensureCartNotEmpty(long cartId, List<CartItem> cartItems) {
-        if (cartItems != null && cartItems.isEmpty()) {
-            throw new EmptyCartException(String.format("Can not create order: cart is empty: (cartId - %d)", cartId));
-        }
     }
 }
