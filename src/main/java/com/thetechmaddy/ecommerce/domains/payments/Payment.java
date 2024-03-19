@@ -21,8 +21,6 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@Builder(toBuilder = true)
-@ToString
 public class Payment extends Audit {
 
     @Id
@@ -31,10 +29,12 @@ public class Payment extends Audit {
     @JsonView(value = {OrderInitiateResponse.class, ProcessPaymentResponse.class, PlaceOrderResponse.class, PaymentStatusResponse.class, GetOrderResponse.class})
     private long id;
 
+    @Setter
     @Column(name = "amount")
     @JsonView(value = {OrderInitiateResponse.class, ProcessPaymentResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
     private BigDecimal amount;
 
+    @Setter
     @Column(name = "payment_mode")
     @Enumerated(EnumType.STRING)
     @JsonView(value = {OrderInitiateResponse.class, ProcessPaymentResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
@@ -52,7 +52,6 @@ public class Payment extends Audit {
     @JsonView(value = {ProcessPaymentResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
     private OffsetDateTime paymentDateTime;
 
-    @ToString.Exclude
     @Setter
     @EqualsAndHashCode.Exclude
     @OneToOne(optional = false)

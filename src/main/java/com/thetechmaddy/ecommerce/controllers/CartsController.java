@@ -46,22 +46,6 @@ public class CartsController extends BaseController {
         return ApiResponse.success();
     }
 
-    @PatchMapping("/{cartId}/lock")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ApiResponse<?> lockCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
-                                   @PathVariable("cartId") long cartId) {
-        boolean result = this.cartsService.lockCart(cartId, cognitoUser.getCognitoSub());
-        return ApiResponse.success(result ? "Cart locked" : "Cart lock failed. Try again!");
-    }
-
-    @PatchMapping("/{cartId}/lock/release")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ApiResponse<?> unlockCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
-                                     @PathVariable("cartId") long cartId) {
-        this.cartsService.unlockCart(cartId, cognitoUser.getCognitoSub());
-        return ApiResponse.success();
-    }
-
     @DeleteMapping("/{cartId}/items/{productId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<?> removeProductFromCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,

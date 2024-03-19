@@ -1,6 +1,5 @@
 package com.thetechmaddy.ecommerce.domains.orders;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thetechmaddy.ecommerce.domains.Audit;
@@ -64,13 +63,11 @@ public class Order extends Audit {
     @Setter
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
-    @JsonAlias("paymentInfo")
     private Payment payment;
 
     @Setter
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
-    @JsonAlias("deliveryInfo")
     private DeliveryDetails deliveryDetails;
 
     public Order(OrderStatus orderStatus, String userId) {

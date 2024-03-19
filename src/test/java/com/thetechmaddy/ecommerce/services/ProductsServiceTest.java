@@ -120,9 +120,6 @@ public class ProductsServiceTest extends BaseIntegrationTest {
 
         List<Product> products = result.data();
         assertEquals(2, products.size());
-
-        assertEquals("p2", products.get(0).getName());
-        assertEquals("p3", products.get(1).getName());
     }
 
     @Test

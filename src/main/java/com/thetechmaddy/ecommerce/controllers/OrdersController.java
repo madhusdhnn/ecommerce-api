@@ -27,7 +27,7 @@ public class OrdersController extends BaseController {
     public ApiResponse<Order> initiateOrder(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
                                             @RequestBody @Valid OrderRequest orderRequest) {
 
-        Order pendingOrder = ordersService.getPendingOrder(cognitoUser.getCognitoSub());
+        Order pendingOrder = ordersService.getUserOrderInPendingStatus(cognitoUser.getCognitoSub());
 
         if (pendingOrder == null) {
             pendingOrder = ordersService.createNewOrder(cognitoUser.getCognitoSub(), orderRequest);

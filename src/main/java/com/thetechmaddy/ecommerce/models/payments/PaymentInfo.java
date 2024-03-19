@@ -21,7 +21,7 @@ public class PaymentInfo {
     @NotNull(message = "paymentMode" + " " + NOT_NULL_MESSAGE_SUFFIX)
     private PaymentMode paymentMode;
 
-    public boolean isCashOnDeliveryMode() {
+    public boolean isCashOnDelivery() {
         return CASH_ON_DELIVERY == paymentMode;
     }
 

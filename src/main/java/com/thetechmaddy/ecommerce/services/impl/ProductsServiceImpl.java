@@ -17,12 +17,26 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 @Primary
 @Service("productsServiceImpl")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class ProductsServiceImpl implements ProductsService {
 
     private final ProductsRepository productsRepository;
+
+    @Override
+    public void reserveProducts(Map<Long, Integer> productIdQuantityMap) {
+        List<Product> products = productsRepository.findAllById(productIdQuantityMap.keySet());
+
+        for (Product product : products) {
+            product.decrementStockQuantity(productIdQuantityMap.get(product.getId()));
+        }
+
+        productsRepository.saveAll(products);
+    }
 
     @Override
     public Product getProductById(long productId) {

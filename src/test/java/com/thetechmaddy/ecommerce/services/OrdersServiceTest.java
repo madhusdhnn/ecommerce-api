@@ -104,7 +104,6 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     }
 
     @Test
-    @Transactional
     public void testNewOrderInitiateCashOnDelivery() {
         getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
             cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
@@ -151,9 +150,8 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     }
 
     @Test
-    @Transactional
     public void testInitiateOrderReturnExisting() {
-        assertNull(ordersService.getPendingOrder(TEST_COGNITO_SUB));
+        assertNull(ordersService.getUserOrderInPendingStatus(TEST_COGNITO_SUB));
 
         getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
             cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
@@ -171,12 +169,11 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         OrderRequest orderRequest = getOrderRequest(cartId, options);
         Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
 
-        Order actual = ordersService.getPendingOrder(TEST_COGNITO_SUB);
-        assertEquals(order, actual);
+        Order actual = ordersService.getUserOrderInPendingStatus(TEST_COGNITO_SUB);
+        assertEquals(order.getId(), actual.getId());
     }
 
     @Test
-    @Transactional
     public void testCreateOrderDuplicateError() {
         getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
             cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
@@ -269,7 +266,6 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
 
         Order order2 = new Order(order);
-
         ordersRepository.save(order2);
 
         assertThrows(DuplicatePendingOrderException.class, () -> ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest));

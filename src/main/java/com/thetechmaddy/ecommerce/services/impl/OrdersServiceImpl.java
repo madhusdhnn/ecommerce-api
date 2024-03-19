@@ -1,6 +1,5 @@
 package com.thetechmaddy.ecommerce.services.impl;
 
-import com.thetechmaddy.ecommerce.domains.DeliveryDetails;
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.domains.carts.CartItem;
 import com.thetechmaddy.ecommerce.domains.orders.Order;
@@ -45,17 +44,26 @@ public class OrdersServiceImpl implements OrdersService {
 
     private final CartsService cartsService;
     private final PaymentService paymentService;
-    private final InventoryService inventoryService;
+    private final ProductsService productsService;
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
     private final DeliveryDetailsService deliveryDetailsService;
     private final CartLockApplierService cartLockApplierService;
-
     private final CartItemToOrderItemMapper cartItemToOrderItemMapper;
 
     @Override
-    public Order getPendingOrder(String userId) {
-        return getOrderInPendingStatus(userId);
+    public Order getUserOrderInPendingStatus(String userId) {
+        List<Order> userOrders = ordersRepository.findByUserIdAndStatusEquals(userId, PENDING);
+
+        if (userOrders.isEmpty()) {
+            return null;
+        }
+
+        if (userOrders.size() == 1) {
+            return userOrders.get(0);
+        }
+
+        throw new DuplicatePendingOrderException(String.format("Found more than one PENDING order for user: (userId - %s)", userId));
     }
 
     @Override
@@ -66,36 +74,28 @@ public class OrdersServiceImpl implements OrdersService {
         Cart cart = cartsService.getCart(orderRequest.getCartId(), userId);
 
         PaymentInfo paymentInfo = orderRequest.getPaymentInfo();
-        if (paymentInfo.getAmount().compareTo(cart.getSubTotal()) != 0) {
-            throw new CartItemsTotalMismatchException(
-                    String.format("Cart items total and payment request amount do not match. Cart Total: %s. Payment requested: %s",
-                            cart.getSubTotal(), paymentInfo.getAmount())
-            );
-        }
+        ensureCartTotalAndPaymentMatches(paymentInfo, cart);
 
         List<CartItem> cartItems = cart.getCartItems();
         ensureCartNotEmpty(cart.getId(), cartItems);
 
-        cartLockApplierService.acquireLock(cart);
+        String lockAcquireReason = String.format("Creating new order for user: (userId - %s)", userId);
+        cartLockApplierService.acquireLock(cart, lockAcquireReason);
 
         Order newOrder = createOrder(userId, paymentInfo, cart.getCartItems());
 
-        DeliveryDetails deliveryDetails = deliveryDetailsService.saveDeliveryInfo(orderRequest.getDeliveryInfo(), newOrder);
-        newOrder.setDeliveryDetails(deliveryDetails);
+        deliveryDetailsService.saveDeliveryInfo(orderRequest.getDeliveryInfo(), newOrder);
         log.info(String.format("Saved delivery information for order: (orderId - %d) and user: (userId - %s)", newOrder.getId(), userId));
 
-        Payment newPayment = paymentService.savePaymentInfo(paymentInfo, payment -> {
-            payment.setOrder(newOrder);
-            return payment;
-        });
-        newOrder.setPayment(newPayment);
+        paymentService.savePaymentInfo(paymentInfo, newOrder);
         log.info(String.format("Saved payment information for order: (orderId - %d) and user: (userId - %s)", newOrder.getId(), userId));
 
-        if (paymentInfo.isCashOnDeliveryMode()) {
-            cartLockApplierService.releaseLock(cart);
+        if (paymentInfo.isCashOnDelivery()) {
+            String lockReleaseReason = String.format("Order: (orderId - %d) confirmed as it is a CASH_ON_DELIVERY for user: (userId - %s)",
+                    newOrder.getId(), userId);
+            cartLockApplierService.releaseLock(cart, lockReleaseReason);
             cartsService.clearCart(cart.getId(), userId);
-
-            updateProductsStock(cart.getCartItems());
+            reserveProducts(cart.getCartItems());
         }
 
         return newOrder;
@@ -124,10 +124,11 @@ public class OrdersServiceImpl implements OrdersService {
 
             Cart cart = cartsService.getUserCart(customer.getCognitoSub());
 
-            cartLockApplierService.releaseLock(cart);
+            String lockReleaseReason = String.format("Order: (orderId - %d) confirmed for user: (userId - %s)", order.getId(), customer.getCognitoSub());
+            cartLockApplierService.releaseLock(cart, lockReleaseReason);
             cartsService.clearCart(cart.getId(), customer.getCognitoSub());
 
-            updateProductsStock(cart.getCartItems());
+            reserveProducts(cart.getCartItems());
             return order;
         }
         throw new UnprocessableOrderException(String.format("Order: (orderId - %d) not in pending status", orderId));
@@ -149,7 +150,7 @@ public class OrdersServiceImpl implements OrdersService {
         Order.OrderBuilder builder = Order.builder();
 
         builder.userId(userId);
-        builder.status(paymentInfo.isCashOnDeliveryMode() ? CONFIRMED : PENDING);
+        builder.status(paymentInfo.isCashOnDelivery() ? CONFIRMED : PENDING);
 
         NetTotalCalculator netTotalCalculator = new NetTotalCalculator();
         GrossTotalCalculator grossTotalCalculator = new GrossTotalCalculator();
@@ -162,7 +163,7 @@ public class OrdersServiceImpl implements OrdersService {
         List<OrderItem> orderItems = cartItems.stream()
                 .map(cartItemToOrderItemMapper::mapCartItemToOrderItem)
                 .peek(orderItem -> {
-                    orderItem.setStatus(getOrderItemStatus(paymentInfo.isCashOnDeliveryMode()));
+                    orderItem.setStatus(getOrderItemStatus(paymentInfo.isCashOnDelivery()));
                     orderItem.setOrder(order);
                 })
                 .collect(Collectors.toList());
@@ -175,22 +176,6 @@ public class OrdersServiceImpl implements OrdersService {
         return newOrder;
     }
 
-    private Order getOrderInPendingStatus(String userId) {
-        List<Order> userOrders = ordersRepository.findByUserIdAndStatusEquals(userId, PENDING);
-
-        if (userOrders.isEmpty()) {
-            return null;
-        }
-
-        if (userOrders.size() == 1) {
-            Order order = userOrders.get(0);
-            ordersRepository.updateTime(order.getId());
-            return order;
-        }
-
-        throw new DuplicatePendingOrderException(String.format("Found more than one PENDING order for user: (userId - %s)", userId));
-    }
-
     private void ensureNoPendingOrderExists(String userId) {
         long totalPendingOrders = ordersRepository.countByUserIdAndStatusEquals(userId, PENDING);
 
@@ -199,10 +184,19 @@ public class OrdersServiceImpl implements OrdersService {
         }
     }
 
-    private void updateProductsStock(List<CartItem> cartItems) {
+    private void reserveProducts(List<CartItem> cartItems) {
         Map<Long, Integer> productIdQuantityMap = cartItems.stream()
                 .collect(Collectors.toMap(cartItem -> cartItem.getProduct().getId(), CartItem::getQuantity));
-        inventoryService.updateProductsStock(productIdQuantityMap);
+        productsService.reserveProducts(productIdQuantityMap);
+    }
+
+    private static void ensureCartTotalAndPaymentMatches(PaymentInfo paymentInfo, Cart cart) {
+        if (paymentInfo.getAmount().compareTo(cart.getSubTotal()) != 0) {
+            throw new CartItemsTotalMismatchException(
+                    String.format("Cart items total and payment request amount do not match. Cart Total: %s. Payment requested: %s",
+                            cart.getSubTotal(), paymentInfo.getAmount())
+            );
+        }
     }
 
     private static void ensurePaymentIsSuccess(Order order) {

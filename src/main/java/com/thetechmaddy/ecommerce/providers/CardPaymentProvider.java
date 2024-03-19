@@ -1,8 +1,6 @@
 package com.thetechmaddy.ecommerce.providers;
 
 import com.thetechmaddy.ecommerce.exceptions.PaymentInfoRequiredException;
-import com.thetechmaddy.ecommerce.exceptions.UnsupportedPaymentInfoTypeException;
-import com.thetechmaddy.ecommerce.models.payments.CardPaymentInfo;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.payments.gateway.PaymentGatewayRequest;
 import com.thetechmaddy.ecommerce.models.payments.gateway.PaymentGatewayResponse;

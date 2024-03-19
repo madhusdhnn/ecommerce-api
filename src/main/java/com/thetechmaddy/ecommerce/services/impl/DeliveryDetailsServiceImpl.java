@@ -20,13 +20,14 @@ public class DeliveryDetailsServiceImpl implements DeliveryDetailsService {
     private final DeliveryInfoToDeliveryDetailsDaoMapper deliveryInfoToDeliveryDetailsDaoMapper;
 
     @Override
-    public DeliveryDetails saveDeliveryInfo(DeliveryInfo deliveryInfo, Order order) {
+    public void saveDeliveryInfo(DeliveryInfo deliveryInfo, Order order) {
         if (order == null) {
             throw new NullPointerException("order == null");
         }
 
         DeliveryDetails deliveryDetails = deliveryInfoToDeliveryDetailsDaoMapper.mapDeliveryInfoToDeliveryDetails(deliveryInfo);
         deliveryDetails.setOrder(order);
-        return this.deliveryDetailsRepository.save(deliveryDetails);
+        order.setDeliveryDetails(deliveryDetails);
+        this.deliveryDetailsRepository.save(deliveryDetails);
     }
 }

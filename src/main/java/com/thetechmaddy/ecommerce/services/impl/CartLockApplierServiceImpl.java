@@ -19,21 +19,25 @@ public class CartLockApplierServiceImpl implements CartLockApplierService {
 
     private final CartsRepository cartsRepository;
 
-    public void acquireLock(Cart cart) {
+    public void acquireLock(Cart cart, String reason) {
         ensureCartIsNotNull(cart);
         if (cart.isUnlocked()) {
             cart.lock();
             cartsRepository.save(cart);
-            log.info(String.format("Lock acquired for cart: (cartId - %d) at %s", cart.getId(), OffsetDateTime.now()));
+            log.info(String.format("Lock acquired for cart: (cartId - %d) at %s. CartLockAcquireReason: %s",
+                    cart.getId(), OffsetDateTime.now(), reason)
+            );
         }
     }
 
-    public void releaseLock(Cart cart) {
+    public void releaseLock(Cart cart, String reason) {
         ensureCartIsNotNull(cart);
         if (cart.isLocked()) {
             cart.unlock();
             cartsRepository.save(cart);
-            log.info(String.format("Lock released for cart: (cartId - %d) at %s", cart.getId(), OffsetDateTime.now()));
+            log.info(String.format("Lock released for cart: (cartId - %d) at %s. CartLockReleaseReason: %s",
+                    cart.getId(), OffsetDateTime.now(), reason)
+            );
         }
     }
 

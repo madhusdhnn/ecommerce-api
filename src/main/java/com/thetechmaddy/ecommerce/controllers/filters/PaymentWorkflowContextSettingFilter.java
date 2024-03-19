@@ -7,15 +7,17 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
 import static com.thetechmaddy.ecommerce.models.AppConstants.PAYMENT_ID_HEADER_NAME;
 import static com.thetechmaddy.ecommerce.utils.HttpUtils.sendErrorResponse;
@@ -23,20 +25,22 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Order(1)
 @Component
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class PaymentWorkflowContextSettingFilter extends OncePerRequestFilter {
 
     private final ObjectMapper objectMapper;
-    private static final Pattern PAYMENTS_API_PATTERN = Pattern.compile(".*/payments/.*");
+    private final RequestMatcher matcher;
+
+    @Autowired
+    public PaymentWorkflowContextSettingFilter(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        this.matcher = new AndRequestMatcher(getApiPathsToFilter());
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            Matcher matcher = PAYMENTS_API_PATTERN.matcher(request.getRequestURI());
-            if (matcher.matches()) {
-                String idempotency = request.getHeader(PAYMENT_ID_HEADER_NAME);
-                PaymentWorkflowContextHolder.setContext(Long.parseLong(idempotency));
-            }
+            String idempotency = request.getHeader(PAYMENT_ID_HEADER_NAME);
+            PaymentWorkflowContextHolder.setContext(Long.parseLong(idempotency));
             filterChain.doFilter(request, response);
         } catch (NumberFormatException e) {
             sendErrorResponse(objectMapper, response, BAD_REQUEST,
@@ -49,10 +53,13 @@ public class PaymentWorkflowContextSettingFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !isPaymentAPI(request);
+        return !matcher.matches(request);
     }
 
-    private static boolean isPaymentAPI(HttpServletRequest request) {
-        return PAYMENTS_API_PATTERN.matcher(request.getRequestURI()).matches();
+    private static List<RequestMatcher> getApiPathsToFilter() {
+        return List.of(
+                new AntPathRequestMatcher("/payments/process", HttpMethod.POST.name()),
+                new AntPathRequestMatcher("/payments/status", HttpMethod.GET.name())
+        );
     }
 }

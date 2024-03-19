@@ -7,7 +7,7 @@ import com.thetechmaddy.ecommerce.models.responses.Paged;
 
 public interface OrdersService {
 
-    Order getPendingOrder(String userId);
+    Order getUserOrderInPendingStatus(String userId);
 
     Order createNewOrder(String userId, OrderRequest orderRequest);
 
