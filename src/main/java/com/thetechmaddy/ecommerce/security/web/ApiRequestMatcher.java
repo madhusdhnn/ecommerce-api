@@ -1,31 +1,28 @@
 package com.thetechmaddy.ecommerce.security.web;
 
-import com.thetechmaddy.ecommerce.models.PathAndHttpMethod;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 
-@Component
-public class ApiRequestMatcher extends PathAndHttpMethodMatcher {
+public class ApiRequestMatcher implements RequestMatcher {
 
-    @Getter
-    private final String apiBasePath;
-    private final Set<PathAndHttpMethod> apiPaths;
-
-    public ApiRequestMatcher(@Value("${server.servlet.context-path}") String contextPath) {
-        this.apiBasePath = contextPath + "/api";
-        this.apiPaths = Collections.emptySet();
-    }
+    private final RequestMatcher delegate = new OrRequestMatcher(getApisToMatch());
 
     @Override
     public boolean matches(HttpServletRequest request) {
-        if (apiPaths.isEmpty()) {
-            return request.getRequestURI().startsWith(apiBasePath);
-        }
-        return apiPaths.stream().anyMatch(pm -> super.matches(request, pm));
+        return delegate.matches(request);
+    }
+
+    private static List<RequestMatcher> getApisToMatch() {
+        return List.of(
+                new AntPathRequestMatcher("/api/products/*"),
+                new AntPathRequestMatcher("/api/categories/*"),
+                new AntPathRequestMatcher("/api/carts/*"),
+                new AntPathRequestMatcher("/api/orders/*"),
+                new AntPathRequestMatcher("/api/payments/*")
+        );
     }
 }

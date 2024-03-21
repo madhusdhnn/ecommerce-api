@@ -8,6 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PaymentGatewayRequest {
 
+    private long idempotencyId;
     private String sender;
     private String receiver;
     private String currency;

@@ -1,6 +1,6 @@
 package com.thetechmaddy.ecommerce.models.requests;
 
-import com.thetechmaddy.ecommerce.models.DeliveryInfo;
+import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

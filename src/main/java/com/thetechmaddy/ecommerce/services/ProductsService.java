@@ -18,4 +18,5 @@ public interface ProductsService {
 
     void ensureProductInStock(long productId);
 
+    void restoreProducts(Map<Long, Integer> productIdQuantityMap);
 }

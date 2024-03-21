@@ -25,11 +25,5 @@ public enum OrderStatus {
     /**
      * Represents order cancellation
      */
-    CANCELLED,
-
-    /**
-     * Reprents the pending order was cancelled due to change in order items or user navigated away
-     */
-    DRAFT_CANCELLED
-
+    CANCELLED
 }

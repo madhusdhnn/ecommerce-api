@@ -10,8 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -33,7 +33,7 @@ public class PaymentWorkflowContextSettingFilter extends OncePerRequestFilter {
     @Autowired
     public PaymentWorkflowContextSettingFilter(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.matcher = new AndRequestMatcher(getApiPathsToFilter());
+        this.matcher = new OrRequestMatcher(getApiPathsToFilter());
     }
 
     @Override
@@ -58,8 +58,8 @@ public class PaymentWorkflowContextSettingFilter extends OncePerRequestFilter {
 
     private static List<RequestMatcher> getApiPathsToFilter() {
         return List.of(
-                new AntPathRequestMatcher("/payments/process", HttpMethod.POST.name()),
-                new AntPathRequestMatcher("/payments/status", HttpMethod.GET.name())
+                new AntPathRequestMatcher("/api/payments/process", HttpMethod.POST.name()),
+                new AntPathRequestMatcher("/api/payments/status", HttpMethod.GET.name())
         );
     }
 }

@@ -99,6 +99,8 @@ public class OrdersServiceTest extends BaseIntegrationTest {
                 .createPaymentInfo(true)
                 .cartAmount(new BigDecimal("0")).build();
 
+        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
+
         assertThrows(EmptyCartException.class, () ->
                 ordersService.createNewOrder(TEST_COGNITO_SUB, getOrderRequest(cartId, options)));
     }
@@ -120,6 +122,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
         OrderRequest orderRequest = getOrderRequest(cartId, options);
 
+        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
         Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
         assertNotNull(order);
 
@@ -166,6 +169,8 @@ public class OrdersServiceTest extends BaseIntegrationTest {
                 .paymentMode(CREDIT_CARD)
                 .build();
 
+        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
+
         OrderRequest orderRequest = getOrderRequest(cartId, options);
         Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
 
@@ -188,6 +193,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
                 .paymentMode(CREDIT_CARD)
                 .build();
 
+        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
 
         OrderRequest orderRequest = getOrderRequest(cartId, options);
         ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
@@ -210,9 +216,9 @@ public class OrdersServiceTest extends BaseIntegrationTest {
                 .paymentMode(CREDIT_CARD)
                 .build();
 
+        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
 
         OrderRequest orderRequest = getOrderRequest(cartId, options);
-
         Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
         assertNotNull(order);
 
@@ -262,7 +268,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
 
         OrderRequest orderRequest = getOrderRequest(cartId, options);
-
+        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
         Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
 
         Order order2 = new Order(order);
@@ -274,7 +280,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     @Test
     public void testPlaceOrderUnprocessableOrderException() {
         Order order = ordersRepository.save(new Order(OrderStatus.COMPLETED, TEST_COGNITO_SUB));
-        assertThrows(UnprocessableOrderException.class, () -> ordersService.placeOrder(order.getId(), new CognitoUser(TEST_COGNITO_SUB)));
+        assertThrows(UnProcessableEntityException.class, () -> ordersService.placeOrder(order.getId(), new CognitoUser(TEST_COGNITO_SUB)));
         ordersRepository.deleteAll();
     }
 
@@ -318,9 +324,9 @@ public class OrdersServiceTest extends BaseIntegrationTest {
                 .paymentMode(CREDIT_CARD)
                 .build();
 
+        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
 
         OrderRequest orderRequest = getOrderRequest(cartId, options);
-
         Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
 
         Payment payment = order.getPayment();

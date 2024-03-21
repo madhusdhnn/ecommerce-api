@@ -11,11 +11,16 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Objects;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CartUtils {
 
     public static void ensureCartTotalAndPaymentMatches(PaymentInfo paymentInfo, Cart cart) {
+        ensureCartNotNull(cart);
+
+        Objects.requireNonNull(paymentInfo, "paymentInfo == null");
+
         if (paymentInfo.getAmount().compareTo(cart.getSubTotal()) != 0) {
             throw new CartItemsTotalMismatchException(
                     String.format("Cart items total and payment request amount do not match. Cart Total: %s. Payment requested: %s",
@@ -31,9 +36,7 @@ public class CartUtils {
     }
 
     public static void verifyCartOwnerAndLockStatus(String userId, Cart cart) {
-        if (cart == null) {
-            throw new NullPointerException("cart == null");
-        }
+        ensureCartNotNull(cart);
 
         if (!cart.belongsTo(userId)) {
             throw new CartNotBelongsToUserException(
@@ -44,5 +47,9 @@ public class CartUtils {
         if (cart.isLocked()) {
             throw new CartLockedException(cart.getId());
         }
+    }
+
+    private static void ensureCartNotNull(Cart cart) {
+        Objects.requireNonNull(cart, "cart == null");
     }
 }

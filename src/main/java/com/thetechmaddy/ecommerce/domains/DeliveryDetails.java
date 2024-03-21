@@ -75,4 +75,5 @@ public class DeliveryDetails extends Audit {
     @Column(name = "billing_zip_code")
     @JsonView(value = {OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
     private String billingZipCode;
+
 }

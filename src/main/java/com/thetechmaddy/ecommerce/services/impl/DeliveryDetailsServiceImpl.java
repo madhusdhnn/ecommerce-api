@@ -2,7 +2,7 @@ package com.thetechmaddy.ecommerce.services.impl;
 
 import com.thetechmaddy.ecommerce.domains.DeliveryDetails;
 import com.thetechmaddy.ecommerce.domains.orders.Order;
-import com.thetechmaddy.ecommerce.models.DeliveryInfo;
+import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
 import com.thetechmaddy.ecommerce.models.mappers.DeliveryInfoToDeliveryDetailsDaoMapper;
 import com.thetechmaddy.ecommerce.repositories.DeliveryDetailsRepository;
 import com.thetechmaddy.ecommerce.services.DeliveryDetailsService;

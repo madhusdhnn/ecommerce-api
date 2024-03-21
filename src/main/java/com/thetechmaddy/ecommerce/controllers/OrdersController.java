@@ -3,6 +3,8 @@ package com.thetechmaddy.ecommerce.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.orders.Order;
 import com.thetechmaddy.ecommerce.models.JsonViews;
+import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
+import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
@@ -36,6 +38,22 @@ public class OrdersController extends BaseController {
         return ApiResponse.success(pendingOrder);
     }
 
+    @PutMapping("/{orderId}/payment")
+    public ApiResponse<?> updatePayment(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
+                                        @PathVariable("orderId") long orderId,
+                                        @RequestBody @Valid PaymentInfo paymentInfo) {
+        ordersService.updatePaymentInfo(orderId, cognitoUser.getCognitoSub(), paymentInfo);
+        return ApiResponse.success();
+    }
+
+    @PutMapping("/{orderId}/delivery")
+    public ApiResponse<?> updateDelivery(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
+                                         @PathVariable("orderId") long orderId,
+                                         @RequestBody @Valid DeliveryInfo deliveryInfo) {
+        ordersService.updateDeliveryInfo(orderId, cognitoUser.getCognitoSub(), deliveryInfo);
+        return ApiResponse.success();
+    }
+
     @PutMapping("/{orderId}/place")
     @JsonView(JsonViews.PlaceOrderResponse.class)
     public ApiResponse<?> placeOrder(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
@@ -56,5 +74,12 @@ public class OrdersController extends BaseController {
                                   @RequestParam(name = "page") Integer page,
                                   @RequestParam(name = "size") Integer size) {
         return ordersService.getUserOrders(page, size, cognitoUser.getCognitoSub());
+    }
+
+    @DeleteMapping("/{orderId}")
+    public ApiResponse<?> deleteDraftOrder(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
+                                           @PathVariable("orderId") long orderId) {
+        ordersService.deleteDraftOrder(orderId, cognitoUser.getCognitoSub());
+        return ApiResponse.success();
     }
 }

@@ -176,6 +176,9 @@ public class CartsServiceImpl implements CartsService {
     public CheckoutData checkoutCart(long cartId, String userId) {
         ensureCartExistsAndNotLocked(cartId, userId);
 
+        String lockAcquireReason = String.format("Checkout cart:(cartId - %d) by user: (userId - %s)", cartId, userId);
+        cartLockApplierService.acquireLock(getCart(cartId, userId), lockAcquireReason);
+
         BigDecimal grossTotal = cartItemsRepository.getTotal(cartId, userId);
         return new CheckoutData(cartId, grossTotal);
     }

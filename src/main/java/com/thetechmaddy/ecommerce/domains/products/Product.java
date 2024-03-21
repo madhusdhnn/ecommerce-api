@@ -106,11 +106,15 @@ public class Product extends Audit {
         return this.stockQuantity > 0;
     }
 
-    public void decrementStockQuantity(Integer reductionCount) {
+    public void decrementStockQuantity(int reductionCount) {
         int quantity = this.stockQuantity;
 
         int newQuantity;
         this.stockQuantity = (newQuantity = quantity - reductionCount) <= 0 ? 0 : newQuantity;
+    }
+
+    public void incrementStockQuantity(int incrementCount) {
+        this.stockQuantity += incrementCount;
     }
 
     public boolean hasInsufficientQuantity(int quantity) {

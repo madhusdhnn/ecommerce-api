@@ -61,7 +61,7 @@ public class Order extends Audit {
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @Setter
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
     private Payment payment;
 
@@ -69,6 +69,11 @@ public class Order extends Audit {
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
     private DeliveryDetails deliveryDetails;
+
+    public Order(long id, OrderStatus status) {
+        this.id = id;
+        this.status = status;
+    }
 
     public Order(OrderStatus orderStatus, String userId) {
         this.userId = userId;

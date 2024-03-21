@@ -4,6 +4,6 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 public class OrderNotFoundException extends BusinessException {
     public OrderNotFoundException(long orderId) {
-        super(String.format("Order: (orderId - %d) does not exist", orderId), FORBIDDEN);
+        super(String.format("Order: (orderId - %d) details not found", orderId), FORBIDDEN);
     }
 }

@@ -1,9 +1,12 @@
 package com.thetechmaddy.ecommerce.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JsonUtils {
 
     public static <T> T safeParseJSON(ObjectMapper objectMapper, String json, Class<T> target) {

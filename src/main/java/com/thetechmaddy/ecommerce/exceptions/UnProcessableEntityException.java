@@ -2,9 +2,9 @@ package com.thetechmaddy.ecommerce.exceptions;
 
 import static org.springframework.http.HttpStatus.FAILED_DEPENDENCY;
 
-public class UnprocessableOrderException extends BusinessException {
+public class UnProcessableEntityException extends BusinessException {
 
-    public UnprocessableOrderException(String message) {
+    public UnProcessableEntityException(String message) {
         super(message, FAILED_DEPENDENCY);
     }
 

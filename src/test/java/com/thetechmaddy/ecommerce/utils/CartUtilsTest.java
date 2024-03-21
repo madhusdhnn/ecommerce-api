@@ -1,4 +1,4 @@
-package com.thetechmaddy.ecommerce;
+package com.thetechmaddy.ecommerce.utils;
 
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.exceptions.CartLockedException;

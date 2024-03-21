@@ -41,6 +41,11 @@ public class Payment extends Audit {
     private PaymentMode paymentMode;
 
     @Setter
+    @Column(name = "transaction_id")
+    @JsonView(value = {ProcessPaymentResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    private String transactionId;
+
+    @Setter
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     @JsonView(value = {OrderInitiateResponse.class, ProcessPaymentResponse.class, PlaceOrderResponse.class, PaymentStatusResponse.class, GetOrderResponse.class})
@@ -64,6 +69,12 @@ public class Payment extends Audit {
         this.amount = new BigDecimal("1000");
     }
 
+    public Payment(long id, PaymentStatus paymentStatus) {
+        this.id = id;
+        this.status = paymentStatus;
+        this.amount = new BigDecimal("1000");
+    }
+
     @JsonIgnore
     public boolean isSuccess() {
         return PaymentStatus.SUCCESS == this.status;
@@ -72,5 +83,10 @@ public class Payment extends Audit {
     @JsonIgnore
     public boolean isPending() {
         return PaymentStatus.PENDING == this.status;
+    }
+
+    @JsonIgnore
+    public boolean isProcessing() {
+        return PaymentStatus.PROCESSING == this.status;
     }
 }

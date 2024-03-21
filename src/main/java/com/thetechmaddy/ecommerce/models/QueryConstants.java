@@ -35,4 +35,8 @@ public class QueryConstants {
                 SELECT SUM(ci.product.grossAmount * ci.quantity) FROM CartItem ci JOIN Cart c ON c.id = ci.cart.id
                 WHERE c.id = :cartId AND c.userId = :userId AND ci.status = 'SELECTED'
             """;
+    public static final String LOCK_CART_QUERY = """
+                UPDATE Cart c SET c.cartStatus = 'LOCKED'
+                WHERE c.id = :cartId AND c.userId = :userId
+            """;
 }

@@ -36,9 +36,7 @@ public class SecurityConfiguration {
 
     private final ObjectMapper objectMapper;
 
-    private final ApiRequestMatcher apiRequestMatcher;
     private final UserAuthenticationFilter userAuthenticationFilter;
-    private final AdminRoleApiRequestMatcher adminRoleApiRequestMatcher;
     private final CognitoGroupToGrantedAuthorityConverter cognitoGroupToGrantedAuthorityConverter;
 
     @Bean
@@ -71,9 +69,9 @@ public class SecurityConfiguration {
         return (httpRequestsAuthorizer) -> httpRequestsAuthorizer
                     .requestMatchers(HttpMethod.GET, "/ping")
                         .permitAll()
-                    .requestMatchers(adminRoleApiRequestMatcher)
+                    .requestMatchers(new AdminRoleApiRequestMatcher())
                         .hasRole(COGNITO_ADMIN_GROUP_NAME)
-                    .requestMatchers(apiRequestMatcher)
+                    .requestMatchers(new ApiRequestMatcher())
                         .hasAnyRole(COGNITO_ADMIN_GROUP_NAME, COGNITO_USER_GROUP_NAME)
                     .anyRequest()
                         .authenticated();

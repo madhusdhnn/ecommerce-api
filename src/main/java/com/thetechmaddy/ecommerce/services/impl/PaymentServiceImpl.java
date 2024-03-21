@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.thetechmaddy.ecommerce.models.payments.PaymentStatus.*;
+import static com.thetechmaddy.ecommerce.utils.PaymentUtils.validatePaymentDetailsInputAndPayment;
 
 @Log4j2
 @Primary
@@ -62,17 +63,20 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(() -> new PaymentNotFoundException(idempotencyId));
 
         if (payment.isPending()) {
+            validatePaymentDetailsInputAndPayment(payment, paymentInfo);
+
             payment.setStatus(PROCESSING);
             payment = paymentsRepository.save(payment);
 
             PaymentProvider paymentProvider = paymentProviderFactory.getPaymentProvider(payment.getPaymentMode());
             PaymentGatewayRequest paymentGatewayRequest = new PaymentGatewayRequest(
-                    user.getFullName(), "Jane Doe", "INR", paymentInfo
+                    idempotencyId, user.getFullName(), "Jane Doe", "INR", paymentInfo
             );
             PaymentGatewayResponse gatewayResponse = paymentProvider.processPayment(paymentGatewayRequest);
 
             payment.setStatus(gatewayResponse.isSuccess() ? SUCCESS : FAILED);
             payment.setPaymentDateTime(OffsetDateTime.now());
+            payment.setTransactionId(gatewayResponse.getTransactionId());
 
             log.info(String.format("Payment: (paymentId - %d) completed with status %s and transactionId - %s", payment.getId(), payment.getStatus(), gatewayResponse.getTransactionId()));
 

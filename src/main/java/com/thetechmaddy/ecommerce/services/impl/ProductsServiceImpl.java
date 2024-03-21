@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+// TODO: Have a separate table mapped to orderId that holds reserved product_ids.
+// TODO: This will ensure only those quantities are restored. Otherwise duplicate increase/ decrease quantities happen
 @Primary
 @Service("productsServiceImpl")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
@@ -69,5 +71,14 @@ public class ProductsServiceImpl implements ProductsService {
         if (!product.isInStock()) {
             throw new ProductOutOfStockException(productId);
         }
+    }
+
+    @Override
+    public void restoreProducts(Map<Long, Integer> productIdQuantityMap) {
+        List<Product> products = productsRepository.findAllById(productIdQuantityMap.keySet());
+        for (Product product : products) {
+            product.incrementStockQuantity(productIdQuantityMap.get(product.getId()));
+        }
+        productsRepository.saveAll(products);
     }
 }
