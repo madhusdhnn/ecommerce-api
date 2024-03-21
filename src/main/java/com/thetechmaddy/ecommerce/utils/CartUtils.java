@@ -2,10 +2,7 @@ package com.thetechmaddy.ecommerce.utils;
 
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.domains.carts.CartItem;
-import com.thetechmaddy.ecommerce.exceptions.CartItemsTotalMismatchException;
-import com.thetechmaddy.ecommerce.exceptions.CartLockedException;
-import com.thetechmaddy.ecommerce.exceptions.CartNotBelongsToUserException;
-import com.thetechmaddy.ecommerce.exceptions.EmptyCartException;
+import com.thetechmaddy.ecommerce.exceptions.*;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -46,6 +43,13 @@ public class CartUtils {
 
         if (cart.isLocked()) {
             throw new CartLockedException(cart.getId());
+        }
+    }
+
+    public static void ensureCartLocked(Cart cart) {
+        Objects.requireNonNull(cart, "cart == null");
+        if (cart.isUnlocked()) {
+            throw new CartNotLockedException(String.format("Cart: (cartId - %d) not locked", cart.getId()));
         }
     }
 

@@ -176,6 +176,13 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
         Order actual = ordersService.getUserOrderInPendingStatus(TEST_COGNITO_SUB);
         assertEquals(order.getId(), actual.getId());
+
+        ordersRepository.save(new Order(PENDING, TEST_COGNITO_SUB));
+        DuplicatePendingOrderException ex = assertThrows(DuplicatePendingOrderException.class,
+                () -> ordersService.getUserOrderInPendingStatus(TEST_COGNITO_SUB));
+
+        String message = String.format("Found more than one PENDING order for user: (userId - %s)", TEST_COGNITO_SUB);
+        assertEquals(message, ex.getMessage());
     }
 
     @Test

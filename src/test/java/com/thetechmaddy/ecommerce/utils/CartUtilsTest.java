@@ -1,10 +1,7 @@
 package com.thetechmaddy.ecommerce.utils;
 
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
-import com.thetechmaddy.ecommerce.exceptions.CartItemsTotalMismatchException;
-import com.thetechmaddy.ecommerce.exceptions.CartLockedException;
-import com.thetechmaddy.ecommerce.exceptions.CartNotBelongsToUserException;
-import com.thetechmaddy.ecommerce.exceptions.EmptyCartException;
+import com.thetechmaddy.ecommerce.exceptions.*;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.payments.PaymentMode;
 import org.junit.jupiter.api.Test;
@@ -53,5 +50,12 @@ public class CartUtilsTest {
 
         assertThrows(CartItemsTotalMismatchException.class, () -> ensureCartTotalAndPaymentMatches(paymentInfo, cart));
         assertDoesNotThrow(() -> ensureCartTotalAndPaymentMatches(paymentInfo, new Cart(new BigDecimal("100"))));
+    }
+
+    @Test
+    public void testCartLocked() {
+        assertDoesNotThrow(() -> ensureCartLocked(new Cart("user", LOCKED)));
+        assertThrows(CartNotLockedException.class, () -> ensureCartLocked(new Cart("user", UN_LOCKED)));
+
     }
 }

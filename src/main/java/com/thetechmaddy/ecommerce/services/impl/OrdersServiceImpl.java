@@ -7,7 +7,6 @@ import com.thetechmaddy.ecommerce.domains.carts.CartItem;
 import com.thetechmaddy.ecommerce.domains.orders.Order;
 import com.thetechmaddy.ecommerce.domains.orders.OrderItem;
 import com.thetechmaddy.ecommerce.domains.payments.Payment;
-import com.thetechmaddy.ecommerce.exceptions.CartNotLockedException;
 import com.thetechmaddy.ecommerce.exceptions.DuplicatePendingOrderException;
 import com.thetechmaddy.ecommerce.exceptions.OrderItemsTotalMismatchException;
 import com.thetechmaddy.ecommerce.exceptions.OrderNotFoundException;
@@ -42,8 +41,7 @@ import java.util.stream.Collectors;
 import static com.thetechmaddy.ecommerce.models.OrderItemStatus.PENDING_ORDER_CONFIRMATION;
 import static com.thetechmaddy.ecommerce.models.OrderStatus.CONFIRMED;
 import static com.thetechmaddy.ecommerce.models.OrderStatus.PENDING;
-import static com.thetechmaddy.ecommerce.utils.CartUtils.ensureCartNotEmpty;
-import static com.thetechmaddy.ecommerce.utils.CartUtils.ensureCartTotalAndPaymentMatches;
+import static com.thetechmaddy.ecommerce.utils.CartUtils.*;
 import static com.thetechmaddy.ecommerce.utils.OrderUtils.ensureOrderInPendingStatus;
 import static com.thetechmaddy.ecommerce.utils.PaymentUtils.ensurePaymentInEditableState;
 import static com.thetechmaddy.ecommerce.utils.PaymentUtils.ensurePaymentIsSuccess;
@@ -212,13 +210,6 @@ public class OrdersServiceImpl implements OrdersService {
     private void unlockAndClearCart(Cart cart, String userId, String unlockReleaseReason) {
         cartLockApplierService.releaseLock(cart, unlockReleaseReason);
         cartsService.clearCart(cart.getId(), userId);
-    }
-
-    private static void ensureCartLocked(Cart cart) {
-        Objects.requireNonNull(cart, "cart == null");
-        if (cart.isUnlocked()) {
-            throw new CartNotLockedException(String.format("Cart: (cartId - %d) not locked", cart.getId()));
-        }
     }
 
     private Order createOrder(String userId, PaymentInfo paymentInfo, List<CartItem> cartItems) {
