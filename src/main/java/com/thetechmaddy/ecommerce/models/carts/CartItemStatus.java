@@ -1,4 +1,4 @@
-package com.thetechmaddy.ecommerce.models;
+package com.thetechmaddy.ecommerce.models.carts;
 
 public enum CartItemStatus {
 

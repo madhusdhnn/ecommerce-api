@@ -3,14 +3,14 @@ package com.thetechmaddy.ecommerce.domains.carts;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.Audit;
 import com.thetechmaddy.ecommerce.domains.products.Product;
-import com.thetechmaddy.ecommerce.models.CartItemStatus;
 import com.thetechmaddy.ecommerce.models.JsonViews;
+import com.thetechmaddy.ecommerce.models.carts.CartItemStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.OffsetDateTime;
 
-import static com.thetechmaddy.ecommerce.models.CartItemStatus.SELECTED;
+import static com.thetechmaddy.ecommerce.models.carts.CartItemStatus.SELECTED;
 
 @Entity
 @Table(name = "cart_items")

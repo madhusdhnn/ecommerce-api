@@ -21,7 +21,7 @@ public class CartUtils {
 
         Objects.requireNonNull(paymentInfo, "paymentInfo == null");
 
-        if (paymentInfo.getAmount().compareTo(cart.getSubTotal()) != 0) {
+        if (paymentInfo.getAmount().compareTo(cart.getTotal()) != 0) {
             throw new CartItemsTotalMismatchException(
                     String.format("Cart items total and payment request amount do not match. Cart Total: %s. Payment requested: %s",
                             cart.getSubTotal(), paymentInfo.getAmount())

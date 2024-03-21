@@ -28,7 +28,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
+import static com.thetechmaddy.ecommerce.models.carts.CartStatus.UN_LOCKED;
 import static com.thetechmaddy.ecommerce.models.payments.PaymentMode.CREDIT_CARD;
 import static com.thetechmaddy.ecommerce.models.payments.PaymentMode.UPI;
 import static com.thetechmaddy.ecommerce.utils.TestUtils.getOrderRequest;

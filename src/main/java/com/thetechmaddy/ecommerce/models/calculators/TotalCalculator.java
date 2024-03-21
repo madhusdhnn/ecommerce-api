@@ -5,7 +5,7 @@ import com.thetechmaddy.ecommerce.domains.carts.CartItem;
 import java.math.BigDecimal;
 import java.util.List;
 
-public interface OrderTotalCalculator {
+public interface TotalCalculator {
 
     BigDecimal calculate(List<CartItem> cartItems);
 

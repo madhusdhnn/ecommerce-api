@@ -32,9 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
 import static com.thetechmaddy.ecommerce.models.OrderStatus.CONFIRMED;
 import static com.thetechmaddy.ecommerce.models.OrderStatus.PENDING;
+import static com.thetechmaddy.ecommerce.models.carts.CartStatus.UN_LOCKED;
 import static com.thetechmaddy.ecommerce.models.payments.PaymentMode.CASH_ON_DELIVERY;
 import static com.thetechmaddy.ecommerce.models.payments.PaymentMode.CREDIT_CARD;
 import static com.thetechmaddy.ecommerce.utils.TestUtils.getOrderRequest;

@@ -13,7 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Optional;
 
 import static com.thetechmaddy.ecommerce.BaseIntegrationTest.TEST_COGNITO_SUB;
-import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
+import static com.thetechmaddy.ecommerce.models.carts.CartStatus.UN_LOCKED;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

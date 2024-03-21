@@ -3,8 +3,8 @@ package com.thetechmaddy.ecommerce.domains;
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import org.junit.jupiter.api.Test;
 
-import static com.thetechmaddy.ecommerce.models.CartStatus.LOCKED;
-import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
+import static com.thetechmaddy.ecommerce.models.carts.CartStatus.LOCKED;
+import static com.thetechmaddy.ecommerce.models.carts.CartStatus.UN_LOCKED;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CartTest {

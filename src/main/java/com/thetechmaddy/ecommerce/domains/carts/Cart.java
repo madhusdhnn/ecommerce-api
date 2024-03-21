@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thetechmaddy.ecommerce.domains.Audit;
-import com.thetechmaddy.ecommerce.models.CartStatus;
 import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
+import com.thetechmaddy.ecommerce.models.carts.CartStatus;
 import com.thetechmaddy.ecommerce.models.serializers.BigDecimalToDoubleTwoDecimalPlacesNumberSerializer;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.thetechmaddy.ecommerce.models.CartStatus.LOCKED;
-import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
+import static com.thetechmaddy.ecommerce.models.carts.CartStatus.LOCKED;
+import static com.thetechmaddy.ecommerce.models.carts.CartStatus.UN_LOCKED;
 
 @Entity
 @Table(name = "carts")
@@ -55,11 +55,22 @@ public class Cart extends Audit {
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
     private BigDecimal subTotal = BigDecimal.ZERO;
 
+    @Setter
+    @Transient
+    @EqualsAndHashCode.Exclude
+    @JsonView(CartResponse.class)
+    @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
+    private BigDecimal total = BigDecimal.ZERO;
+
     public Cart(String userId, CartStatus cartStatus) {
         super(OffsetDateTime.now(), OffsetDateTime.now());
         this.userId = userId;
         this.cartStatus = cartStatus;
         this.cartItems = new ArrayList<>();
+    }
+
+    public Cart(BigDecimal total) {
+        this.total = total;
     }
 
     @JsonIgnore

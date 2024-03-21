@@ -27,15 +27,15 @@ fs.readdir(migrationsPath, (err, files) => {
   if (repeatableMigration) {
     fs.closeSync(fs.openSync(`${migrationsPath}/R__${migrationName}.sql`, 'wx'));
   } else {
-    let version = 1;
+    let nextVersion = 1;
       if (files.length !== 0) {
-        const filesDescSorted = files.sort((a, b) => {
+        const filesDescSorted = files.filter(f => !f.startsWith('R')).sort((a, b) => {
           const aV = a.split('__')[0];
           const bV = b.split('__')[0];
           return parseInt(bV.substring(1)) - parseInt(aV.substring(1));
         });
-        version = parseInt(filesDescSorted[0].split("__")[0].substring(1)) + 1;
+        nextVersion = parseInt(filesDescSorted[0].split("__")[0].substring(1)) + 1;
       }
-      fs.closeSync(fs.openSync(`${migrationsPath}/V${version}__${migrationName}.sql`, 'wx'));
+      fs.closeSync(fs.openSync(`${migrationsPath}/V${nextVersion}__${migrationName}.sql`, 'wx'));
   }
 });

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GrossTotalCalculatorTest {
 
-    private final OrderTotalCalculator grossTotalCalculator = new GrossTotalCalculator();
+    private final TotalCalculator grossTotalCalculator = new GrossTotalCalculator();
 
     @Test
     public void testEmptyListReturnZero() {
