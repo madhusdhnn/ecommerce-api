@@ -11,6 +11,7 @@ import com.thetechmaddy.ecommerce.exceptions.DuplicatePendingOrderException;
 import com.thetechmaddy.ecommerce.exceptions.OrderItemsTotalMismatchException;
 import com.thetechmaddy.ecommerce.exceptions.OrderNotFoundException;
 import com.thetechmaddy.ecommerce.models.OrderItemStatus;
+import com.thetechmaddy.ecommerce.models.OrderSummary;
 import com.thetechmaddy.ecommerce.models.calculators.GrossTotalCalculator;
 import com.thetechmaddy.ecommerce.models.calculators.NetTotalCalculator;
 import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
@@ -21,7 +22,6 @@ import com.thetechmaddy.ecommerce.models.payments.PaymentStatus;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
-import com.thetechmaddy.ecommerce.repositories.OrderItemsRepository;
 import com.thetechmaddy.ecommerce.repositories.OrdersRepository;
 import com.thetechmaddy.ecommerce.repositories.specifications.GetOrdersSpecification;
 import com.thetechmaddy.ecommerce.services.*;
@@ -63,7 +63,6 @@ public class OrdersServiceImpl implements OrdersService {
     private final CartLockApplierService cartLockApplierService;
 
     private final OrdersRepository ordersRepository;
-    private final OrderItemsRepository orderItemsRepository;
 
     private final CartItemToOrderItemMapper cartItemToOrderItemMapper;
 
@@ -129,14 +128,10 @@ public class OrdersServiceImpl implements OrdersService {
         order.setStatus(CONFIRMED);
         log.info(String.format("Order: (orderId - %d) is confirmed for user: (userId - %s)", order.getId(), customer.getCognitoSub()));
 
-        List<OrderItem> orderItems = order.getOrderItems()
-                .stream()
-                .peek(oi -> {
-                    oi.setStatus(OrderItemStatus.CONFIRMED);
-                    oi.setOrder(order);
-                })
-                .collect(Collectors.toList());
-        orderItemsRepository.saveAll(orderItems);
+        List<OrderItem> orderItems = order.getOrderItems();
+        orderItems.forEach(OrderItem::confirmItem);
+
+        ordersRepository.save(order);
 
         String unlockReleaseReason = String.format("Order: (orderId - %d) confirmed for user: (userId - %s)",
                 orderId, customer.getCognitoSub());
@@ -152,10 +147,11 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public Paged<Order> getUserOrders(Integer page, Integer size, String userId, OrderFilters orderFilters) {
+    public Paged<OrderSummary> getUserOrders(Integer page, Integer size, String userId, OrderFilters orderFilters) {
         Specification<Order> orderSpecification = new GetOrdersSpecification(userId, orderFilters);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-        Page<Order> pagedOrders = ordersRepository.findAll(orderSpecification, PageRequest.of(page, size));
+        Page<OrderSummary> pagedOrders = ordersRepository.findAll(orderSpecification, pageRequest).map(OrderSummary::new);
         return new Paged<>(pagedOrders.getContent(), page, pagedOrders.getTotalElements(), pagedOrders.getNumberOfElements());
     }
 
@@ -291,3 +287,4 @@ public class OrdersServiceImpl implements OrdersService {
         }
     }
 }
+

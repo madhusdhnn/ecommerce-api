@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thetechmaddy.ecommerce.domains.Audit;
 import com.thetechmaddy.ecommerce.domains.products.Product;
-import com.thetechmaddy.ecommerce.models.JsonViews.GetOrderResponse;
 import com.thetechmaddy.ecommerce.models.JsonViews.OrderInitiateResponse;
 import com.thetechmaddy.ecommerce.models.JsonViews.PlaceOrderResponse;
 import com.thetechmaddy.ecommerce.models.OrderItemStatus;
@@ -17,8 +16,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
-import static com.thetechmaddy.ecommerce.models.OrderItemStatus.PENDING_ORDER_CONFIRMATION;
-
 @Entity
 @Table(name = "order_items")
 @Getter
@@ -28,7 +25,7 @@ public class OrderItem extends Audit {
 
     @Id
     @Column(name = "id")
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
@@ -44,43 +41,46 @@ public class OrderItem extends Audit {
 
     @Setter
     @Column(name = "quantity")
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     private int quantity;
 
     @Setter
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     private OrderItemStatus status;
 
     @Setter
     @Column(name = "unit_price")
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
     private BigDecimal unitPrice;
 
     @Setter
     @Column(name = "net_amount")
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
     private BigDecimal netAmount;
 
     @Setter
     @Column(name = "gross_amount")
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
     private BigDecimal grossAmount;
 
     @Setter
     @Column(name = "tax_amount")
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
     private BigDecimal taxAmount;
 
     @Setter
     @Column(name = "tax_percentage")
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
     private BigDecimal taxPercentage;
 
+    public void confirmItem() {
+        this.status = OrderItemStatus.CONFIRMED;
+    }
 }

@@ -11,6 +11,7 @@ import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.*;
 import com.thetechmaddy.ecommerce.models.OrderItemStatus;
 import com.thetechmaddy.ecommerce.models.OrderStatus;
+import com.thetechmaddy.ecommerce.models.OrderSummary;
 import com.thetechmaddy.ecommerce.models.delivery.Customer;
 import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
 import com.thetechmaddy.ecommerce.models.filters.OrderFilters;
@@ -323,10 +324,10 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     public void testGetAllOrdersWithoutFilters() {
         createTestOrderWithCreditCardPaymentMode();
 
-        Paged<Order> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, null);
+        Paged<OrderSummary> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, null);
         assertNotNull(result);
 
-        List<Order> orders = result.data();
+        List<OrderSummary> orders = result.data();
         assertEquals(1, orders.size());
 
         result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.emptyFilters());
@@ -340,10 +341,10 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     public void testGetAllOrdersWithFilters1() {
         createTestOrderWithCreditCardPaymentMode();
 
-        Paged<Order> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().year(2023).build());
+        Paged<OrderSummary> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().year(2023).build());
         assertNotNull(result);
 
-        List<Order> orders = result.data();
+        List<OrderSummary> orders = result.data();
         assertTrue(orders.isEmpty());
         assertEquals(0, result.total());
     }
@@ -354,10 +355,10 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         order.setCreatedAt(OffsetDateTime.now().minusDays(34));
         ordersRepository.save(order);
 
-        Paged<Order> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().last30Days(true).build());
+        Paged<OrderSummary> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().last30Days(true).build());
         assertNotNull(result);
 
-        List<Order> orders = result.data();
+        List<OrderSummary> orders = result.data();
         assertTrue(orders.isEmpty());
         assertEquals(0, result.total());
     }
@@ -368,10 +369,10 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         order.setCreatedAt(OffsetDateTime.now().minusMonths(4));
         ordersRepository.save(order);
 
-        Paged<Order> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().past3Months(true).build());
+        Paged<OrderSummary> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().past3Months(true).build());
         assertNotNull(result);
 
-        List<Order> orders = result.data();
+        List<OrderSummary> orders = result.data();
         assertTrue(orders.isEmpty());
         assertEquals(0, result.total());
     }
@@ -380,10 +381,10 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     public void testGetAllOrdersWithFilters4() {
         createTestOrderWithCreditCardPaymentMode();
 
-        Paged<Order> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().orderStatus(COMPLETED).build());
+        Paged<OrderSummary> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().orderStatus(COMPLETED).build());
         assertNotNull(result);
 
-        List<Order> orders = result.data();
+        List<OrderSummary> orders = result.data();
         assertTrue(orders.isEmpty());
         assertEquals(0, result.total());
     }
@@ -417,8 +418,10 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     @Test
     public void testUpdatePaymentInfoFailed3() {
         Order order = createTestOrderWithCreditCardPaymentMode();
+
         Payment payment = order.getPayment();
         payment.setStatus(PaymentStatus.PROCESSING);
+
         order.setPayment(payment);
         ordersRepository.save(order);
 
@@ -433,8 +436,10 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     @Test
     public void testUpdatePaymentInfoFailed4() {
         Order order = createTestOrderWithCreditCardPaymentMode();
+
         Payment payment = order.getPayment();
         payment.setStatus(PaymentStatus.SUCCESS);
+
         order.setPayment(payment);
         ordersRepository.save(order);
 

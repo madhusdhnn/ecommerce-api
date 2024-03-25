@@ -60,18 +60,18 @@ public class Order extends Audit {
 
     @Setter
     @Builder.Default
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "order")
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @Setter
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     private Payment payment;
 
     @Setter
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     private DeliveryDetails deliveryDetails;
 
     public Order(long id, OrderStatus status) {
