@@ -18,7 +18,7 @@ public enum OrderStatus {
     CONFIRMED,
 
     /**
-     * Represents order has been completed. This includes the return window as well
+     * Represents order has been completed
      */
     COMPLETED,
 

@@ -10,17 +10,20 @@ import com.thetechmaddy.ecommerce.models.JsonViews.PlaceOrderResponse;
 import com.thetechmaddy.ecommerce.models.OrderItemStatus;
 import com.thetechmaddy.ecommerce.models.serializers.BigDecimalToDoubleTwoDecimalPlacesNumberSerializer;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
+
+import static com.thetechmaddy.ecommerce.models.OrderItemStatus.PENDING_ORDER_CONFIRMATION;
 
 @Entity
 @Table(name = "order_items")
 @Getter
 @NoArgsConstructor
-@ToString
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 public class OrderItem extends Audit {
 
     @Id
@@ -29,14 +32,13 @@ public class OrderItem extends Audit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ToString.Exclude
     @Setter
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
     @Setter
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 

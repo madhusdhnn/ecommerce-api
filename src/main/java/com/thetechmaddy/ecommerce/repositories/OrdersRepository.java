@@ -2,6 +2,10 @@ package com.thetechmaddy.ecommerce.repositories;
 
 import com.thetechmaddy.ecommerce.domains.orders.Order;
 import com.thetechmaddy.ecommerce.models.OrderStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -18,5 +22,6 @@ public interface OrdersRepository extends JpaRepository<Order, Long>, JpaSpecifi
 
     long countByUserIdAndStatusEquals(String userId, OrderStatus orderStatus);
 
-    List<Order> findByStatusEquals(OrderStatus orderStatus);
+    @EntityGraph(value = "Orders")
+    Page<Order> findAll(Specification<Order> spec, Pageable pageable);
 }

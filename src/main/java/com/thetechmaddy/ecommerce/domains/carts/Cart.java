@@ -24,7 +24,6 @@ import static com.thetechmaddy.ecommerce.models.carts.CartStatus.UN_LOCKED;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @NamedEntityGraph(name = "Cart.cartItems", attributeNodes = @NamedAttributeNode("cartItems"))
 public class Cart extends Audit {
 

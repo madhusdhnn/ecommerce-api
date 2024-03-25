@@ -1,6 +1,7 @@
 package com.thetechmaddy.ecommerce.services;
 
 import com.thetechmaddy.ecommerce.BaseIntegrationTest;
+import com.thetechmaddy.ecommerce.domains.Address;
 import com.thetechmaddy.ecommerce.domains.DeliveryDetails;
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.domains.orders.Order;
@@ -10,13 +11,15 @@ import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.*;
 import com.thetechmaddy.ecommerce.models.OrderItemStatus;
 import com.thetechmaddy.ecommerce.models.OrderStatus;
+import com.thetechmaddy.ecommerce.models.delivery.Customer;
+import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
+import com.thetechmaddy.ecommerce.models.filters.OrderFilters;
+import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.payments.PaymentStatus;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
-import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
-import com.thetechmaddy.ecommerce.repositories.CartsRepository;
-import com.thetechmaddy.ecommerce.repositories.OrdersRepository;
-import com.thetechmaddy.ecommerce.repositories.PaymentsRepository;
+import com.thetechmaddy.ecommerce.models.responses.Paged;
+import com.thetechmaddy.ecommerce.repositories.*;
 import com.thetechmaddy.ecommerce.utils.TestUtils.TestOrderRequestOptions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,13 +33,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
-import static com.thetechmaddy.ecommerce.models.OrderStatus.CONFIRMED;
-import static com.thetechmaddy.ecommerce.models.OrderStatus.PENDING;
+import static com.thetechmaddy.ecommerce.models.OrderStatus.*;
 import static com.thetechmaddy.ecommerce.models.carts.CartStatus.UN_LOCKED;
-import static com.thetechmaddy.ecommerce.models.payments.PaymentMode.CASH_ON_DELIVERY;
-import static com.thetechmaddy.ecommerce.models.payments.PaymentMode.CREDIT_CARD;
+import static com.thetechmaddy.ecommerce.models.payments.PaymentMode.*;
 import static com.thetechmaddy.ecommerce.utils.TestUtils.getOrderRequest;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,6 +64,9 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Autowired
     private PaymentsRepository paymentsRepository;
+
+    @Autowired
+    private DeliveryDetailsRepository deliveryDetailsRepository;
 
     private long cartId;
 
@@ -111,7 +117,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
             cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
         });
 
-        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
+        BigDecimal cartTotal = cartItemsRepository.getGrossTotalForSelectedCartItems(cartId, TEST_COGNITO_SUB);
 
         TestOrderRequestOptions options = TestOrderRequestOptions.builder()
                 .createDeliveryInfo(true)
@@ -156,23 +162,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     public void testInitiateOrderReturnExisting() {
         assertNull(ordersService.getUserOrderInPendingStatus(TEST_COGNITO_SUB));
 
-        getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
-            cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
-        });
-
-        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
-
-        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
-                .createDeliveryInfo(true)
-                .createPaymentInfo(true)
-                .cartAmount(cartTotal)
-                .paymentMode(CREDIT_CARD)
-                .build();
-
-        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
-
-        OrderRequest orderRequest = getOrderRequest(cartId, options);
-        Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
+        Order order = createTestOrderWithCreditCardPaymentMode();
 
         Order actual = ordersService.getUserOrderInPendingStatus(TEST_COGNITO_SUB);
         assertEquals(order.getId(), actual.getId());
@@ -191,7 +181,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
             cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
         });
 
-        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
+        BigDecimal cartTotal = cartItemsRepository.getGrossTotalForSelectedCartItems(cartId, TEST_COGNITO_SUB);
 
         TestOrderRequestOptions options = TestOrderRequestOptions.builder()
                 .createDeliveryInfo(true)
@@ -210,23 +200,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testNewOrderInitiateOtherPaymentModes() {
-        getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
-            cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
-        });
-
-        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
-
-        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
-                .createDeliveryInfo(true)
-                .createPaymentInfo(true)
-                .cartAmount(cartTotal)
-                .paymentMode(CREDIT_CARD)
-                .build();
-
-        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
-
-        OrderRequest orderRequest = getOrderRequest(cartId, options);
-        Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
+        Order order = createTestOrderWithCreditCardPaymentMode();
         assertNotNull(order);
 
         assertEquals(PENDING, order.getStatus());
@@ -264,7 +238,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         getTestProducts().stream().filter(Product::isInStock)
                 .forEach(product -> cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId));
 
-        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
+        BigDecimal cartTotal = cartItemsRepository.getGrossTotalForSelectedCartItems(cartId, TEST_COGNITO_SUB);
 
         TestOrderRequestOptions options = TestOrderRequestOptions.builder()
                 .createDeliveryInfo(true)
@@ -318,23 +292,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     @Test
     @Transactional
     public void testPlaceOrder() {
-        getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
-            cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
-        });
-
-        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
-
-        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
-                .createDeliveryInfo(true)
-                .createPaymentInfo(true)
-                .cartAmount(cartTotal)
-                .paymentMode(CREDIT_CARD)
-                .build();
-
-        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
-
-        OrderRequest orderRequest = getOrderRequest(cartId, options);
-        Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
+        Order order = createTestOrderWithCreditCardPaymentMode();
 
         Payment payment = order.getPayment();
         payment.setStatus(PaymentStatus.SUCCESS);
@@ -348,6 +306,256 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
         assertTrue(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
         assertEquals(0, cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB));
+    }
+
+    @Test
+    public void testGetOrderThrowNotFound() {
+        assertThrows(OrderNotFoundException.class, () -> ordersService.getOrder(Integer.MAX_VALUE, TEST_COGNITO_SUB));
+    }
+
+    @Test
+    public void testGetOrderDoesNotThrowNotFound() {
+        Order order = ordersRepository.save(new Order(PENDING, TEST_COGNITO_SUB));
+        assertDoesNotThrow(() -> ordersService.getOrder(order.getId(), TEST_COGNITO_SUB));
+    }
+
+    @Test
+    public void testGetAllOrdersWithoutFilters() {
+        createTestOrderWithCreditCardPaymentMode();
+
+        Paged<Order> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, null);
+        assertNotNull(result);
+
+        List<Order> orders = result.data();
+        assertEquals(1, orders.size());
+
+        result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.emptyFilters());
+        assertNotNull(result);
+
+        orders = result.data();
+        assertEquals(1, orders.size());
+    }
+
+    @Test
+    public void testGetAllOrdersWithFilters1() {
+        createTestOrderWithCreditCardPaymentMode();
+
+        Paged<Order> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().year(2023).build());
+        assertNotNull(result);
+
+        List<Order> orders = result.data();
+        assertTrue(orders.isEmpty());
+        assertEquals(0, result.total());
+    }
+
+    @Test
+    public void testGetAllOrdersWithFilters2() {
+        Order order = createTestOrderWithCreditCardPaymentMode();
+        order.setCreatedAt(OffsetDateTime.now().minusDays(34));
+        ordersRepository.save(order);
+
+        Paged<Order> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().last30Days(true).build());
+        assertNotNull(result);
+
+        List<Order> orders = result.data();
+        assertTrue(orders.isEmpty());
+        assertEquals(0, result.total());
+    }
+
+    @Test
+    public void testGetAllOrdersWithFilters3() {
+        Order order = createTestOrderWithCreditCardPaymentMode();
+        order.setCreatedAt(OffsetDateTime.now().minusMonths(4));
+        ordersRepository.save(order);
+
+        Paged<Order> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().past3Months(true).build());
+        assertNotNull(result);
+
+        List<Order> orders = result.data();
+        assertTrue(orders.isEmpty());
+        assertEquals(0, result.total());
+    }
+
+    @Test
+    public void testGetAllOrdersWithFilters4() {
+        createTestOrderWithCreditCardPaymentMode();
+
+        Paged<Order> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().orderStatus(COMPLETED).build());
+        assertNotNull(result);
+
+        List<Order> orders = result.data();
+        assertTrue(orders.isEmpty());
+        assertEquals(0, result.total());
+    }
+
+    @Test
+    public void testUpdatePaymentInfoFailed1() {
+        Order order = createTestOrderWithCreditCardPaymentMode();
+        order.setStatus(CONFIRMED);
+        ordersRepository.save(order);
+
+        assertThrows(UnProcessableEntityException.class,
+                () -> ordersService.updatePaymentInfo(
+                        order.getId(), TEST_COGNITO_SUB,
+                        new PaymentInfo(order.getGrossTotal(), CREDIT_CARD)
+                )
+        );
+    }
+
+    @Test
+    public void testUpdatePaymentInfoFailed2() {
+        Order order = createTestOrderWithCreditCardPaymentMode();
+
+        assertThrows(OrderItemsTotalMismatchException.class,
+                () -> ordersService.updatePaymentInfo(
+                        order.getId(), TEST_COGNITO_SUB,
+                        new PaymentInfo(order.getGrossTotal().add(new BigDecimal("100.2")), CREDIT_CARD)
+                )
+        );
+    }
+
+    @Test
+    public void testUpdatePaymentInfoFailed3() {
+        Order order = createTestOrderWithCreditCardPaymentMode();
+        Payment payment = order.getPayment();
+        payment.setStatus(PaymentStatus.PROCESSING);
+        order.setPayment(payment);
+        ordersRepository.save(order);
+
+        assertThrows(UnProcessableEntityException.class,
+                () -> ordersService.updatePaymentInfo(
+                        order.getId(), TEST_COGNITO_SUB,
+                        new PaymentInfo(order.getGrossTotal(), CREDIT_CARD)
+                )
+        );
+    }
+
+    @Test
+    public void testUpdatePaymentInfoFailed4() {
+        Order order = createTestOrderWithCreditCardPaymentMode();
+        Payment payment = order.getPayment();
+        payment.setStatus(PaymentStatus.SUCCESS);
+        order.setPayment(payment);
+        ordersRepository.save(order);
+
+        assertThrows(UnProcessableEntityException.class,
+                () -> ordersService.updatePaymentInfo(
+                        order.getId(), TEST_COGNITO_SUB,
+                        new PaymentInfo(order.getGrossTotal(), CREDIT_CARD)
+                )
+        );
+    }
+
+    @Test
+    public void testUpdatePaymentInfoSuccess() {
+        Order order = createTestOrderWithCreditCardPaymentMode();
+
+        Payment payment = order.getPayment();
+        assertNotNull(payment);
+        assertEquals(CREDIT_CARD, payment.getPaymentMode());
+
+        ordersService.updatePaymentInfo(
+                order.getId(), TEST_COGNITO_SUB,
+                new PaymentInfo(order.getGrossTotal(), DEBIT_CARD));
+
+        Order updatedOrder = ordersService.getOrder(order.getId(), TEST_COGNITO_SUB);
+        assertNotNull(updatedOrder);
+
+        Payment updatedPayment = updatedOrder.getPayment();
+        assertNotNull(updatedPayment);
+        assertEquals(DEBIT_CARD, updatedPayment.getPaymentMode());
+    }
+
+    @Test
+    public void testUpdateDeliveryInfoFailed1() {
+        Order order = createTestOrderWithCreditCardPaymentMode();
+        order.setStatus(CONFIRMED);
+        ordersRepository.save(order);
+
+        assertThrows(UnProcessableEntityException.class,
+                () -> ordersService.updateDeliveryInfo(
+                        order.getId(), TEST_COGNITO_SUB,
+                        null
+                )
+        );
+    }
+
+    @Test
+    public void testUpdateDeliveryInfoSuccess() {
+        Order order = createTestOrderWithCreditCardPaymentMode();
+
+        Address shippingAddress = Address.builder()
+                .addressOne("Wall St")
+                .zipCode("567234")
+                .build();
+
+        Address billingAddress = Address.builder()
+                .addressOne("Peter St")
+                .zipCode("567244")
+                .build();
+
+        DeliveryInfo updateBillingAddressInput = new DeliveryInfo(
+                new Customer("Jane Doe", "jane.doe@example.com"),
+                shippingAddress,
+                billingAddress
+        );
+
+        ordersService.updateDeliveryInfo(
+                order.getId(), TEST_COGNITO_SUB,
+                updateBillingAddressInput
+        );
+
+        order = ordersService.getOrder(order.getId(), TEST_COGNITO_SUB);
+        DeliveryDetails deliveryDetails = order.getDeliveryDetails();
+        assertNotNull(deliveryDetails);
+
+        assertEquals("Peter St", deliveryDetails.getBillingAddressOne());
+    }
+
+    @Test
+    public void testDeleteDraftOrderFailed() {
+        Order order = createTestOrderWithCreditCardPaymentMode();
+        order.setStatus(CONFIRMED);
+        ordersRepository.save(order);
+
+        assertThrows(UnProcessableEntityException.class, () -> ordersService.deleteDraftOrder(order.getId(), TEST_COGNITO_SUB));
+    }
+
+    @Test
+    public void testDeleteDraftOrderSuccess() {
+        Order order = createTestOrderWithCreditCardPaymentMode();
+
+        long orderId = order.getId();
+        ordersService.deleteDraftOrder(orderId, TEST_COGNITO_SUB);
+
+        assertTrue(ordersRepository.findByIdAndUserId(orderId, TEST_COGNITO_SUB).isEmpty());
+        assertTrue(paymentsRepository.findByOrderId(orderId).isEmpty());
+        assertTrue(deliveryDetailsRepository.findByOrderId(orderId).isEmpty());
+
+        assertTrue(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
+
+        // just unlocked, not cleared
+        assertEquals(4, cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB));
+    }
+
+    private Order createTestOrderWithCreditCardPaymentMode() {
+        getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
+            cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
+        });
+
+        BigDecimal cartTotal = cartItemsRepository.getGrossTotalForSelectedCartItems(cartId, TEST_COGNITO_SUB);
+
+        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
+                .createDeliveryInfo(true)
+                .createPaymentInfo(true)
+                .cartAmount(cartTotal)
+                .paymentMode(CREDIT_CARD)
+                .build();
+
+        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
+
+        OrderRequest orderRequest = getOrderRequest(cartId, options);
+        return ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
     }
 
     @AfterEach

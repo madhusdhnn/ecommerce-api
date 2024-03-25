@@ -4,10 +4,10 @@ import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.InsufficientProductQuantityException;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotFoundException;
 import com.thetechmaddy.ecommerce.exceptions.ProductOutOfStockException;
-import com.thetechmaddy.ecommerce.models.ProductFilters;
+import com.thetechmaddy.ecommerce.models.filters.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 import com.thetechmaddy.ecommerce.repositories.ProductsRepository;
-import com.thetechmaddy.ecommerce.repositories.specifications.ProductsSpecification;
+import com.thetechmaddy.ecommerce.repositories.specifications.GetProductsSpecification;
 import com.thetechmaddy.ecommerce.services.ProductsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +57,7 @@ public class ProductsServiceImpl implements ProductsService {
 
     @Override
     public Paged<Product> getAllProducts(Integer page, Integer size, String search, ProductFilters productFilters) {
-        Specification<Product> specification = new ProductsSpecification(search, productFilters);
+        Specification<Product> specification = new GetProductsSpecification(search, productFilters);
         PageRequest pageRequest = PageRequest.of(page, size);
 
         Page<Product> products = this.productsRepository.findAll(specification, pageRequest);

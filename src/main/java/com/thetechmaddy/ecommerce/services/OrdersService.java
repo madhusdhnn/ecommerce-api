@@ -2,6 +2,7 @@ package com.thetechmaddy.ecommerce.services;
 
 import com.thetechmaddy.ecommerce.domains.orders.Order;
 import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
+import com.thetechmaddy.ecommerce.models.filters.OrderFilters;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
@@ -17,7 +18,7 @@ public interface OrdersService {
 
     Order getOrder(long orderId, String userId);
 
-    Paged<Order> getUserOrders(Integer page, Integer size, String userId);
+    Paged<Order> getUserOrders(Integer page, Integer size, String userId, OrderFilters orderFilters);
 
     void updatePaymentInfo(long orderId, String userId, PaymentInfo paymentInfo);
 

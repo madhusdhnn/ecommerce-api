@@ -19,12 +19,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "orders")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@Table(name = "orders")
 @Builder(toBuilder = true)
+@NamedEntityGraph(name = "Orders", attributeNodes = {
+        @NamedAttributeNode(value = "orderItems"),
+        @NamedAttributeNode(value = "payment"),
+        @NamedAttributeNode(value = "deliveryDetails")
+})
 public class Order extends Audit {
 
     @Id
@@ -54,19 +58,19 @@ public class Order extends Audit {
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
     private BigDecimal grossTotal;
 
-    @Builder.Default
     @Setter
+    @Builder.Default
     @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "order")
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @Setter
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
     private Payment payment;
 
     @Setter
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
     private DeliveryDetails deliveryDetails;
 
@@ -94,4 +98,5 @@ public class Order extends Audit {
     public boolean isPending() {
         return OrderStatus.PENDING == this.status;
     }
+
 }

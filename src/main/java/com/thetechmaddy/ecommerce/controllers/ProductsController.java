@@ -3,7 +3,7 @@ package com.thetechmaddy.ecommerce.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.models.JsonViews;
-import com.thetechmaddy.ecommerce.models.ProductFilters;
+import com.thetechmaddy.ecommerce.models.filters.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 import com.thetechmaddy.ecommerce.services.ProductsService;
@@ -31,8 +31,11 @@ public class ProductsController extends BaseController {
             @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
             @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice
     ) {
-        ProductFilters filters = new ProductFilters(available, category, minPrice, maxPrice);
-        return this.productsService.getAllProducts(page, size, search, filters);
+        ProductFilters productFilters = ProductFilters.builder()
+                .minPrice(minPrice).maxPrice(maxPrice)
+                .category(category).available(available)
+                .build();
+        return this.productsService.getAllProducts(page, size, search, productFilters);
     }
 
     @GetMapping("/{productId}")

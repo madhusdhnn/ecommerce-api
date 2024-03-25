@@ -23,8 +23,10 @@ import static com.thetechmaddy.ecommerce.utils.NumberUtils.formatAsTwoDecimalPla
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-@NamedEntityGraph(name = "Product.attributes", attributeNodes = @NamedAttributeNode("attributes"))
+@NamedEntityGraph(name = "Products", attributeNodes = {
+        @NamedAttributeNode("attributes"),
+        @NamedAttributeNode("category")
+})
 public class Product extends Audit {
 
     @Id

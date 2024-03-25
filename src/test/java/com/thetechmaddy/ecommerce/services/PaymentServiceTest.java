@@ -101,7 +101,9 @@ public class PaymentServiceTest extends BaseIntegrationTest {
                 new CardPaymentInfo(options.getCartAmount(), options.getPaymentMode()),
                 new CognitoUser(TEST_COGNITO_SUB)
         );
-        assertEquals(payment, idempotentPayment);
+        assertEquals(payment.getId(), idempotentPayment.getId());
+        assertEquals(payment.getStatus(), idempotentPayment.getStatus());
+        assertEquals(payment.getPaymentMode(), idempotentPayment.getPaymentMode());
     }
 
     @Test
@@ -123,7 +125,9 @@ public class PaymentServiceTest extends BaseIntegrationTest {
                 new UPIPaymentInfo(result.options().getCartAmount(), result.options().getPaymentMode()),
                 new CognitoUser(TEST_COGNITO_SUB)
         );
-        assertEquals(payment, idempotentPayment);
+        assertEquals(payment.getId(), idempotentPayment.getId());
+        assertEquals(payment.getStatus(), idempotentPayment.getStatus());
+        assertEquals(payment.getPaymentMode(), idempotentPayment.getPaymentMode());
     }
 
     @Test
@@ -162,7 +166,7 @@ public class PaymentServiceTest extends BaseIntegrationTest {
                 .forEach(product ->
                         cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId));
 
-        BigDecimal cartTotal = cartItemsRepository.getTotal(cartId, TEST_COGNITO_SUB);
+        BigDecimal cartTotal = cartItemsRepository.getGrossTotalForSelectedCartItems(cartId, TEST_COGNITO_SUB);
 
         TestOrderRequestOptions options = TestOrderRequestOptions.builder()
                 .paymentMode(paymentMode)

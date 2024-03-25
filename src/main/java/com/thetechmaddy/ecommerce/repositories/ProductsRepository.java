@@ -12,6 +12,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductsRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
-    @EntityGraph(value = "Product.attributes")
+    @EntityGraph(value = "Products")
     Page<Product> findAll(Specification<Product> spec, Pageable pageable);
 }

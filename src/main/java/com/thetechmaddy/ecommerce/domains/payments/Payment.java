@@ -8,7 +8,10 @@ import com.thetechmaddy.ecommerce.models.JsonViews.*;
 import com.thetechmaddy.ecommerce.models.payments.PaymentMode;
 import com.thetechmaddy.ecommerce.models.payments.PaymentStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.TimeZoneStorage;
 import org.hibernate.annotations.TimeZoneStorageType;
 
@@ -20,7 +23,6 @@ import java.time.OffsetDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 public class Payment extends Audit {
 
     @Id
@@ -58,8 +60,7 @@ public class Payment extends Audit {
     private OffsetDateTime paymentDateTime;
 
     @Setter
-    @EqualsAndHashCode.Exclude
-    @OneToOne(optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Order order;
 

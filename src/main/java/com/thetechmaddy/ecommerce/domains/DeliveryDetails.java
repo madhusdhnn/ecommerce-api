@@ -14,7 +14,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 public class DeliveryDetails extends Audit {
 
     @Id
@@ -23,8 +22,7 @@ public class DeliveryDetails extends Audit {
     @JsonView(value = {OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
     private long id;
 
-    @EqualsAndHashCode.Exclude
-    @OneToOne(optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Order order;
 

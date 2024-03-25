@@ -1,7 +1,7 @@
 package com.thetechmaddy.ecommerce.services;
 
 import com.thetechmaddy.ecommerce.domains.products.Product;
-import com.thetechmaddy.ecommerce.models.ProductFilters;
+import com.thetechmaddy.ecommerce.models.filters.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 
 import java.util.Map;

@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Table(name = "user_addresses")
-@EqualsAndHashCode(callSuper = true)
 public class UserAddress extends Address {
 
     @Id

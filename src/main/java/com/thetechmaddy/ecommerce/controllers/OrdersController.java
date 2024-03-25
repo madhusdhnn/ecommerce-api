@@ -3,7 +3,9 @@ package com.thetechmaddy.ecommerce.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.orders.Order;
 import com.thetechmaddy.ecommerce.models.JsonViews;
+import com.thetechmaddy.ecommerce.models.OrderStatus;
 import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
+import com.thetechmaddy.ecommerce.models.filters.OrderFilters;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
@@ -72,8 +74,16 @@ public class OrdersController extends BaseController {
     @JsonView(JsonViews.GetOrderResponse.class)
     public Paged<Order> getOrders(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
                                   @RequestParam(name = "page") Integer page,
-                                  @RequestParam(name = "size") Integer size) {
-        return ordersService.getUserOrders(page, size, cognitoUser.getCognitoSub());
+                                  @RequestParam(name = "size") Integer size,
+                                  @RequestParam(name = "year", required = false) Integer year,
+                                  @RequestParam(name = "last30Days", required = false) Boolean last30Days,
+                                  @RequestParam(name = "past3Months", required = false) Boolean past3Months,
+                                  @RequestParam(name = "orderStatus", required = false) OrderStatus orderStatus) {
+        OrderFilters orderFilters = OrderFilters.builder()
+                .year(year).last30Days(last30Days)
+                .past3Months(past3Months).orderStatus(orderStatus)
+                .build();
+        return ordersService.getUserOrders(page, size, cognitoUser.getCognitoSub(), orderFilters);
     }
 
     @DeleteMapping("/{orderId}")

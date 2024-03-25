@@ -10,14 +10,11 @@ import lombok.*;
 
 import java.time.OffsetDateTime;
 
-import static com.thetechmaddy.ecommerce.models.carts.CartItemStatus.SELECTED;
-
 @Entity
 @Table(name = "cart_items")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 public class CartItem extends Audit {
 
     @Id
@@ -60,10 +57,6 @@ public class CartItem extends Audit {
     public CartItem(int quantity, Product product) {
         this.quantity = quantity;
         this.product = product;
-    }
-
-    public boolean isSelected() {
-        return SELECTED.equals(this.status);
     }
 
     public void incrementQuantity(int quantity) {

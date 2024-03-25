@@ -15,7 +15,6 @@ import static com.thetechmaddy.ecommerce.models.validations.ValidationConstants.
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(callSuper = true)
 public class Address extends Audit {
 
     @NotNull(message = "address1" + " " + NOT_NULL_MESSAGE_SUFFIX)

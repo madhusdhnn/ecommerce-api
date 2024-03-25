@@ -10,6 +10,6 @@ import java.math.BigDecimal;
 public class CheckoutData {
 
     private long cartId;
-    private BigDecimal cartTotal;
+    private BigDecimal totalAmount;
 
 }

@@ -14,6 +14,7 @@ import com.thetechmaddy.ecommerce.models.OrderItemStatus;
 import com.thetechmaddy.ecommerce.models.calculators.GrossTotalCalculator;
 import com.thetechmaddy.ecommerce.models.calculators.NetTotalCalculator;
 import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
+import com.thetechmaddy.ecommerce.models.filters.OrderFilters;
 import com.thetechmaddy.ecommerce.models.mappers.CartItemToOrderItemMapper;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.payments.PaymentStatus;
@@ -22,6 +23,7 @@ import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 import com.thetechmaddy.ecommerce.repositories.OrderItemsRepository;
 import com.thetechmaddy.ecommerce.repositories.OrdersRepository;
+import com.thetechmaddy.ecommerce.repositories.specifications.GetOrdersSpecification;
 import com.thetechmaddy.ecommerce.services.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -30,12 +32,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.thetechmaddy.ecommerce.models.OrderItemStatus.PENDING_ORDER_CONFIRMATION;
@@ -45,6 +47,7 @@ import static com.thetechmaddy.ecommerce.utils.CartUtils.*;
 import static com.thetechmaddy.ecommerce.utils.OrderUtils.ensureOrderInPendingStatus;
 import static com.thetechmaddy.ecommerce.utils.PaymentUtils.ensurePaymentInEditableState;
 import static com.thetechmaddy.ecommerce.utils.PaymentUtils.ensurePaymentIsSuccess;
+import static java.util.Objects.requireNonNull;
 
 @Log4j2
 @Primary
@@ -149,8 +152,10 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public Paged<Order> getUserOrders(Integer page, Integer size, String userId) {
-        Page<Order> pagedOrders = ordersRepository.findAll(PageRequest.of(page, size));
+    public Paged<Order> getUserOrders(Integer page, Integer size, String userId, OrderFilters orderFilters) {
+        Specification<Order> orderSpecification = new GetOrdersSpecification(userId, orderFilters);
+
+        Page<Order> pagedOrders = ordersRepository.findAll(orderSpecification, PageRequest.of(page, size));
         return new Paged<>(pagedOrders.getContent(), page, pagedOrders.getTotalElements(), pagedOrders.getNumberOfElements());
     }
 
@@ -158,24 +163,17 @@ public class OrdersServiceImpl implements OrdersService {
     @Transactional
     public void updatePaymentInfo(long orderId, String userId, PaymentInfo paymentInfo) {
         Order order = getOrder(orderId, userId);
+
         ensureOrderInPendingStatus(order);
+        ensureOrderTotalAndPaymentInfoAmountMatches(paymentInfo, order);
 
-        if (order.getGrossTotal().compareTo(paymentInfo.getAmount()) != 0) {
-            throw new OrderItemsTotalMismatchException(
-                    String.format("Payment update request amount: (%s) and order total amount: (%s) do not match.",
-                            paymentInfo.getAmount(), order.getGrossTotal()));
-        }
+        Payment payment = order.getPayment();
+        ensurePaymentInEditableState(payment);
 
-        Payment payment;
-        if ((payment = order.getPayment()) != null) {
-            ensurePaymentInEditableState(payment);
+        payment.setPaymentMode(paymentInfo.getPaymentMode());
+        payment.setStatus(PaymentStatus.PENDING);
 
-            payment.setPaymentMode(paymentInfo.getPaymentMode());
-            payment.setAmount(paymentInfo.getAmount());
-            payment.setStatus(PaymentStatus.PENDING);
-
-            ordersRepository.save(order);
-        }
+        ordersRepository.save(order);
     }
 
     @Override
@@ -184,11 +182,11 @@ public class OrdersServiceImpl implements OrdersService {
         Order order = getOrder(orderId, userId);
         ensureOrderInPendingStatus(order);
 
-        DeliveryDetails deliveryDetails;
-        if ((deliveryDetails = order.getDeliveryDetails()) != null) {
-            mergeDeliveryInfo(deliveryDetails, deliveryInfo);
-            ordersRepository.save(order);
-        }
+        DeliveryDetails deliveryDetails = order.getDeliveryDetails();
+        requireNonNull(deliveryDetails);
+
+        updateDeliveryDetails(deliveryDetails, deliveryInfo);
+        ordersRepository.save(order);
     }
 
     @Override
@@ -260,9 +258,9 @@ public class OrdersServiceImpl implements OrdersService {
         return cashOnDeliveryMode ? OrderItemStatus.CONFIRMED : PENDING_ORDER_CONFIRMATION;
     }
 
-    private static void mergeDeliveryInfo(DeliveryDetails deliveryDetails, DeliveryInfo deliveryInfo) {
-        Objects.requireNonNull(deliveryDetails);
-        Objects.requireNonNull(deliveryInfo);
+    private static void updateDeliveryDetails(DeliveryDetails deliveryDetails, DeliveryInfo deliveryInfo) {
+        requireNonNull(deliveryDetails);
+        requireNonNull(deliveryInfo);
 
         deliveryDetails.setCustomerName(deliveryInfo.getCustomer().getName());
         deliveryDetails.setCustomerEmail(deliveryInfo.getCustomer().getEmail());
@@ -280,5 +278,16 @@ public class OrdersServiceImpl implements OrdersService {
         deliveryDetails.setBillingCity(billingAddress.getCity());
         deliveryDetails.setBillingState(billingAddress.getState());
         deliveryDetails.setBillingZipCode(billingAddress.getZipCode());
+    }
+
+    private static void ensureOrderTotalAndPaymentInfoAmountMatches(PaymentInfo paymentInfo, Order order) {
+        requireNonNull(paymentInfo);
+        requireNonNull(order);
+
+        if (order.getGrossTotal().compareTo(paymentInfo.getAmount()) != 0) {
+            throw new OrderItemsTotalMismatchException(
+                    String.format("Payment update request amount: (%s) and order total amount: (%s) do not match.",
+                            paymentInfo.getAmount(), order.getGrossTotal()));
+        }
     }
 }
