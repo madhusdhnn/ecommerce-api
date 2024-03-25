@@ -7,6 +7,10 @@ import com.thetechmaddy.ecommerce.exceptions.CartNotBelongsToUserException;
 import com.thetechmaddy.ecommerce.exceptions.CartNotFoundException;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotInCartException;
 import com.thetechmaddy.ecommerce.exceptions.ProductOutOfStockException;
+import com.thetechmaddy.ecommerce.models.calculators.GrossTotalCalculator;
+import com.thetechmaddy.ecommerce.models.calculators.NetTotalCalculator;
+import com.thetechmaddy.ecommerce.models.carts.CartItemStatus;
+import com.thetechmaddy.ecommerce.models.carts.CheckoutData;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
 import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;
 import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
@@ -22,10 +26,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
-import static com.thetechmaddy.ecommerce.models.CartItemStatus.SELECTED;
-import static com.thetechmaddy.ecommerce.models.CartItemStatus.UN_SELECTED;
+import static com.thetechmaddy.ecommerce.models.carts.CartItemStatus.SELECTED;
 import static com.thetechmaddy.ecommerce.utils.CartUtils.verifyCartOwnerAndLockStatus;
 
 @Log4j2
@@ -49,7 +53,8 @@ public class CartsServiceImpl implements CartsService {
             throw new CartNotBelongsToUserException(String.format("Cart:(cartId - %d) does not belong to the user - %s", cartId, userId));
         }
 
-        return withSubTotalCalculated(cart);
+        calculateSubTotalAndTotal(cart);
+        return cart;
     }
 
     @Override
@@ -97,9 +102,9 @@ public class CartsServiceImpl implements CartsService {
                 cartItem.setQuantity(quantity);
             }
 
-            Boolean isSelected = cartItemUpdateRequest.getIsSelected();
-            if (isSelected != null) {
-                cartItem.setStatus(isSelected ? SELECTED : UN_SELECTED);
+            CartItemStatus cartItemStatus = cartItemUpdateRequest.getCartItemStatus();
+            if (cartItemStatus != null) {
+                cartItem.setStatus(cartItemStatus);
             }
 
             cartItemsRepository.save(cartItem);
@@ -119,11 +124,8 @@ public class CartsServiceImpl implements CartsService {
 
         int rowsDeleted = cartItemsRepository.removeItem(cartId, productId, userId);
         if (rowsDeleted == 1) {
-            log.info(
-                    String.format("Deleted product: (productId - %d) from cart: (cartId - %d) by user: (userId - %s)",
-                            productId, cartId, userId
-                    )
-            );
+            log.info(String.format("Deleted product: (productId - %d) from cart: (cartId - %d) by user: (userId - %s)",
+                    productId, cartId, userId));
             return true;
         }
         return false;
@@ -147,7 +149,7 @@ public class CartsServiceImpl implements CartsService {
         Cart cart = getUserCart(cartId, userId);
 
         log.info(String.format("Cart lock requested by userId %s for cartId %d", userId, cart.getId()));
-        cartLockApplierService.acquireLock(cart);
+        cartLockApplierService.acquireLock(cart, "-");
 
         log.info(String.format("Cart locked by userId %s for cartId %d", userId, cart.getId()));
         return cart.isLocked();
@@ -158,7 +160,7 @@ public class CartsServiceImpl implements CartsService {
         Cart cart = getUserCart(cartId, userId);
 
         log.info(String.format("Cart unlock requested by userId %s for cartId %d", userId, cart.getId()));
-        cartLockApplierService.releaseLock(cart);
+        cartLockApplierService.releaseLock(cart, "-");
 
         log.info(String.format("Cart unlocked by userId %s for cartId %d", userId, cart.getId()));
         return cart.isUnlocked();
@@ -170,14 +172,27 @@ public class CartsServiceImpl implements CartsService {
                 .orElseThrow(() -> new CartNotFoundException(String.format("Cart for user: (userId - %s) not found", userId)));
     }
 
-    private Cart withSubTotalCalculated(Cart cart) {
-        BigDecimal subTotal = cart.getCartItems()
-                .stream()
-                .filter(CartItem::isSelected)
-                .map(ci -> ci.getProduct().getGrossAmount().multiply(new BigDecimal(ci.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    @Override
+    public CheckoutData checkoutCart(long cartId, String userId) {
+        ensureCartExistsAndNotLocked(cartId, userId);
+
+        String lockAcquireReason = String.format("Checkout cart:(cartId - %d) by user: (userId - %s)", cartId, userId);
+        cartLockApplierService.acquireLock(getCart(cartId, userId), lockAcquireReason);
+
+        BigDecimal grossTotal = cartItemsRepository.getGrossTotalForSelectedCartItems(cartId, userId);
+        return new CheckoutData(cartId, grossTotal);
+    }
+
+    private void calculateSubTotalAndTotal(Cart cart) {
+        NetTotalCalculator netTotalCalculator = new NetTotalCalculator();
+        GrossTotalCalculator grossTotalCalculator = new GrossTotalCalculator();
+
+        List<CartItem> cartItems = cart.getCartItems();
+        BigDecimal subTotal = netTotalCalculator.calculate(cartItems);
+        BigDecimal total = grossTotalCalculator.calculate(cartItems);
+
         cart.setSubTotal(subTotal);
-        return cart;
+        cart.setTotal(total);
     }
 
     private Cart getUserCart(long cartId, String userId) {

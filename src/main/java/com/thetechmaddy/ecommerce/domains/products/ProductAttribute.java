@@ -12,7 +12,6 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 public class ProductAttribute extends Audit {
 
     @Id

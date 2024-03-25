@@ -23,8 +23,10 @@ import static com.thetechmaddy.ecommerce.utils.NumberUtils.formatAsTwoDecimalPla
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-@NamedEntityGraph(name = "Product.attributes", attributeNodes = @NamedAttributeNode("attributes"))
+@NamedEntityGraph(name = "Products", attributeNodes = {
+        @NamedAttributeNode("attributes"),
+        @NamedAttributeNode("category")
+})
 public class Product extends Audit {
 
     @Id
@@ -106,11 +108,15 @@ public class Product extends Audit {
         return this.stockQuantity > 0;
     }
 
-    public void decrementStockQuantity(Integer reductionCount) {
+    public void decrementStockQuantity(int reductionCount) {
         int quantity = this.stockQuantity;
 
         int newQuantity;
         this.stockQuantity = (newQuantity = quantity - reductionCount) <= 0 ? 0 : newQuantity;
+    }
+
+    public void incrementStockQuantity(int incrementCount) {
+        this.stockQuantity += incrementCount;
     }
 
     public boolean hasInsufficientQuantity(int quantity) {

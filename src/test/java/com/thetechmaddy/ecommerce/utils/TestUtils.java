@@ -1,7 +1,8 @@
 package com.thetechmaddy.ecommerce.utils;
 
 import com.thetechmaddy.ecommerce.domains.Address;
-import com.thetechmaddy.ecommerce.models.DeliveryInfo;
+import com.thetechmaddy.ecommerce.models.delivery.Customer;
+import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
 import com.thetechmaddy.ecommerce.models.payments.PaymentMode;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
@@ -32,8 +33,7 @@ public class TestUtils {
                     .build();
 
             deliveryInfo = new DeliveryInfo(
-                    "Jane Doe",
-                    "jane.doe@example.com",
+                    new Customer("Jane Doe", "jane.doe@example.com"),
                     options.isShippingSameAsBilling() ? billingAddress : shippingAddress,
                     billingAddress
             );

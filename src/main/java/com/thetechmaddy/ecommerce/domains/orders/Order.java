@@ -1,6 +1,5 @@
 package com.thetechmaddy.ecommerce.domains.orders;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thetechmaddy.ecommerce.domains.Audit;
@@ -20,12 +19,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "orders")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@Table(name = "orders")
 @Builder(toBuilder = true)
+@NamedEntityGraph(name = "Orders", attributeNodes = {
+        @NamedAttributeNode(value = "orderItems"),
+        @NamedAttributeNode(value = "payment"),
+        @NamedAttributeNode(value = "deliveryDetails")
+})
 public class Order extends Audit {
 
     @Id
@@ -55,23 +58,26 @@ public class Order extends Audit {
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
     private BigDecimal grossTotal;
 
-    @Builder.Default
     @Setter
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
+    @Builder.Default
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "order")
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @Setter
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
-    @JsonAlias("paymentInfo")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     private Payment payment;
 
     @Setter
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class, GetOrderResponse.class})
-    @JsonAlias("deliveryInfo")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonView({OrderInitiateResponse.class, PlaceOrderResponse.class})
     private DeliveryDetails deliveryDetails;
+
+    public Order(long id, OrderStatus status) {
+        this.id = id;
+        this.status = status;
+    }
 
     public Order(OrderStatus orderStatus, String userId) {
         this.userId = userId;
@@ -92,4 +98,5 @@ public class Order extends Audit {
     public boolean isPending() {
         return OrderStatus.PENDING == this.status;
     }
+
 }

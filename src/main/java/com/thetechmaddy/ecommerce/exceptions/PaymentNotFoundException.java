@@ -8,4 +8,8 @@ public class PaymentNotFoundException extends BusinessException {
         super(String.format("Payment entry not found for id - %d", idempotencyId), FORBIDDEN);
     }
 
+    public PaymentNotFoundException(String message) {
+        super(message, FORBIDDEN);
+    }
+
 }

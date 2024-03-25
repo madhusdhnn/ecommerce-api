@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @Table(name = "categories")
 public class Category extends Audit {
 

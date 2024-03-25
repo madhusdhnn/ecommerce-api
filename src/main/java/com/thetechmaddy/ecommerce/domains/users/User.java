@@ -3,7 +3,6 @@ package com.thetechmaddy.ecommerce.domains.users;
 import com.thetechmaddy.ecommerce.domains.Audit;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +12,6 @@ import java.time.OffsetDateTime;
 @Getter
 @NoArgsConstructor
 @Table(name = "user_pool")
-@EqualsAndHashCode(callSuper = true)
 public class User extends Audit {
 
     @Id

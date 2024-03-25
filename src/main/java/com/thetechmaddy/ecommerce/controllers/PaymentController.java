@@ -5,12 +5,15 @@ import com.thetechmaddy.ecommerce.domains.payments.Payment;
 import com.thetechmaddy.ecommerce.models.JsonViews;
 import com.thetechmaddy.ecommerce.models.contexts.PaymentWorkflowContextHolder;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
+import com.thetechmaddy.ecommerce.models.payments.PaymentMode;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.services.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.thetechmaddy.ecommerce.models.AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE;
 
@@ -21,6 +24,11 @@ public class PaymentController extends BaseController {
 
 
     private final PaymentService paymentService;
+
+    @GetMapping("/payment-modes")
+    public ApiResponse<List<PaymentMode>> getSupportedPaymentModes() {
+        return ApiResponse.success(paymentService.getSupportedPaymentModes());
+    }
 
     @PostMapping("/process")
     @JsonView(value = {JsonViews.ProcessPaymentResponse.class})

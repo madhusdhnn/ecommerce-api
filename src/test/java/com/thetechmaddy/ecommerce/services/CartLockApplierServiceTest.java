@@ -13,7 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Optional;
 
 import static com.thetechmaddy.ecommerce.BaseIntegrationTest.TEST_COGNITO_SUB;
-import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
+import static com.thetechmaddy.ecommerce.models.carts.CartStatus.UN_LOCKED;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -41,8 +41,8 @@ public class CartLockApplierServiceTest {
 
     @Test
     public void testForNPE() {
-        assertThrows(NullPointerException.class, () -> cartLockApplierService.acquireLock(null));
-        assertThrows(NullPointerException.class, () -> cartLockApplierService.releaseLock(null));
+        assertThrows(NullPointerException.class, () -> cartLockApplierService.acquireLock(null, "test reason"));
+        assertThrows(NullPointerException.class, () -> cartLockApplierService.releaseLock(null, "test reason"));
     }
 
     @Test
@@ -53,7 +53,7 @@ public class CartLockApplierServiceTest {
         Cart cart = cartOptional.get();
         assertTrue(cart.isUnlocked());
 
-        cartLockApplierService.acquireLock(cart);
+        cartLockApplierService.acquireLock(cart, "test reason");
 
         assertTrue(cartsRepository.findById(cartId).filter(Cart::isLocked).isPresent());
     }
@@ -64,9 +64,9 @@ public class CartLockApplierServiceTest {
         assertTrue(cartOptional.isPresent());
 
         Cart cart = cartOptional.get();
-        cartLockApplierService.acquireLock(cart);
+        cartLockApplierService.acquireLock(cart, "test reason");
 
-        cartLockApplierService.releaseLock(cart);
+        cartLockApplierService.releaseLock(cart, "test reason");
 
         assertTrue(cartsRepository.findById(cartId).filter(Cart::isUnlocked).isPresent());
     }

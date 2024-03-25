@@ -16,7 +16,6 @@ import java.time.OffsetDateTime;
 @MappedSuperclass
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 public abstract class Audit {
 
     @TimeZoneStorage(value = TimeZoneStorageType.NORMALIZE)

@@ -5,7 +5,7 @@ import com.thetechmaddy.ecommerce.domains.carts.CartItem;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class GrossTotalCalculator implements OrderTotalCalculator {
+public class GrossTotalCalculator implements TotalCalculator {
     @Override
     public BigDecimal calculate(List<CartItem> cartItems) {
         BigDecimal zero = BigDecimal.ZERO;

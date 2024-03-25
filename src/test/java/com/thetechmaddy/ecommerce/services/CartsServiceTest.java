@@ -6,6 +6,7 @@ import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.domains.carts.CartItem;
 import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.*;
+import com.thetechmaddy.ecommerce.models.carts.CheckoutData;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
 import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;
 import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
@@ -22,9 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.thetechmaddy.ecommerce.models.CartItemStatus.SELECTED;
-import static com.thetechmaddy.ecommerce.models.CartItemStatus.UN_SELECTED;
-import static com.thetechmaddy.ecommerce.models.CartStatus.UN_LOCKED;
+import static com.thetechmaddy.ecommerce.models.carts.CartItemStatus.SELECTED;
+import static com.thetechmaddy.ecommerce.models.carts.CartItemStatus.UN_SELECTED;
+import static com.thetechmaddy.ecommerce.models.carts.CartStatus.UN_LOCKED;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -295,6 +296,27 @@ public class CartsServiceTest extends BaseIntegrationTest {
         assertEquals(TEST_COGNITO_SUB, cart.getUserId());
 
         assertThrows(CartNotFoundException.class, () -> cartsService.getUserCart("some-other-user"));
+    }
+
+    @Test
+    @Transactional
+    public void testCheckoutCart() {
+        assertThrows(CartNotFoundException.class, () -> cartsService.checkoutCart(Integer.MAX_VALUE, "some-other-user"));
+
+        cartsService.lockCart(cartId, TEST_COGNITO_SUB);
+        assertThrows(CartLockedException.class, () -> cartsService.checkoutCart(cartId, TEST_COGNITO_SUB));
+
+        cartsService.unlockCart(cartId, TEST_COGNITO_SUB);
+        assertCartUnlocked();
+
+        Product product = getTestProducts().get(2);
+        CartItemRequest cartItemRequest = new CartItemRequest(product.getId(), 3);
+        cartsService.addProductToCart(cartId, TEST_COGNITO_SUB, cartItemRequest);
+
+        CheckoutData checkoutData = cartsService.checkoutCart(cartId, TEST_COGNITO_SUB);
+        assertNotNull(checkoutData);
+
+        assertFalse(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
     }
 
     private void addItemToCart(Product product) {

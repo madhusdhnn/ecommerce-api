@@ -1,4 +1,4 @@
-package com.thetechmaddy.ecommerce.models;
+package com.thetechmaddy.ecommerce.models.filters;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,6 +31,6 @@ public class ProductFilters {
     }
 
     public boolean hasAvailableFilter() {
-        return available != null && available;
+        return Boolean.TRUE.equals(available);
     }
 }

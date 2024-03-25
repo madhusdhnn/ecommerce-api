@@ -5,7 +5,7 @@
 -- Dumped from database version 13.11
 -- Dumped by pg_dump version 15.3
 
--- Started on 2024-03-18 20:32:07 IST
+-- Started on 2024-03-20 22:11:20 IST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -33,7 +33,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- TOC entry 200 (class 1259 OID 213376)
+-- TOC entry 200 (class 1259 OID 220352)
 -- Name: cart_items; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -51,7 +51,7 @@ CREATE TABLE public.cart_items (
 ALTER TABLE public.cart_items OWNER TO madhusudhanan;
 
 --
--- TOC entry 201 (class 1259 OID 213385)
+-- TOC entry 201 (class 1259 OID 220361)
 -- Name: cart_items_id_seq; Type: SEQUENCE; Schema: public; Owner: madhusudhanan
 --
 
@@ -66,7 +66,7 @@ CREATE SEQUENCE public.cart_items_id_seq
 ALTER TABLE public.cart_items_id_seq OWNER TO madhusudhanan;
 
 --
--- TOC entry 3490 (class 0 OID 0)
+-- TOC entry 3473 (class 0 OID 0)
 -- Dependencies: 201
 -- Name: cart_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: madhusudhanan
 --
@@ -75,7 +75,7 @@ ALTER SEQUENCE public.cart_items_id_seq OWNED BY public.cart_items.id;
 
 
 --
--- TOC entry 202 (class 1259 OID 213387)
+-- TOC entry 202 (class 1259 OID 220363)
 -- Name: carts; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -91,7 +91,7 @@ CREATE TABLE public.carts (
 ALTER TABLE public.carts OWNER TO madhusudhanan;
 
 --
--- TOC entry 203 (class 1259 OID 213395)
+-- TOC entry 203 (class 1259 OID 220371)
 -- Name: carts_id_seq; Type: SEQUENCE; Schema: public; Owner: madhusudhanan
 --
 
@@ -106,7 +106,7 @@ CREATE SEQUENCE public.carts_id_seq
 ALTER TABLE public.carts_id_seq OWNER TO madhusudhanan;
 
 --
--- TOC entry 3491 (class 0 OID 0)
+-- TOC entry 3474 (class 0 OID 0)
 -- Dependencies: 203
 -- Name: carts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: madhusudhanan
 --
@@ -115,7 +115,7 @@ ALTER SEQUENCE public.carts_id_seq OWNED BY public.carts.id;
 
 
 --
--- TOC entry 204 (class 1259 OID 213397)
+-- TOC entry 204 (class 1259 OID 220373)
 -- Name: categories; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -130,7 +130,7 @@ CREATE TABLE public.categories (
 ALTER TABLE public.categories OWNER TO madhusudhanan;
 
 --
--- TOC entry 205 (class 1259 OID 213405)
+-- TOC entry 205 (class 1259 OID 220381)
 -- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: madhusudhanan
 --
 
@@ -145,7 +145,7 @@ CREATE SEQUENCE public.categories_id_seq
 ALTER TABLE public.categories_id_seq OWNER TO madhusudhanan;
 
 --
--- TOC entry 3492 (class 0 OID 0)
+-- TOC entry 3475 (class 0 OID 0)
 -- Dependencies: 205
 -- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: madhusudhanan
 --
@@ -154,7 +154,7 @@ ALTER SEQUENCE public.categories_id_seq OWNED BY public.categories.id;
 
 
 --
--- TOC entry 220 (class 1259 OID 213574)
+-- TOC entry 206 (class 1259 OID 220383)
 -- Name: delivery_details; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -181,7 +181,7 @@ CREATE TABLE public.delivery_details (
 ALTER TABLE public.delivery_details OWNER TO madhusudhanan;
 
 --
--- TOC entry 219 (class 1259 OID 213572)
+-- TOC entry 207 (class 1259 OID 220391)
 -- Name: delivery_details_id_seq; Type: SEQUENCE; Schema: public; Owner: madhusudhanan
 --
 
@@ -196,8 +196,8 @@ CREATE SEQUENCE public.delivery_details_id_seq
 ALTER TABLE public.delivery_details_id_seq OWNER TO madhusudhanan;
 
 --
--- TOC entry 3493 (class 0 OID 0)
--- Dependencies: 219
+-- TOC entry 3476 (class 0 OID 0)
+-- Dependencies: 207
 -- Name: delivery_details_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: madhusudhanan
 --
 
@@ -205,7 +205,7 @@ ALTER SEQUENCE public.delivery_details_id_seq OWNED BY public.delivery_details.i
 
 
 --
--- TOC entry 206 (class 1259 OID 213407)
+-- TOC entry 208 (class 1259 OID 220393)
 -- Name: order_items; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -228,7 +228,7 @@ CREATE TABLE public.order_items (
 ALTER TABLE public.order_items OWNER TO madhusudhanan;
 
 --
--- TOC entry 207 (class 1259 OID 213420)
+-- TOC entry 209 (class 1259 OID 220406)
 -- Name: order_items_id_seq; Type: SEQUENCE; Schema: public; Owner: madhusudhanan
 --
 
@@ -243,8 +243,8 @@ CREATE SEQUENCE public.order_items_id_seq
 ALTER TABLE public.order_items_id_seq OWNER TO madhusudhanan;
 
 --
--- TOC entry 3494 (class 0 OID 0)
--- Dependencies: 207
+-- TOC entry 3477 (class 0 OID 0)
+-- Dependencies: 209
 -- Name: order_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: madhusudhanan
 --
 
@@ -252,7 +252,7 @@ ALTER SEQUENCE public.order_items_id_seq OWNED BY public.order_items.id;
 
 
 --
--- TOC entry 208 (class 1259 OID 213422)
+-- TOC entry 210 (class 1259 OID 220408)
 -- Name: orders; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -270,7 +270,7 @@ CREATE TABLE public.orders (
 ALTER TABLE public.orders OWNER TO madhusudhanan;
 
 --
--- TOC entry 209 (class 1259 OID 213432)
+-- TOC entry 211 (class 1259 OID 220418)
 -- Name: orders_id_seq; Type: SEQUENCE; Schema: public; Owner: madhusudhanan
 --
 
@@ -285,8 +285,8 @@ CREATE SEQUENCE public.orders_id_seq
 ALTER TABLE public.orders_id_seq OWNER TO madhusudhanan;
 
 --
--- TOC entry 3495 (class 0 OID 0)
--- Dependencies: 209
+-- TOC entry 3478 (class 0 OID 0)
+-- Dependencies: 211
 -- Name: orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: madhusudhanan
 --
 
@@ -294,7 +294,7 @@ ALTER SEQUENCE public.orders_id_seq OWNED BY public.orders.id;
 
 
 --
--- TOC entry 224 (class 1259 OID 213617)
+-- TOC entry 212 (class 1259 OID 220420)
 -- Name: payments; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -306,14 +306,15 @@ CREATE TABLE public.payments (
     amount double precision DEFAULT 0.00 NOT NULL,
     payment_date timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    transaction_id text
 );
 
 
 ALTER TABLE public.payments OWNER TO madhusudhanan;
 
 --
--- TOC entry 223 (class 1259 OID 213615)
+-- TOC entry 213 (class 1259 OID 220429)
 -- Name: payments_id_seq; Type: SEQUENCE; Schema: public; Owner: madhusudhanan
 --
 
@@ -328,8 +329,8 @@ CREATE SEQUENCE public.payments_id_seq
 ALTER TABLE public.payments_id_seq OWNER TO madhusudhanan;
 
 --
--- TOC entry 3496 (class 0 OID 0)
--- Dependencies: 223
+-- TOC entry 3479 (class 0 OID 0)
+-- Dependencies: 213
 -- Name: payments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: madhusudhanan
 --
 
@@ -337,7 +338,7 @@ ALTER SEQUENCE public.payments_id_seq OWNED BY public.payments.id;
 
 
 --
--- TOC entry 210 (class 1259 OID 213434)
+-- TOC entry 214 (class 1259 OID 220431)
 -- Name: product_attributes; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -354,7 +355,7 @@ CREATE TABLE public.product_attributes (
 ALTER TABLE public.product_attributes OWNER TO madhusudhanan;
 
 --
--- TOC entry 211 (class 1259 OID 213442)
+-- TOC entry 215 (class 1259 OID 220439)
 -- Name: product_attributes_id_seq; Type: SEQUENCE; Schema: public; Owner: madhusudhanan
 --
 
@@ -369,8 +370,8 @@ CREATE SEQUENCE public.product_attributes_id_seq
 ALTER TABLE public.product_attributes_id_seq OWNER TO madhusudhanan;
 
 --
--- TOC entry 3497 (class 0 OID 0)
--- Dependencies: 211
+-- TOC entry 3480 (class 0 OID 0)
+-- Dependencies: 215
 -- Name: product_attributes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: madhusudhanan
 --
 
@@ -378,7 +379,7 @@ ALTER SEQUENCE public.product_attributes_id_seq OWNED BY public.product_attribut
 
 
 --
--- TOC entry 212 (class 1259 OID 213444)
+-- TOC entry 216 (class 1259 OID 220441)
 -- Name: products; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -401,7 +402,7 @@ CREATE TABLE public.products (
 ALTER TABLE public.products OWNER TO madhusudhanan;
 
 --
--- TOC entry 213 (class 1259 OID 213457)
+-- TOC entry 217 (class 1259 OID 220454)
 -- Name: products_id_seq; Type: SEQUENCE; Schema: public; Owner: madhusudhanan
 --
 
@@ -416,8 +417,8 @@ CREATE SEQUENCE public.products_id_seq
 ALTER TABLE public.products_id_seq OWNER TO madhusudhanan;
 
 --
--- TOC entry 3498 (class 0 OID 0)
--- Dependencies: 213
+-- TOC entry 3481 (class 0 OID 0)
+-- Dependencies: 217
 -- Name: products_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: madhusudhanan
 --
 
@@ -425,7 +426,7 @@ ALTER SEQUENCE public.products_id_seq OWNED BY public.products.id;
 
 
 --
--- TOC entry 214 (class 1259 OID 213459)
+-- TOC entry 218 (class 1259 OID 220456)
 -- Name: schema_version; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -445,9 +446,8 @@ CREATE TABLE public.schema_version (
 
 ALTER TABLE public.schema_version OWNER TO madhusudhanan;
 
-
 --
--- TOC entry 215 (class 1259 OID 213466)
+-- TOC entry 219 (class 1259 OID 220463)
 -- Name: user_addresses; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -468,7 +468,7 @@ CREATE TABLE public.user_addresses (
 ALTER TABLE public.user_addresses OWNER TO madhusudhanan;
 
 --
--- TOC entry 216 (class 1259 OID 213474)
+-- TOC entry 220 (class 1259 OID 220471)
 -- Name: user_pool; Type: TABLE; Schema: public; Owner: madhusudhanan
 --
 
@@ -486,7 +486,7 @@ CREATE TABLE public.user_pool (
 ALTER TABLE public.user_pool OWNER TO madhusudhanan;
 
 --
--- TOC entry 217 (class 1259 OID 213482)
+-- TOC entry 221 (class 1259 OID 220479)
 -- Name: user_pool_id_seq; Type: SEQUENCE; Schema: public; Owner: madhusudhanan
 --
 
@@ -501,8 +501,8 @@ CREATE SEQUENCE public.user_pool_id_seq
 ALTER TABLE public.user_pool_id_seq OWNER TO madhusudhanan;
 
 --
--- TOC entry 3500 (class 0 OID 0)
--- Dependencies: 217
+-- TOC entry 3482 (class 0 OID 0)
+-- Dependencies: 221
 -- Name: user_pool_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: madhusudhanan
 --
 
@@ -510,7 +510,7 @@ ALTER SEQUENCE public.user_pool_id_seq OWNED BY public.user_pool.id;
 
 
 --
--- TOC entry 218 (class 1259 OID 213484)
+-- TOC entry 222 (class 1259 OID 220481)
 -- Name: user_profile_id_seq; Type: SEQUENCE; Schema: public; Owner: madhusudhanan
 --
 
@@ -525,8 +525,8 @@ CREATE SEQUENCE public.user_profile_id_seq
 ALTER TABLE public.user_profile_id_seq OWNER TO madhusudhanan;
 
 --
--- TOC entry 3501 (class 0 OID 0)
--- Dependencies: 218
+-- TOC entry 3483 (class 0 OID 0)
+-- Dependencies: 222
 -- Name: user_profile_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: madhusudhanan
 --
 
@@ -534,7 +534,7 @@ ALTER SEQUENCE public.user_profile_id_seq OWNED BY public.user_addresses.id;
 
 
 --
--- TOC entry 3212 (class 2604 OID 213486)
+-- TOC entry 3206 (class 2604 OID 220483)
 -- Name: cart_items id; Type: DEFAULT; Schema: public; Owner: madhusudhanan
 --
 
@@ -542,7 +542,7 @@ ALTER TABLE ONLY public.cart_items ALTER COLUMN id SET DEFAULT nextval('public.c
 
 
 --
--- TOC entry 3216 (class 2604 OID 213487)
+-- TOC entry 3210 (class 2604 OID 220484)
 -- Name: carts id; Type: DEFAULT; Schema: public; Owner: madhusudhanan
 --
 
@@ -550,7 +550,7 @@ ALTER TABLE ONLY public.carts ALTER COLUMN id SET DEFAULT nextval('public.carts_
 
 
 --
--- TOC entry 3219 (class 2604 OID 213488)
+-- TOC entry 3213 (class 2604 OID 220485)
 -- Name: categories id; Type: DEFAULT; Schema: public; Owner: madhusudhanan
 --
 
@@ -558,7 +558,7 @@ ALTER TABLE ONLY public.categories ALTER COLUMN id SET DEFAULT nextval('public.c
 
 
 --
--- TOC entry 3253 (class 2604 OID 213577)
+-- TOC entry 3216 (class 2604 OID 220486)
 -- Name: delivery_details id; Type: DEFAULT; Schema: public; Owner: madhusudhanan
 --
 
@@ -566,7 +566,7 @@ ALTER TABLE ONLY public.delivery_details ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3222 (class 2604 OID 213489)
+-- TOC entry 3219 (class 2604 OID 220487)
 -- Name: order_items id; Type: DEFAULT; Schema: public; Owner: madhusudhanan
 --
 
@@ -574,7 +574,7 @@ ALTER TABLE ONLY public.order_items ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
--- TOC entry 3230 (class 2604 OID 213490)
+-- TOC entry 3227 (class 2604 OID 220488)
 -- Name: orders id; Type: DEFAULT; Schema: public; Owner: madhusudhanan
 --
 
@@ -582,7 +582,7 @@ ALTER TABLE ONLY public.orders ALTER COLUMN id SET DEFAULT nextval('public.order
 
 
 --
--- TOC entry 3259 (class 2604 OID 213620)
+-- TOC entry 3232 (class 2604 OID 220489)
 -- Name: payments id; Type: DEFAULT; Schema: public; Owner: madhusudhanan
 --
 
@@ -590,7 +590,7 @@ ALTER TABLE ONLY public.payments ALTER COLUMN id SET DEFAULT nextval('public.pay
 
 
 --
--- TOC entry 3235 (class 2604 OID 213491)
+-- TOC entry 3236 (class 2604 OID 220490)
 -- Name: product_attributes id; Type: DEFAULT; Schema: public; Owner: madhusudhanan
 --
 
@@ -598,7 +598,7 @@ ALTER TABLE ONLY public.product_attributes ALTER COLUMN id SET DEFAULT nextval('
 
 
 --
--- TOC entry 3238 (class 2604 OID 213492)
+-- TOC entry 3239 (class 2604 OID 220491)
 -- Name: products id; Type: DEFAULT; Schema: public; Owner: madhusudhanan
 --
 
@@ -606,7 +606,7 @@ ALTER TABLE ONLY public.products ALTER COLUMN id SET DEFAULT nextval('public.pro
 
 
 --
--- TOC entry 3247 (class 2604 OID 213493)
+-- TOC entry 3248 (class 2604 OID 220492)
 -- Name: user_addresses id; Type: DEFAULT; Schema: public; Owner: madhusudhanan
 --
 
@@ -614,7 +614,7 @@ ALTER TABLE ONLY public.user_addresses ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3250 (class 2604 OID 213494)
+-- TOC entry 3251 (class 2604 OID 220493)
 -- Name: user_pool id; Type: DEFAULT; Schema: public; Owner: madhusudhanan
 --
 
@@ -622,7 +622,7 @@ ALTER TABLE ONLY public.user_pool ALTER COLUMN id SET DEFAULT nextval('public.us
 
 
 --
--- TOC entry 3459 (class 0 OID 213376)
+-- TOC entry 3444 (class 0 OID 220352)
 -- Dependencies: 200
 -- Data for Name: cart_items; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
@@ -632,7 +632,7 @@ COPY public.cart_items (id, cart_id, product_id, quantity, status, created_at, u
 
 
 --
--- TOC entry 3461 (class 0 OID 213387)
+-- TOC entry 3446 (class 0 OID 220363)
 -- Dependencies: 202
 -- Data for Name: carts; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
@@ -644,7 +644,7 @@ COPY public.carts (id, user_id, status, created_at, updated_at) FROM stdin;
 
 
 --
--- TOC entry 3463 (class 0 OID 213397)
+-- TOC entry 3448 (class 0 OID 220373)
 -- Dependencies: 204
 -- Data for Name: categories; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
@@ -672,8 +672,8 @@ COPY public.categories (id, name, created_at, updated_at) FROM stdin;
 
 
 --
--- TOC entry 3479 (class 0 OID 213574)
--- Dependencies: 220
+-- TOC entry 3450 (class 0 OID 220383)
+-- Dependencies: 206
 -- Data for Name: delivery_details; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
 
@@ -685,8 +685,8 @@ COPY public.delivery_details (id, order_id, customer_email, customer_name, shipp
 
 
 --
--- TOC entry 3465 (class 0 OID 213407)
--- Dependencies: 206
+-- TOC entry 3452 (class 0 OID 220393)
+-- Dependencies: 208
 -- Data for Name: order_items; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
 
@@ -702,8 +702,8 @@ COPY public.order_items (id, order_id, product_id, quantity, unit_price, net_amo
 
 
 --
--- TOC entry 3467 (class 0 OID 213422)
--- Dependencies: 208
+-- TOC entry 3454 (class 0 OID 220408)
+-- Dependencies: 210
 -- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
 
@@ -715,21 +715,21 @@ COPY public.orders (id, user_id, status, net_total, gross_total, created_at, upd
 
 
 --
--- TOC entry 3483 (class 0 OID 213617)
--- Dependencies: 224
+-- TOC entry 3456 (class 0 OID 220420)
+-- Dependencies: 212
 -- Data for Name: payments; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
 
-COPY public.payments (id, order_id, payment_mode, status, amount, payment_date, created_at, updated_at) FROM stdin;
-1	25	CREDIT_CARD	SUCCESS	107527.1	2024-03-18 13:02:49.739222+05:30	2024-03-18 11:51:18.032301+05:30	2024-03-18 13:02:49.740916+05:30
-5	29	CREDIT_CARD	SUCCESS	897	2024-03-18 17:47:08.622939+05:30	2024-03-18 17:26:56.699751+05:30	2024-03-18 17:47:08.62695+05:30
-6	30	CREDIT_CARD	SUCCESS	196676.2	2024-03-18 20:14:46.984073+05:30	2024-03-18 19:54:08.912451+05:30	2024-03-18 20:14:46.985106+05:30
+COPY public.payments (id, order_id, payment_mode, status, amount, payment_date, created_at, updated_at, transaction_id) FROM stdin;
+1	25	CREDIT_CARD	SUCCESS	107527.1	2024-03-18 13:02:49.739222+05:30	2024-03-18 11:51:18.032301+05:30	2024-03-18 13:02:49.740916+05:30	\N
+5	29	CREDIT_CARD	SUCCESS	897	2024-03-18 17:47:08.622939+05:30	2024-03-18 17:26:56.699751+05:30	2024-03-18 17:47:08.62695+05:30	\N
+6	30	CREDIT_CARD	SUCCESS	196676.2	2024-03-18 20:14:46.984073+05:30	2024-03-18 19:54:08.912451+05:30	2024-03-18 20:14:46.985106+05:30	\N
 \.
 
 
 --
--- TOC entry 3469 (class 0 OID 213434)
--- Dependencies: 210
+-- TOC entry 3458 (class 0 OID 220431)
+-- Dependencies: 214
 -- Data for Name: product_attributes; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
 
@@ -780,8 +780,8 @@ COPY public.product_attributes (id, product_id, attribute_name, attribute_value,
 
 
 --
--- TOC entry 3471 (class 0 OID 213444)
--- Dependencies: 212
+-- TOC entry 3460 (class 0 OID 220441)
+-- Dependencies: 216
 -- Data for Name: products; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
 
@@ -800,21 +800,21 @@ COPY public.products (id, category_id, name, description, sku_code, stock_quanti
 
 
 --
--- TOC entry 3473 (class 0 OID 213459)
--- Dependencies: 214
+-- TOC entry 3462 (class 0 OID 220456)
+-- Dependencies: 218
 -- Data for Name: schema_version; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
 
 COPY public.schema_version (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) FROM stdin;
 2	2	create order shopping cart tables	SQL	V2__create_order_shopping_cart_tables.sql	-1310596681	madhusudhanan	2024-03-16 15:54:57.077329	82	t
 1	1	create tables	SQL	V1__create_tables.sql	735756421	madhusudhanan	2024-03-16 15:54:56.931695	121	t
-3	3	create order delivery payment tables	SQL	V3__create_order_delivery_payment_tables.sql	-838740087	madhusudhanan	2024-03-18 11:40:46.812901	50	t
+3	3	create order delivery payment tables	SQL	V3__create_order_delivery_payment_tables.sql	-929485003	madhusudhanan	2024-03-18 11:40:46.812901	50	t
 \.
 
 
 --
--- TOC entry 3474 (class 0 OID 213466)
--- Dependencies: 215
+-- TOC entry 3463 (class 0 OID 220463)
+-- Dependencies: 219
 -- Data for Name: user_addresses; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
 
@@ -823,8 +823,8 @@ COPY public.user_addresses (id, user_id, address_1, address_2, city, state, zip_
 
 
 --
--- TOC entry 3475 (class 0 OID 213474)
--- Dependencies: 216
+-- TOC entry 3464 (class 0 OID 220471)
+-- Dependencies: 220
 -- Data for Name: user_pool; Type: TABLE DATA; Schema: public; Owner: madhusudhanan
 --
 
@@ -833,7 +833,7 @@ COPY public.user_pool (id, cognito_sub, email, first_name, last_name, created_at
 
 
 --
--- TOC entry 3502 (class 0 OID 0)
+-- TOC entry 3484 (class 0 OID 0)
 -- Dependencies: 201
 -- Name: cart_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: madhusudhanan
 --
@@ -842,7 +842,7 @@ SELECT pg_catalog.setval('public.cart_items_id_seq', 9, true);
 
 
 --
--- TOC entry 3503 (class 0 OID 0)
+-- TOC entry 3485 (class 0 OID 0)
 -- Dependencies: 203
 -- Name: carts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: madhusudhanan
 --
@@ -851,7 +851,7 @@ SELECT pg_catalog.setval('public.carts_id_seq', 1, false);
 
 
 --
--- TOC entry 3504 (class 0 OID 0)
+-- TOC entry 3486 (class 0 OID 0)
 -- Dependencies: 205
 -- Name: categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: madhusudhanan
 --
@@ -860,8 +860,8 @@ SELECT pg_catalog.setval('public.categories_id_seq', 18, true);
 
 
 --
--- TOC entry 3505 (class 0 OID 0)
--- Dependencies: 219
+-- TOC entry 3487 (class 0 OID 0)
+-- Dependencies: 207
 -- Name: delivery_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: madhusudhanan
 --
 
@@ -869,8 +869,8 @@ SELECT pg_catalog.setval('public.delivery_details_id_seq', 6, true);
 
 
 --
--- TOC entry 3506 (class 0 OID 0)
--- Dependencies: 207
+-- TOC entry 3488 (class 0 OID 0)
+-- Dependencies: 209
 -- Name: order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: madhusudhanan
 --
 
@@ -878,8 +878,8 @@ SELECT pg_catalog.setval('public.order_items_id_seq', 21, true);
 
 
 --
--- TOC entry 3507 (class 0 OID 0)
--- Dependencies: 209
+-- TOC entry 3489 (class 0 OID 0)
+-- Dependencies: 211
 -- Name: orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: madhusudhanan
 --
 
@@ -887,8 +887,8 @@ SELECT pg_catalog.setval('public.orders_id_seq', 30, true);
 
 
 --
--- TOC entry 3508 (class 0 OID 0)
--- Dependencies: 223
+-- TOC entry 3490 (class 0 OID 0)
+-- Dependencies: 213
 -- Name: payments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: madhusudhanan
 --
 
@@ -896,8 +896,8 @@ SELECT pg_catalog.setval('public.payments_id_seq', 6, true);
 
 
 --
--- TOC entry 3509 (class 0 OID 0)
--- Dependencies: 211
+-- TOC entry 3491 (class 0 OID 0)
+-- Dependencies: 215
 -- Name: product_attributes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: madhusudhanan
 --
 
@@ -905,8 +905,8 @@ SELECT pg_catalog.setval('public.product_attributes_id_seq', 42, true);
 
 
 --
--- TOC entry 3510 (class 0 OID 0)
--- Dependencies: 213
+-- TOC entry 3492 (class 0 OID 0)
+-- Dependencies: 217
 -- Name: products_id_seq; Type: SEQUENCE SET; Schema: public; Owner: madhusudhanan
 --
 
@@ -914,8 +914,8 @@ SELECT pg_catalog.setval('public.products_id_seq', 11, true);
 
 
 --
--- TOC entry 3512 (class 0 OID 0)
--- Dependencies: 217
+-- TOC entry 3493 (class 0 OID 0)
+-- Dependencies: 221
 -- Name: user_pool_id_seq; Type: SEQUENCE SET; Schema: public; Owner: madhusudhanan
 --
 
@@ -923,8 +923,8 @@ SELECT pg_catalog.setval('public.user_pool_id_seq', 1, false);
 
 
 --
--- TOC entry 3513 (class 0 OID 0)
--- Dependencies: 218
+-- TOC entry 3494 (class 0 OID 0)
+-- Dependencies: 222
 -- Name: user_profile_id_seq; Type: SEQUENCE SET; Schema: public; Owner: madhusudhanan
 --
 
@@ -932,7 +932,7 @@ SELECT pg_catalog.setval('public.user_profile_id_seq', 1, false);
 
 
 --
--- TOC entry 3264 (class 2606 OID 213496)
+-- TOC entry 3255 (class 2606 OID 220495)
 -- Name: cart_items cart_items_pkey; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -941,7 +941,7 @@ ALTER TABLE ONLY public.cart_items
 
 
 --
--- TOC entry 3266 (class 2606 OID 213498)
+-- TOC entry 3257 (class 2606 OID 220497)
 -- Name: cart_items cart_product_unique; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -950,7 +950,7 @@ ALTER TABLE ONLY public.cart_items
 
 
 --
--- TOC entry 3269 (class 2606 OID 213500)
+-- TOC entry 3260 (class 2606 OID 220499)
 -- Name: carts carts_pkey; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -959,7 +959,7 @@ ALTER TABLE ONLY public.carts
 
 
 --
--- TOC entry 3274 (class 2606 OID 213502)
+-- TOC entry 3265 (class 2606 OID 220501)
 -- Name: categories categories_name_key; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -968,7 +968,7 @@ ALTER TABLE ONLY public.categories
 
 
 --
--- TOC entry 3276 (class 2606 OID 213504)
+-- TOC entry 3267 (class 2606 OID 220503)
 -- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -977,7 +977,7 @@ ALTER TABLE ONLY public.categories
 
 
 --
--- TOC entry 3305 (class 2606 OID 213592)
+-- TOC entry 3269 (class 2606 OID 220505)
 -- Name: delivery_details delivery_details_order_id; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -986,7 +986,7 @@ ALTER TABLE ONLY public.delivery_details
 
 
 --
--- TOC entry 3307 (class 2606 OID 213584)
+-- TOC entry 3271 (class 2606 OID 220507)
 -- Name: delivery_details delivery_details_pkey; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -995,7 +995,7 @@ ALTER TABLE ONLY public.delivery_details
 
 
 --
--- TOC entry 3278 (class 2606 OID 213506)
+-- TOC entry 3274 (class 2606 OID 220509)
 -- Name: order_items order_items_pkey; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1004,7 +1004,7 @@ ALTER TABLE ONLY public.order_items
 
 
 --
--- TOC entry 3280 (class 2606 OID 213508)
+-- TOC entry 3276 (class 2606 OID 220511)
 -- Name: order_items order_items_unique; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1013,7 +1013,7 @@ ALTER TABLE ONLY public.order_items
 
 
 --
--- TOC entry 3283 (class 2606 OID 213510)
+-- TOC entry 3279 (class 2606 OID 220513)
 -- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1022,7 +1022,7 @@ ALTER TABLE ONLY public.orders
 
 
 --
--- TOC entry 3315 (class 2606 OID 213635)
+-- TOC entry 3282 (class 2606 OID 220515)
 -- Name: payments payments_order_id; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1031,7 +1031,7 @@ ALTER TABLE ONLY public.payments
 
 
 --
--- TOC entry 3317 (class 2606 OID 213628)
+-- TOC entry 3284 (class 2606 OID 220517)
 -- Name: payments payments_pkey; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1040,7 +1040,7 @@ ALTER TABLE ONLY public.payments
 
 
 --
--- TOC entry 3286 (class 2606 OID 213512)
+-- TOC entry 3287 (class 2606 OID 220519)
 -- Name: product_attributes product_attributes_pkey; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1049,7 +1049,7 @@ ALTER TABLE ONLY public.product_attributes
 
 
 --
--- TOC entry 3289 (class 2606 OID 213514)
+-- TOC entry 3290 (class 2606 OID 220521)
 -- Name: products products_pkey; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1058,7 +1058,7 @@ ALTER TABLE ONLY public.products
 
 
 --
--- TOC entry 3291 (class 2606 OID 213516)
+-- TOC entry 3292 (class 2606 OID 220523)
 -- Name: products products_sku_code_key; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1067,7 +1067,7 @@ ALTER TABLE ONLY public.products
 
 
 --
--- TOC entry 3293 (class 2606 OID 213518)
+-- TOC entry 3294 (class 2606 OID 220525)
 -- Name: schema_version schema_version_pk; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1076,7 +1076,7 @@ ALTER TABLE ONLY public.schema_version
 
 
 --
--- TOC entry 3272 (class 2606 OID 213520)
+-- TOC entry 3263 (class 2606 OID 220527)
 -- Name: carts user_cart_unique; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1085,7 +1085,7 @@ ALTER TABLE ONLY public.carts
 
 
 --
--- TOC entry 3299 (class 2606 OID 213522)
+-- TOC entry 3300 (class 2606 OID 220529)
 -- Name: user_pool user_pool_cognito_sub_key; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1094,7 +1094,7 @@ ALTER TABLE ONLY public.user_pool
 
 
 --
--- TOC entry 3301 (class 2606 OID 213524)
+-- TOC entry 3302 (class 2606 OID 220531)
 -- Name: user_pool user_pool_email_key; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1103,7 +1103,7 @@ ALTER TABLE ONLY public.user_pool
 
 
 --
--- TOC entry 3303 (class 2606 OID 213526)
+-- TOC entry 3304 (class 2606 OID 220533)
 -- Name: user_pool user_pool_pkey; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1112,7 +1112,7 @@ ALTER TABLE ONLY public.user_pool
 
 
 --
--- TOC entry 3297 (class 2606 OID 213528)
+-- TOC entry 3298 (class 2606 OID 220535)
 -- Name: user_addresses user_profile_pkey; Type: CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1121,7 +1121,7 @@ ALTER TABLE ONLY public.user_addresses
 
 
 --
--- TOC entry 3267 (class 1259 OID 213529)
+-- TOC entry 3258 (class 1259 OID 220536)
 -- Name: idx_cart_items_cart_id; Type: INDEX; Schema: public; Owner: madhusudhanan
 --
 
@@ -1129,7 +1129,7 @@ CREATE INDEX idx_cart_items_cart_id ON public.cart_items USING btree (cart_id);
 
 
 --
--- TOC entry 3270 (class 1259 OID 213530)
+-- TOC entry 3261 (class 1259 OID 220537)
 -- Name: idx_carts_user_id; Type: INDEX; Schema: public; Owner: madhusudhanan
 --
 
@@ -1137,7 +1137,7 @@ CREATE INDEX idx_carts_user_id ON public.carts USING btree (user_id);
 
 
 --
--- TOC entry 3308 (class 1259 OID 213590)
+-- TOC entry 3272 (class 1259 OID 220538)
 -- Name: idx_delivery_details_order_id; Type: INDEX; Schema: public; Owner: madhusudhanan
 --
 
@@ -1145,7 +1145,7 @@ CREATE INDEX idx_delivery_details_order_id ON public.delivery_details USING btre
 
 
 --
--- TOC entry 3281 (class 1259 OID 213531)
+-- TOC entry 3277 (class 1259 OID 220539)
 -- Name: idx_orders_user_id; Type: INDEX; Schema: public; Owner: madhusudhanan
 --
 
@@ -1153,7 +1153,7 @@ CREATE INDEX idx_orders_user_id ON public.orders USING btree (user_id);
 
 
 --
--- TOC entry 3313 (class 1259 OID 213636)
+-- TOC entry 3280 (class 1259 OID 220540)
 -- Name: idx_payments_order_id; Type: INDEX; Schema: public; Owner: madhusudhanan
 --
 
@@ -1161,7 +1161,7 @@ CREATE INDEX idx_payments_order_id ON public.payments USING btree (order_id);
 
 
 --
--- TOC entry 3284 (class 1259 OID 213532)
+-- TOC entry 3285 (class 1259 OID 220541)
 -- Name: idx_product_attributes_product_id; Type: INDEX; Schema: public; Owner: madhusudhanan
 --
 
@@ -1169,7 +1169,7 @@ CREATE INDEX idx_product_attributes_product_id ON public.product_attributes USIN
 
 
 --
--- TOC entry 3287 (class 1259 OID 213533)
+-- TOC entry 3288 (class 1259 OID 220542)
 -- Name: idx_product_category_id; Type: INDEX; Schema: public; Owner: madhusudhanan
 --
 
@@ -1177,7 +1177,7 @@ CREATE INDEX idx_product_category_id ON public.products USING btree (category_id
 
 
 --
--- TOC entry 3295 (class 1259 OID 213534)
+-- TOC entry 3296 (class 1259 OID 220543)
 -- Name: idx_user_address_user_id; Type: INDEX; Schema: public; Owner: madhusudhanan
 --
 
@@ -1185,7 +1185,7 @@ CREATE INDEX idx_user_address_user_id ON public.user_addresses USING btree (user
 
 
 --
--- TOC entry 3294 (class 1259 OID 213535)
+-- TOC entry 3295 (class 1259 OID 220544)
 -- Name: schema_version_s_idx; Type: INDEX; Schema: public; Owner: madhusudhanan
 --
 
@@ -1193,7 +1193,7 @@ CREATE INDEX schema_version_s_idx ON public.schema_version USING btree (success)
 
 
 --
--- TOC entry 3318 (class 2606 OID 213536)
+-- TOC entry 3305 (class 2606 OID 220545)
 -- Name: cart_items cart_items_cart_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1202,7 +1202,7 @@ ALTER TABLE ONLY public.cart_items
 
 
 --
--- TOC entry 3319 (class 2606 OID 213541)
+-- TOC entry 3306 (class 2606 OID 220550)
 -- Name: cart_items cart_items_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1211,7 +1211,7 @@ ALTER TABLE ONLY public.cart_items
 
 
 --
--- TOC entry 3325 (class 2606 OID 213585)
+-- TOC entry 3307 (class 2606 OID 220555)
 -- Name: delivery_details delivery_details_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1220,7 +1220,7 @@ ALTER TABLE ONLY public.delivery_details
 
 
 --
--- TOC entry 3320 (class 2606 OID 213546)
+-- TOC entry 3308 (class 2606 OID 220560)
 -- Name: order_items order_items_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1229,7 +1229,7 @@ ALTER TABLE ONLY public.order_items
 
 
 --
--- TOC entry 3321 (class 2606 OID 213551)
+-- TOC entry 3309 (class 2606 OID 220565)
 -- Name: order_items order_items_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1238,7 +1238,7 @@ ALTER TABLE ONLY public.order_items
 
 
 --
--- TOC entry 3328 (class 2606 OID 213629)
+-- TOC entry 3310 (class 2606 OID 220570)
 -- Name: payments payments_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1247,7 +1247,7 @@ ALTER TABLE ONLY public.payments
 
 
 --
--- TOC entry 3322 (class 2606 OID 213556)
+-- TOC entry 3311 (class 2606 OID 220575)
 -- Name: product_attributes product_attributes_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1256,7 +1256,7 @@ ALTER TABLE ONLY public.product_attributes
 
 
 --
--- TOC entry 3323 (class 2606 OID 213561)
+-- TOC entry 3312 (class 2606 OID 220580)
 -- Name: products products_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1265,7 +1265,7 @@ ALTER TABLE ONLY public.products
 
 
 --
--- TOC entry 3324 (class 2606 OID 213566)
+-- TOC entry 3313 (class 2606 OID 220585)
 -- Name: user_addresses user_profile_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: madhusudhanan
 --
 
@@ -1274,7 +1274,7 @@ ALTER TABLE ONLY public.user_addresses
 
 
 --
--- TOC entry 3489 (class 0 OID 0)
+-- TOC entry 3472 (class 0 OID 0)
 -- Dependencies: 5
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: madhusudhanan
 --
@@ -1283,7 +1283,7 @@ REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2024-03-18 20:32:07 IST
+-- Completed on 2024-03-20 22:11:20 IST
 
 --
 -- PostgreSQL database dump complete

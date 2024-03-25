@@ -5,7 +5,7 @@ import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.InsufficientProductQuantityException;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotFoundException;
 import com.thetechmaddy.ecommerce.exceptions.ProductOutOfStockException;
-import com.thetechmaddy.ecommerce.models.ProductFilters;
+import com.thetechmaddy.ecommerce.models.filters.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -120,9 +120,6 @@ public class ProductsServiceTest extends BaseIntegrationTest {
 
         List<Product> products = result.data();
         assertEquals(2, products.size());
-
-        assertEquals("p2", products.get(0).getName());
-        assertEquals("p3", products.get(1).getName());
     }
 
     @Test

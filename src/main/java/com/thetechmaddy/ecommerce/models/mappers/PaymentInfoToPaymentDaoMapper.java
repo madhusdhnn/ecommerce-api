@@ -18,5 +18,8 @@ public interface PaymentInfoToPaymentDaoMapper {
     @Mapping(target = "order", ignore = true)
     @Mapping(target = "paymentDateTime", ignore = true)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "transactionId", ignore = true)
     Payment mapPaymentInfoToPayment(PaymentInfo paymentInfo);
 }

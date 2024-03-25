@@ -1,28 +1,23 @@
 package com.thetechmaddy.ecommerce.security.web;
 
-import com.thetechmaddy.ecommerce.models.PathAndHttpMethod;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import java.util.Set;
+import java.util.List;
 
-@Component
-public final class AdminRoleApiRequestMatcher extends PathAndHttpMethodMatcher {
+public final class AdminRoleApiRequestMatcher implements RequestMatcher {
 
-    @Getter
-    private final String apiBasePath;
-    private final Set<PathAndHttpMethod> adminRoleApiPaths;
-
-    public AdminRoleApiRequestMatcher(@Value("${server.servlet.context-path}") String contextPath) {
-        this.apiBasePath = contextPath + "/api";
-        this.adminRoleApiPaths = Set.of(PathAndHttpMethod.of(HttpMethod.POST, "/products"));
-    }
+    private final RequestMatcher delegate = new OrRequestMatcher(getAdminApisToMatch());
 
     @Override
     public boolean matches(HttpServletRequest request) {
-        return adminRoleApiPaths.stream().anyMatch(pm -> super.matches(request, pm));
+        return delegate.matches(request);
+    }
+
+    private static List<RequestMatcher> getAdminApisToMatch() {
+        return List.of(new AntPathRequestMatcher("/api/products", HttpMethod.POST.name()));
     }
 }
