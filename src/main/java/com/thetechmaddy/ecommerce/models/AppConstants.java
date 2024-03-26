@@ -14,4 +14,5 @@ public class AppConstants {
 
     public static final String PAYMENT_ID_HEADER_NAME = "X-Payment-ID";
 
+    public static final String SECURITY_SCHEME_NAME = "CognitoAuth";
 }

@@ -46,3 +46,9 @@ To seed the local database use the below command in your terminal.
 ```shell
  psql -U $DB_USER -d $DB_NAME --single-transaction < ./scripts/seed.sql
 ```
+
+## API Documentation
+
+Project is configured to use Swagger UI for API documentation. Visit the below URL.
+
+`http://localhost:9092/ecommerce/swagger-ui/index.html`

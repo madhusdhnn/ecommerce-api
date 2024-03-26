@@ -20,7 +20,7 @@ import static com.thetechmaddy.ecommerce.models.AppConstants.CURRENT_USER_REQUES
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class PaymentController extends BaseController {
+public class PaymentController extends AuthenticationAwareController {
 
 
     private final PaymentService paymentService;

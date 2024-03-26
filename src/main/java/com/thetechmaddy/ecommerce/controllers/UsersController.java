@@ -14,7 +14,7 @@ import static com.thetechmaddy.ecommerce.models.AppConstants.CURRENT_USER_REQUES
 
 @RestController
 @RequestMapping("/api/users")
-public class UsersController extends BaseController {
+public class UsersController extends AuthenticationAwareController {
 
     @GetMapping("/addresses")
     public ApiResponse<List<UserAddress>> getAllUserAddresses(

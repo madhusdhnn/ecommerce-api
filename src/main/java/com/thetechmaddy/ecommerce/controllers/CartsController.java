@@ -3,8 +3,8 @@ package com.thetechmaddy.ecommerce.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.models.AppConstants;
-import com.thetechmaddy.ecommerce.models.carts.CheckoutData;
 import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
+import com.thetechmaddy.ecommerce.models.carts.CheckoutData;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
 import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/api/carts")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class CartsController extends BaseController {
+public class CartsController extends AuthenticationAwareController {
 
     private final CartsService cartsService;
 
@@ -73,7 +73,7 @@ public class CartsController extends BaseController {
 
     @PutMapping("/{cartId}/unlock")
     public ApiResponse<?> unlockCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
-                                                  @PathVariable("cartId") long cartId) {
+                                     @PathVariable("cartId") long cartId) {
         this.cartsService.unlockCart(cartId, cognitoUser.getCognitoSub());
         return ApiResponse.success();
     }

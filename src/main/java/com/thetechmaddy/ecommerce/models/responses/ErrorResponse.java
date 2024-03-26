@@ -15,16 +15,10 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ErrorResponse {
     private String message;
-    private String detail;
 
     private Map<String, Object> additionalInfo;
 
     public ErrorResponse(String message) {
         this.message = message;
-    }
-
-    public ErrorResponse(String message, Map<String, Object> additionalInfo) {
-        this.message = message;
-        this.additionalInfo = additionalInfo;
     }
 }

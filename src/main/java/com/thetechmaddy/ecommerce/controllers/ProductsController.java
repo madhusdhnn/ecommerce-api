@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 @RestController
 @RequestMapping(value = "/api/products")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class ProductsController extends BaseController {
+public class ProductsController extends AuthenticationAwareController {
 
     private final ProductsService productsService;
 

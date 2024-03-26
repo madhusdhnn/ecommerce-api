@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class CategoriesController extends BaseController {
+public class CategoriesController extends AuthenticationAwareController {
 
     private final CategoriesRepository categoriesRepository;
 

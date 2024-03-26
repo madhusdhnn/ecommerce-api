@@ -23,7 +23,7 @@ import static com.thetechmaddy.ecommerce.models.AppConstants.CURRENT_USER_REQUES
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class OrdersController extends BaseController {
+public class OrdersController extends AuthenticationAwareController {
 
     private final OrdersService ordersService;
 

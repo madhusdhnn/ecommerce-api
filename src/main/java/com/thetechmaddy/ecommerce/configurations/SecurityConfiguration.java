@@ -69,6 +69,11 @@ public class SecurityConfiguration {
         return (httpRequestsAuthorizer) -> httpRequestsAuthorizer
                     .requestMatchers(HttpMethod.GET, "/ping")
                         .permitAll()
+                    .requestMatchers(
+                            "/v3/api-docs/**",
+                            "/swagger-ui.html",
+                            "/swagger-ui/**"
+                    ).permitAll()
                     .requestMatchers(new AdminRoleApiRequestMatcher())
                         .hasRole(COGNITO_ADMIN_GROUP_NAME)
                     .requestMatchers(new ApiRequestMatcher())

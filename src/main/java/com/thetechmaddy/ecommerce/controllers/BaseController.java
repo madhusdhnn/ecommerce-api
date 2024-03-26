@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -26,6 +27,7 @@ import static org.springframework.http.HttpStatus.*;
 public class BaseController {
 
     @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ApiResponse<ErrorResponse>> runtimeException(RuntimeException ex) {
         log.error(ex.getMessage(), ex);
         var response = ApiResponse.error(new ErrorResponse("Something went wrong!"));
@@ -46,6 +48,7 @@ public class BaseController {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(UNPROCESSABLE_ENTITY)
     public ResponseEntity<ApiResponse<ErrorResponse>> dataIntegrityViolationException(DataIntegrityViolationException ex) {
         log.error(ex.getMessage(), ex);
         var response = ApiResponse.error(new ErrorResponse("Data integrity violation"));
@@ -53,6 +56,7 @@ public class BaseController {
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(NOT_FOUND)
     public ResponseEntity<ApiResponse<ErrorResponse>> routeNotFoundException(NoHandlerFoundException ex) {
         log.error(ex.getMessage(), ex);
         var response = ApiResponse.error(new ErrorResponse("Requested endpoint not found"));
@@ -60,6 +64,7 @@ public class BaseController {
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(BAD_REQUEST)
     public ResponseEntity<ApiResponse<ErrorResponse>> missingRequestParameterException(MissingServletRequestParameterException ex) {
         log.error(ex.getMessage(), ex);
         var response = ApiResponse.error(new ErrorResponse(ex.getMessage()));
@@ -67,6 +72,7 @@ public class BaseController {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(UNPROCESSABLE_ENTITY)
     public ResponseEntity<ApiResponse<List<ValidationError>>> beanValidationException(MethodArgumentNotValidException ex) {
         log.error(ex.getMessage(), ex);
         List<ValidationError> validationErrors = ex.getFieldErrors()
@@ -77,6 +83,7 @@ public class BaseController {
     }
 
     @ExceptionHandler(MethodNotAllowedException.class)
+    @ResponseStatus(METHOD_NOT_ALLOWED)
     public ResponseEntity<ApiResponse<String>> methodNotAllowedException(MethodNotAllowedException ex) {
         log.error(ex.getMessage(), ex);
         return ResponseEntity.status(METHOD_NOT_ALLOWED)
