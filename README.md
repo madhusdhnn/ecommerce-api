@@ -9,14 +9,40 @@ Export the following env vars before running the command.
 3. `COGNITO_APP_CLIENT_ID` - App client ID in Cognito user pool
 
 ```shell
-./scripts/cognito_auth.sh john.doe@example.com John.Doe@123
+./scripts/cognito_auth.sh <EMAIL/ USERNAME> <PASSWORD>
 ```
 
 Copy the `idToken` that you get from Cognito and send it in `Authorization` header by prepending the word `Bearer`.
 
-## Seeding
+## Database Setup
+
+### Environment Variables
+
+Set the following env vars in your current shell. If you are using IDE, configure them in `run configuration`.
+
+```properties
+DB_HOST=
+DB_NAME=
+DB_PASSWORD=
+DB_PORT=
+DB_USER=
+```
+### Migrations
+
+This application uses Flyway as mirgation tool.
+
+To create a new migration, use the script file `./scripts/create_migration.js`. 
+
+For example: 
+```shell
+./scripts/create_migration.js <MIGRATION_NAME>
+```
+
+To create "Repeatable" migrations, just pass the `--repeatable` argument in the above command after the migration name
+
+### Seeding
 To seed the local database use the below command in your terminal.
 
 ```shell
- psql -U postgres -d ecommerce_db_local --single-transaction < ./scripts/seed.sql
+ psql -U $DB_USER -d $DB_NAME --single-transaction < ./scripts/seed.sql
 ```
