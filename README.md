@@ -4,7 +4,7 @@
 Authenticate users with Amazon Cognito. Run the below command in your terminal.
 
 Export the following env vars before running the command.
-1. `AWS_PROFILE` - name of your AWS account
+1. `AWS_PROFILE` - The name of your AWS account
 2. `AWS_REGION` - The AWS region
 3. `COGNITO_APP_CLIENT_ID` - App client ID in Cognito user pool
 
@@ -12,7 +12,7 @@ Export the following env vars before running the command.
 ./scripts/cognito_auth.sh <EMAIL/ USERNAME> <PASSWORD>
 ```
 
-Copy the `idToken` that you get from Cognito and send it in `Authorization` header by prepending the word `Bearer`.
+Copy the `idToken` that you get from Cognito and send it in the `Authorization` header by prepending the word `Bearer`.
 
 ## Database Setup
 
@@ -59,15 +59,15 @@ Run the following commands to build and deploy the docker image to Amazon ECS
 
 ```shell
 docker build  --no-cache -t thetechmaddy/ecommerce-api:latest .
-
 ```
 ```shell
-   aws ecr get-login-password --region $AWS_REGION --profile $AWS_PROFILE | \
-   docker login --username AWS --password-stdin 426464367463.dkr.ecr.us-east-1.amazonaws.com
-   ```
+aws ecr get-login-password --region $AWS_REGION --profile $AWS_PROFILE | \
+docker login --username AWS --password-stdin 426464367463.dkr.ecr.us-east-1.amazonaws.com
+```
 ```shell
-   docker tag thetechmaddy/ecommerce-api:latest 426464367463.dkr.ecr.us-east-1.amazonaws.com/ecommerce-api-dev-repo:latest
-   ```
+docker tag thetechmaddy/ecommerce-api:latest \
+426464367463.dkr.ecr.us-east-1.amazonaws.com/ecommerce-api-dev-repo:latest
+```
 ```shell
-   docker push 426464367463.dkr.ecr.us-east-1.amazonaws.com/ecommerce-api-dev-repo:latest
-   ```
+docker push 426464367463.dkr.ecr.us-east-1.amazonaws.com/ecommerce-api-dev-repo:latest
+```
