@@ -158,7 +158,7 @@ public class CartsServiceImpl implements CartsService {
         Cart cart = getUserCart(cartId, userId);
 
         log.info(String.format("Cart unlock requested by userId %s for cartId %d", userId, cart.getId()));
-        cartLockApplierService.releaseLock(cart, "-");
+        cartLockApplierService.releaseLock(cart, "Return to cart");
 
         log.info(String.format("Cart unlocked by userId %s for cartId %d", userId, cart.getId()));
         return cart.isUnlocked();

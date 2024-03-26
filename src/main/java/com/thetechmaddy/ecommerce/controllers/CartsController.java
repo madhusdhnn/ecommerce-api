@@ -70,4 +70,11 @@ public class CartsController extends BaseController {
         CheckoutData checkoutData = this.cartsService.checkoutCart(cartId, cognitoUser.getCognitoSub());
         return ApiResponse.success(checkoutData);
     }
+
+    @PutMapping("/{cartId}/unlock")
+    public ApiResponse<?> unlockCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
+                                                  @PathVariable("cartId") long cartId) {
+        this.cartsService.unlockCart(cartId, cognitoUser.getCognitoSub());
+        return ApiResponse.success();
+    }
 }
