@@ -55,7 +55,7 @@ Project is configured to use Swagger UI for API documentation. Visit the below U
 
 ## DevOps
 
-Run the following commands to build and deploy the docker image to Amazon ECS
+Run the following commands to build and publish the docker image to Amazon ECR
 
 ```shell
 docker build  --no-cache -t thetechmaddy/ecommerce-api:latest .
