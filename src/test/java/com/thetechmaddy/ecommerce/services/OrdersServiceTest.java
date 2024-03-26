@@ -69,6 +69,9 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     @Autowired
     private DeliveryDetailsRepository deliveryDetailsRepository;
 
+    @Autowired
+    private ReservedProductsRepository reservedProductsRepository;
+
     private long cartId;
 
     @BeforeAll
@@ -536,6 +539,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         assertTrue(ordersRepository.findByIdAndUserId(orderId, TEST_COGNITO_SUB).isEmpty());
         assertTrue(paymentsRepository.findByOrderId(orderId).isEmpty());
         assertTrue(deliveryDetailsRepository.findByOrderId(orderId).isEmpty());
+        assertEquals(0, reservedProductsRepository.countByOrderId(order.getId()));
 
         assertTrue(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
 
@@ -565,6 +569,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @AfterEach
     public void clearOrdersAndCartItems() {
+        reservedProductsRepository.deleteAll();
         ordersRepository.deleteAll();
         cartItemsRepository.deleteAll();
         Optional<Cart> cartOptional = cartsRepository.findByUserId(TEST_COGNITO_SUB)

@@ -17,7 +17,9 @@ import static com.thetechmaddy.ecommerce.models.QueryConstants.*;
 @Repository
 public interface CartItemsRepository extends JpaRepository<CartItem, Long> {
 
-    // used in testing
+    /**
+     * used in testing
+     */
     @Transactional
     @Modifying
     @Query(value = UPSERT_CART_ITEM_QUERY, nativeQuery = true)
@@ -33,13 +35,20 @@ public interface CartItemsRepository extends JpaRepository<CartItem, Long> {
     @Query(value = REMOVE_ITEM_FROM_CART_QUERY, nativeQuery = true)
     int removeItem(@Param("cartId") long cartId, @Param("productId") long productId, @Param("userId") String userId);
 
-    // used in testing
+    /**
+     * used in testing
+     */
     List<CartItem> findAllByCartIdAndCartUserId(long cartId, String userId);
 
-    // used in testing
+    /**
+     * used in testing
+     */
     @Query(value = COUNT_CART_ITEMS_BY_USER_CART_QUERY, nativeQuery = true)
     int countByCartIdAndCartUserId(@Param("cartId") long cartId, @Param("userId") String userId);
 
+    /**
+     * used in testing
+     */
     @Query(value = GROSS_TOTAL_FOR_SELECTED_CART_ITEMS_QUERY)
     BigDecimal getGrossTotalForSelectedCartItems(@Param("cartId") long cartId, @Param("userId") String userId);
 }

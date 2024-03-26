@@ -18,10 +18,10 @@ public class CartUtils {
 
         Objects.requireNonNull(paymentInfo, "paymentInfo == null");
 
-        if (paymentInfo.getAmount().compareTo(cart.getTotal()) != 0) {
+        if (paymentInfo.getAmount().compareTo(cart.getGrossTotal()) != 0) {
             throw new CartItemsTotalMismatchException(
                     String.format("Cart items total and payment request amount do not match. Cart Total: %s. Payment requested: %s",
-                            cart.getSubTotal(), paymentInfo.getAmount())
+                            cart.getGrossTotal(), paymentInfo.getAmount())
             );
         }
     }
@@ -55,5 +55,14 @@ public class CartUtils {
 
     private static void ensureCartNotNull(Cart cart) {
         Objects.requireNonNull(cart, "cart == null");
+    }
+
+    public static void verifyCartOwner(Cart cart, String userId) {
+        Objects.requireNonNull(cart);
+
+        if (!cart.belongsTo(userId)) {
+            throw new CartNotBelongsToUserException(
+                    String.format("Cart:(cartId - %d) does not belong to the user - %s", cart.getId(), userId));
+        }
     }
 }

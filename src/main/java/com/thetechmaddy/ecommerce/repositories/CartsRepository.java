@@ -23,12 +23,18 @@ public interface CartsRepository extends JpaRepository<Cart, Long> {
     @EntityGraph(value = "Cart.cartItems")
     Optional<Cart> findByIdAndUserId(long cartId, String userId);
 
+    /**
+     * Used in testing
+     */
     @Query(value = IS_CART_UNLOCKED_QUERY, nativeQuery = true)
     boolean isUnlocked(@Param("cartId") long cartId, @Param("userId") String userId);
 
     @EntityGraph(value = "Cart.cartItems")
     Optional<Cart> findByUserId(String userId);
 
+    /**
+     * Used in testing
+     */
     @Transactional
     @Modifying
     @Query(value = LOCK_CART_QUERY)

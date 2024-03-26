@@ -59,7 +59,14 @@ public class Cart extends Audit {
     @EqualsAndHashCode.Exclude
     @JsonView(CartResponse.class)
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
-    private BigDecimal total = BigDecimal.ZERO;
+    private BigDecimal taxTotal = BigDecimal.ZERO;
+
+    @Setter
+    @Transient
+    @EqualsAndHashCode.Exclude
+    @JsonView(CartResponse.class)
+    @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
+    private BigDecimal grossTotal = BigDecimal.ZERO;
 
     public Cart(String userId, CartStatus cartStatus) {
         super(OffsetDateTime.now(), OffsetDateTime.now());
@@ -68,8 +75,8 @@ public class Cart extends Audit {
         this.cartItems = new ArrayList<>();
     }
 
-    public Cart(BigDecimal total) {
-        this.total = total;
+    public Cart(BigDecimal grossTotal) {
+        this.grossTotal = grossTotal;
     }
 
     @JsonIgnore

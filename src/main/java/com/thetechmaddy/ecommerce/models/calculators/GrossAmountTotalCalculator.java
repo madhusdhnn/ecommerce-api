@@ -5,7 +5,7 @@ import com.thetechmaddy.ecommerce.domains.carts.CartItem;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class NetTotalCalculator implements TotalCalculator {
+public class GrossAmountTotalCalculator implements TotalCalculator {
 
     @Override
     public BigDecimal calculate(List<CartItem> cartItems) {
@@ -17,9 +17,8 @@ public class NetTotalCalculator implements TotalCalculator {
 
         return cartItems.stream()
                 .map(cartItem -> cartItem.getProduct()
-                        .getUnitPrice()
+                        .getGrossAmount()
                         .multiply(BigDecimal.valueOf(cartItem.getQuantity()))
-                ).reduce(zero, BigDecimal::add);
+                ).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-
 }

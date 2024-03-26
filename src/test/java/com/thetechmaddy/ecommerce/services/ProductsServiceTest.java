@@ -4,7 +4,6 @@ import com.thetechmaddy.ecommerce.BaseIntegrationTest;
 import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.exceptions.InsufficientProductQuantityException;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotFoundException;
-import com.thetechmaddy.ecommerce.exceptions.ProductOutOfStockException;
 import com.thetechmaddy.ecommerce.models.filters.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 import org.junit.jupiter.api.Test;
@@ -127,12 +126,18 @@ public class ProductsServiceTest extends BaseIntegrationTest {
         Optional<Product> productOptional = getTestProducts().stream().filter(Product::isInStock).findFirst();
         assertTrue(productOptional.isPresent());
 
-        assertDoesNotThrow(() -> this.productsService.ensureProductInStock(productOptional.get().getId()));
+        assertDoesNotThrow(() -> {
+            Product product = productOptional.get();
+            this.productsService.ensureProductHasSufficientQuantity(product.getId(), product.getStockQuantity() - 1);
+        });
 
         Optional<Product> outOfStockProductOptional = getTestProducts().stream().filter(product -> !product.isInStock()).findFirst();
         assertTrue(outOfStockProductOptional.isPresent());
 
-        assertThrows(ProductOutOfStockException.class, () -> this.productsService.ensureProductInStock(outOfStockProductOptional.get().getId()));
+        assertThrows(InsufficientProductQuantityException.class, () -> {
+            Product product = outOfStockProductOptional.get();
+            this.productsService.ensureProductHasSufficientQuantity(product.getId(), 4);
+        });
     }
 
     @Test
