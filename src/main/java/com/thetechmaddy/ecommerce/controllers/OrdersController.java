@@ -65,7 +65,7 @@ public class OrdersController extends BaseController {
     }
 
     @GetMapping("/{orderId}")
-    @JsonView(JsonViews.GetOrderResponse.class)
+    @JsonView(JsonViews.GetOrderDetailResponse.class)
     public ApiResponse<Order> getOrder(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
                                        @PathVariable("orderId") long orderId) {
         return ApiResponse.success(ordersService.getOrder(orderId, cognitoUser.getCognitoSub()));

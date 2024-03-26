@@ -13,8 +13,8 @@ import java.math.BigDecimal;
 @Builder(toBuilder = true)
 public class ProductFilters {
 
-    private Boolean available;
     private String category;
+    private Boolean available;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
 

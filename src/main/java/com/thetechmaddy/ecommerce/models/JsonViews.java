@@ -25,4 +25,7 @@ public interface JsonViews {
 
     class GetOrderResponse {
     }
+
+    class GetOrderDetailResponse {
+    }
 }

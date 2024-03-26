@@ -14,6 +14,12 @@ public class CheckoutData {
     private long cartId;
 
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
-    private BigDecimal totalAmount;
+    private BigDecimal netTotal;
+
+    @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
+    private BigDecimal taxTotal;
+
+    @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
+    private BigDecimal grossTotal;
 
 }

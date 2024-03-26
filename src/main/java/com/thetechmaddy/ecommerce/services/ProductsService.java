@@ -1,14 +1,16 @@
 package com.thetechmaddy.ecommerce.services;
 
+import com.thetechmaddy.ecommerce.domains.orders.Order;
 import com.thetechmaddy.ecommerce.domains.products.Product;
 import com.thetechmaddy.ecommerce.models.filters.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 
+import java.util.List;
 import java.util.Map;
 
 public interface ProductsService {
 
-    void reserveProducts(Map<Long, Integer> productIdQuantityMap);
+    void reserveProducts(Order order, Map<Long, Integer> productIdQuantityMap);
 
     Product getProductById(long productId);
 
@@ -16,7 +18,7 @@ public interface ProductsService {
 
     Paged<Product> getAllProducts(Integer page, Integer size, String search, ProductFilters productFilters);
 
-    void ensureProductInStock(long productId);
+    void ensureProductHasSufficientQuantity(long productId, int requiredQuantity);
 
-    void restoreProducts(Map<Long, Integer> productIdQuantityMap);
+    void restoreProducts(long orderId, List<Long> productIds);
 }

@@ -10,36 +10,36 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class NetTotalCalculatorTest {
+public class TaxAmountTotalCalculatorTest {
 
-    private final TotalCalculator netTotalCalculator = new NetTotalCalculator();
+    private final TotalCalculator taxAmountTotalCalculator = new TaxAmountTotalCalculator();
 
     @Test
     public void testEmptyListReturnZero() {
-        BigDecimal actual = netTotalCalculator.calculate(Collections.emptyList());
+        BigDecimal actual = taxAmountTotalCalculator.calculate(Collections.emptyList());
         assertEquals(BigDecimal.ZERO, actual);
     }
 
     @Test
     public void testNullListReturnZero() {
-        BigDecimal actual = netTotalCalculator.calculate(null);
+        BigDecimal actual = taxAmountTotalCalculator.calculate(null);
         assertEquals(BigDecimal.ZERO, actual);
     }
 
     @Test
     public void testTotalCalculation() {
         Product product1 = new Product();
-        product1.setUnitPrice(new BigDecimal("456.34"));
+        product1.setTaxAmount(new BigDecimal("156.34"));
 
         Product product2 = new Product();
-        product2.setUnitPrice(new BigDecimal("1200.33"));
+        product2.setTaxAmount(new BigDecimal("100.33"));
 
-        BigDecimal actual = netTotalCalculator.calculate(List.of(
+        BigDecimal actual = taxAmountTotalCalculator.calculate(List.of(
                         new CartItem(3, product1),
                         new CartItem(2, product2)
                 )
         );
 
-        assertEquals(new BigDecimal("3769.68"), actual);
+        assertEquals(new BigDecimal("669.68"), actual);
     }
 }

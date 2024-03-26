@@ -3,12 +3,12 @@ package com.thetechmaddy.ecommerce.services.impl;
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.domains.carts.CartItem;
 import com.thetechmaddy.ecommerce.domains.products.Product;
-import com.thetechmaddy.ecommerce.exceptions.CartNotBelongsToUserException;
 import com.thetechmaddy.ecommerce.exceptions.CartNotFoundException;
+import com.thetechmaddy.ecommerce.exceptions.InsufficientProductQuantityException;
 import com.thetechmaddy.ecommerce.exceptions.ProductNotInCartException;
-import com.thetechmaddy.ecommerce.exceptions.ProductOutOfStockException;
-import com.thetechmaddy.ecommerce.models.calculators.GrossTotalCalculator;
-import com.thetechmaddy.ecommerce.models.calculators.NetTotalCalculator;
+import com.thetechmaddy.ecommerce.models.calculators.GrossAmountTotalCalculator;
+import com.thetechmaddy.ecommerce.models.calculators.NetAmountTotalCalculator;
+import com.thetechmaddy.ecommerce.models.calculators.TaxAmountTotalCalculator;
 import com.thetechmaddy.ecommerce.models.carts.CartItemStatus;
 import com.thetechmaddy.ecommerce.models.carts.CheckoutData;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.thetechmaddy.ecommerce.models.carts.CartItemStatus.SELECTED;
-import static com.thetechmaddy.ecommerce.utils.CartUtils.verifyCartOwnerAndLockStatus;
+import static com.thetechmaddy.ecommerce.utils.CartUtils.*;
 
 @Log4j2
 @Primary
@@ -49,11 +49,9 @@ public class CartsServiceImpl implements CartsService {
         Cart cart = cartsRepository.findById(cartId)
                 .orElseThrow(() -> new CartNotFoundException(String.format("Cart not found with id %d", cartId)));
 
-        if (!cart.belongsTo(userId)) {
-            throw new CartNotBelongsToUserException(String.format("Cart:(cartId - %d) does not belong to the user - %s", cartId, userId));
-        }
+        verifyCartOwner(cart, userId);
 
-        calculateSubTotalAndTotal(cart);
+        calculateAllTotals(cart);
         return cart;
     }
 
@@ -91,7 +89,6 @@ public class CartsServiceImpl implements CartsService {
     @Transactional
     public void updateProductInCart(long cartId, long productId, String userId, CartItemUpdateRequest cartItemUpdateRequest) {
         try {
-            productsService.ensureProductInStock(productId);
             ensureCartExistsAndNotLocked(cartId, userId);
 
             CartItem cartItem = cartItemsRepository.findByCartIdAndProductId(cartId, productId)
@@ -99,6 +96,7 @@ public class CartsServiceImpl implements CartsService {
 
             Integer quantity = cartItemUpdateRequest.getQuantity();
             if (quantity != null) {
+                productsService.ensureProductHasSufficientQuantity(productId, cartItemUpdateRequest.getQuantity());
                 cartItem.setQuantity(quantity);
             }
 
@@ -108,10 +106,10 @@ public class CartsServiceImpl implements CartsService {
             }
 
             cartItemsRepository.save(cartItem);
-        } catch (ProductOutOfStockException ex) {
+        } catch (InsufficientProductQuantityException ex) {
             boolean removed = removeProductFromCart(cartId, productId, userId);
             if (removed) {
-                log.info(String.format("Product: (productId - %d) removed from cart as it went out of stock", productId));
+                log.info(String.format("Product: (productId - %d) removed from cart because of insufficient quantity", productId));
             }
             throw ex;
         }
@@ -174,30 +172,37 @@ public class CartsServiceImpl implements CartsService {
 
     @Override
     public CheckoutData checkoutCart(long cartId, String userId) {
-        ensureCartExistsAndNotLocked(cartId, userId);
+        Cart cart = getCart(cartId, userId);
+        ensureCartNotEmpty(cartId, cart.getCartItems());
 
-        String lockAcquireReason = String.format("Checkout cart:(cartId - %d) by user: (userId - %s)", cartId, userId);
-        cartLockApplierService.acquireLock(getCart(cartId, userId), lockAcquireReason);
+        if (cart.isUnlocked()) {
+            String lockAcquireReason = String.format("Checkout cart:(cartId - %d) by user: (userId - %s)", cartId, userId);
+            cartLockApplierService.acquireLock(cart, lockAcquireReason);
+        }
 
-        BigDecimal grossTotal = cartItemsRepository.getGrossTotalForSelectedCartItems(cartId, userId);
-        return new CheckoutData(cartId, grossTotal);
+        return new CheckoutData(cartId, cart.getSubTotal(), cart.getTaxTotal(), cart.getGrossTotal());
     }
 
-    private void calculateSubTotalAndTotal(Cart cart) {
-        NetTotalCalculator netTotalCalculator = new NetTotalCalculator();
-        GrossTotalCalculator grossTotalCalculator = new GrossTotalCalculator();
+    private void calculateAllTotals(Cart cart) {
+        NetAmountTotalCalculator netAmountTotalCalculator = new NetAmountTotalCalculator();
+        GrossAmountTotalCalculator grossAmountTotalCalculator = new GrossAmountTotalCalculator();
+        TaxAmountTotalCalculator taxAmountTotalCalculator = new TaxAmountTotalCalculator();
 
         List<CartItem> cartItems = cart.getCartItems();
-        BigDecimal subTotal = netTotalCalculator.calculate(cartItems);
-        BigDecimal total = grossTotalCalculator.calculate(cartItems);
+        BigDecimal subTotal = netAmountTotalCalculator.calculate(cartItems);
+        BigDecimal grossTotal = grossAmountTotalCalculator.calculate(cartItems);
+        BigDecimal taxTotal = taxAmountTotalCalculator.calculate(cartItems);
 
+        cart.setTaxTotal(taxTotal);
         cart.setSubTotal(subTotal);
-        cart.setTotal(total);
+        cart.setGrossTotal(grossTotal);
     }
 
     private Cart getUserCart(long cartId, String userId) {
         return cartsRepository.findByIdAndUserId(cartId, userId)
-                .orElseThrow(() -> new CartNotFoundException(String.format("Cart: (cartId - %d) not found", cartId)));
+                .orElseThrow(
+                        () -> new CartNotFoundException(
+                                String.format("Cart: (cartId - %d) not found for user: (userId - %s)", cartId, userId)));
     }
 
     private void ensureCartExistsAndNotLocked(long cartId, String userId) {

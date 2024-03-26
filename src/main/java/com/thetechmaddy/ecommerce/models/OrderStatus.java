@@ -8,14 +8,14 @@ public enum OrderStatus {
     PENDING,
 
     /**
-     * Represents seller started processing the order
-     */
-    PROCESSING,
-
-    /**
      * Represents order has been placed
      */
     CONFIRMED,
+
+    /**
+     * Represents seller started processing the order
+     */
+    PROCESSING,
 
     /**
      * Represents order has been completed

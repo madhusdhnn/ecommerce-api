@@ -64,6 +64,7 @@ public class Product extends Audit {
     @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
     private BigDecimal taxPercentage;
 
+    @Setter
     @Column(name = "tax_amount")
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
     @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
