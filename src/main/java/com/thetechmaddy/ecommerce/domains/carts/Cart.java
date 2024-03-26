@@ -72,7 +72,6 @@ public class Cart extends Audit {
         super(OffsetDateTime.now(), OffsetDateTime.now());
         this.userId = userId;
         this.cartStatus = cartStatus;
-        this.cartItems = new ArrayList<>();
     }
 
     public Cart(BigDecimal grossTotal) {

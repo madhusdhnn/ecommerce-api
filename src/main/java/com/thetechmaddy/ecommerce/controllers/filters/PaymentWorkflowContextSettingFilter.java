@@ -44,7 +44,7 @@ public class PaymentWorkflowContextSettingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (NumberFormatException e) {
             sendErrorResponse(objectMapper, response, BAD_REQUEST,
-                    () -> new MissingIdempotencyIdHeaderException(
+                    new MissingIdempotencyIdHeaderException(
                             String.format("%s header is missing in the request", PAYMENT_ID_HEADER_NAME), BAD_REQUEST));
         } finally {
             PaymentWorkflowContextHolder.clearContext();

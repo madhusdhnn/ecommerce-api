@@ -1,4 +1,4 @@
-package com.thetechmaddy.ecommerce.security;
+package com.thetechmaddy.ecommerce.models.security;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

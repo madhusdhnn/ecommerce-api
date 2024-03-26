@@ -1,4 +1,4 @@
-package com.thetechmaddy.ecommerce.security.web;
+package com.thetechmaddy.ecommerce.models.security.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpMethod;

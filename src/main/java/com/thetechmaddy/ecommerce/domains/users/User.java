@@ -3,6 +3,8 @@ package com.thetechmaddy.ecommerce.domains.users;
 import com.thetechmaddy.ecommerce.domains.Audit;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +13,9 @@ import java.time.OffsetDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "user_pool")
+@Builder
 public class User extends Audit {
 
     @Id
@@ -30,20 +34,4 @@ public class User extends Audit {
 
     @Column(name = "last_name")
     private String lastName;
-
-    public User(String cognitoSub, String email, String firstName, String lastName) {
-        super(OffsetDateTime.now(), OffsetDateTime.now());
-        this.cognitoSub = cognitoSub;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
-
-    public User(CognitoUser cognitoUser) {
-        super(OffsetDateTime.now(), OffsetDateTime.now());
-        this.cognitoSub = cognitoUser.getCognitoSub();
-        this.email = cognitoUser.getEmail();
-        this.firstName = cognitoUser.getFirstName();
-        this.lastName = cognitoUser.getLastName();
-    }
 }

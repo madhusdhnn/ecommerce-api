@@ -7,6 +7,8 @@ import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;
 
 public interface CartsService {
 
+    void createCart(String userId);
+
     Cart getCart(long cartId, String userId);
 
     void addProductToCart(long cartId, String userId, CartItemRequest cartItemRequest);

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.thetechmaddy.ecommerce.models.carts.CartItemStatus.SELECTED;
+import static com.thetechmaddy.ecommerce.models.carts.CartStatus.UN_LOCKED;
 import static com.thetechmaddy.ecommerce.utils.CartUtils.*;
 
 @Log4j2
@@ -43,6 +44,12 @@ public class CartsServiceImpl implements CartsService {
     private final CartItemsRepository cartItemsRepository;
 
     private final CartLockApplierService cartLockApplierService;
+
+    @Override
+    public void createCart(String userId) {
+        Cart cart = new Cart(userId, UN_LOCKED);
+        cartsRepository.save(cart);
+    }
 
     @Override
     public Cart getCart(long cartId, String userId) {

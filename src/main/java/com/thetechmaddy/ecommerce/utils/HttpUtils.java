@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.function.Supplier;
 
 import static com.thetechmaddy.ecommerce.utils.JsonUtils.safeWriteAsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -19,14 +18,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpUtils {
 
-    public static void sendErrorResponse(ObjectMapper mapper, HttpServletResponse response, HttpStatus httpStatus, Supplier<Throwable> exSupplier) {
+    public static void sendErrorResponse(ObjectMapper mapper, HttpServletResponse response, HttpStatus httpStatus, Throwable ex) {
         response.setStatus(httpStatus.value());
         response.setContentType(APPLICATION_JSON_VALUE);
 
         ErrorResponse errorResponse = new ErrorResponse("Something went wrong!");
 
-        Throwable ex;
-        if ((ex = exSupplier.get()) != null) {
+        if (ex != null) {
             errorResponse.setMessage(ex.getMessage());
 
             if (ex instanceof BusinessException apiEx) {

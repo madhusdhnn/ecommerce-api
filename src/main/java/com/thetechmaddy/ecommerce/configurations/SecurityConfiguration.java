@@ -2,15 +2,16 @@ package com.thetechmaddy.ecommerce.configurations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thetechmaddy.ecommerce.controllers.filters.UserAuthenticationFilter;
-import com.thetechmaddy.ecommerce.security.CognitoGroupToGrantedAuthorityConverter;
-import com.thetechmaddy.ecommerce.security.web.AdminRoleApiRequestMatcher;
-import com.thetechmaddy.ecommerce.security.web.ApiRequestMatcher;
+import com.thetechmaddy.ecommerce.models.security.CognitoGroupToGrantedAuthorityConverter;
+import com.thetechmaddy.ecommerce.models.security.InternalApiKeyAuthorizationManager;
+import com.thetechmaddy.ecommerce.models.security.web.AdminRoleApiRequestMatcher;
+import com.thetechmaddy.ecommerce.models.security.web.ApiRequestMatcher;
+import com.thetechmaddy.ecommerce.models.security.web.NoAuthApiRequestMatcher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,6 +34,9 @@ public class SecurityConfiguration {
 
     @Value("${cognito.jwks-uri}")
     private String jwksUri;
+
+    @Value("${internal.apiKey}")
+    private String internalApiKey;
 
     private final ObjectMapper objectMapper;
 
@@ -61,25 +65,22 @@ public class SecurityConfiguration {
     private Customizer<ExceptionHandlingConfigurer<HttpSecurity>> exceptionHandlingConfigurerCustomizer() {
         return exCustomizer -> exCustomizer.authenticationEntryPoint(
                 (request, response, authException) ->
-                        sendErrorResponse(objectMapper, response, UNAUTHORIZED, () -> authException));
+                        sendErrorResponse(objectMapper, response, UNAUTHORIZED, authException));
     }
 
     private Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry> authorizationManagerRequestMatcherRegistryCustomizer() {
         // @formatter:off
         return (httpRequestsAuthorizer) -> httpRequestsAuthorizer
-                    .requestMatchers(HttpMethod.GET, "/ping")
-                        .permitAll()
-                    .requestMatchers(
-                            "/v3/api-docs/**",
-                            "/swagger-ui.html",
-                            "/swagger-ui/**"
-                    ).permitAll()
-                    .requestMatchers(new AdminRoleApiRequestMatcher())
-                        .hasRole(COGNITO_ADMIN_GROUP_NAME)
-                    .requestMatchers(new ApiRequestMatcher())
-                        .hasAnyRole(COGNITO_ADMIN_GROUP_NAME, COGNITO_USER_GROUP_NAME)
-                    .anyRequest()
-                        .authenticated();
+                .requestMatchers(new NoAuthApiRequestMatcher())
+                    .permitAll()
+                .requestMatchers(new AdminRoleApiRequestMatcher())
+                    .hasRole(COGNITO_ADMIN_GROUP_NAME)
+                .requestMatchers(new ApiRequestMatcher())
+                    .hasAnyRole(COGNITO_ADMIN_GROUP_NAME, COGNITO_USER_GROUP_NAME)
+                .requestMatchers("/api/user-provisioning")
+                    .access(new InternalApiKeyAuthorizationManager(internalApiKey))
+                .anyRequest()
+                    .authenticated();
         // @formatter:on
     }
 }
