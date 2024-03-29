@@ -1,21 +1,16 @@
 package com.thetechmaddy.ecommerce.models.security.web;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.util.List;
 
 import static org.springframework.http.HttpMethod.GET;
 
-public class NoAuthApiRequestMatcher implements RequestMatcher {
+public class NoAuthApiRequestMatcher extends AbstractRequestMatcher {
 
-    private final RequestMatcher delegate = new OrRequestMatcher(getApisToMatch());
-
-    @Override
-    public boolean matches(HttpServletRequest request) {
-        return delegate.matches(request);
+    public NoAuthApiRequestMatcher() {
+        super(getApisToMatch());
     }
 
     private static List<RequestMatcher> getApisToMatch() {

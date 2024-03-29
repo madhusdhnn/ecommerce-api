@@ -1,19 +1,14 @@
 package com.thetechmaddy.ecommerce.models.security.web;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.util.List;
 
-public class ApiRequestMatcher implements RequestMatcher {
+public final class ApiRequestMatcher extends AbstractRequestMatcher {
 
-    private final RequestMatcher delegate = new OrRequestMatcher(getApisToMatch());
-
-    @Override
-    public boolean matches(HttpServletRequest request) {
-        return delegate.matches(request);
+    public ApiRequestMatcher() {
+        super(getApisToMatch());
     }
 
     private static List<RequestMatcher> getApisToMatch() {

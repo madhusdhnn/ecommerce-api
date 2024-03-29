@@ -6,6 +6,7 @@ import com.thetechmaddy.ecommerce.models.security.CognitoGroupToGrantedAuthority
 import com.thetechmaddy.ecommerce.models.security.InternalApiKeyAuthorizationManager;
 import com.thetechmaddy.ecommerce.models.security.web.AdminRoleApiRequestMatcher;
 import com.thetechmaddy.ecommerce.models.security.web.ApiRequestMatcher;
+import com.thetechmaddy.ecommerce.models.security.web.InternalApiRequestMatcher;
 import com.thetechmaddy.ecommerce.models.security.web.NoAuthApiRequestMatcher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +78,7 @@ public class SecurityConfiguration {
                     .hasRole(COGNITO_ADMIN_GROUP_NAME)
                 .requestMatchers(new ApiRequestMatcher())
                     .hasAnyRole(COGNITO_ADMIN_GROUP_NAME, COGNITO_USER_GROUP_NAME)
-                .requestMatchers("/api/user-provisioning")
+                .requestMatchers(new InternalApiRequestMatcher())
                     .access(new InternalApiKeyAuthorizationManager(internalApiKey))
                 .anyRequest()
                     .authenticated();

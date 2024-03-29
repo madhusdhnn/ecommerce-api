@@ -8,17 +8,17 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SecurityScheme(
-		name = AppConstants.SECURITY_SCHEME_NAME,
-		scheme = "bearer",
-		bearerFormat = "JWT",
-		type = SecuritySchemeType.HTTP,
-		in = SecuritySchemeIn.HEADER
+        name = AppConstants.SECURITY_SCHEME_NAME,
+        scheme = "bearer",
+        bearerFormat = "JWT",
+        type = SecuritySchemeType.HTTP,
+        in = SecuritySchemeIn.HEADER
 )
 @SpringBootApplication
 public class ECommerceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ECommerceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ECommerceApplication.class, args);
+    }
 
 }
