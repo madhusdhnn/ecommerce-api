@@ -158,8 +158,8 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         assertNotNull(payment);
         assertEquals(PaymentStatus.PENDING, payment.getStatus());
 
-        assertTrue(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
-        assertEquals(0, cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB));
+        assertFalse(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
+        assertEquals(order.getOrderItems().size(), cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB));
     }
 
     @Test
@@ -308,8 +308,8 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
         order.getOrderItems().forEach(oi -> assertEquals(OrderItemStatus.CONFIRMED, oi.getStatus()));
 
-        assertTrue(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
-        assertEquals(0, cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB));
+        assertFalse(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
+        assertEquals(order.getOrderItems().size(), cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB));
     }
 
     @Test
@@ -521,20 +521,20 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void testDeleteDraftOrderFailed() {
+    public void testDeletePendingOrderFailed() {
         Order order = createTestOrderWithCreditCardPaymentMode();
         order.setStatus(CONFIRMED);
         ordersRepository.save(order);
 
-        assertThrows(UnProcessableEntityException.class, () -> ordersService.deleteDraftOrder(order.getId(), TEST_COGNITO_SUB));
+        assertThrows(OrderNotFoundException.class, () -> ordersService.deletePendingOrder(order.getId(), TEST_COGNITO_SUB));
     }
 
     @Test
-    public void testDeleteDraftOrderSuccess() {
+    public void testDeletePendingOrderSuccess() {
         Order order = createTestOrderWithCreditCardPaymentMode();
 
         long orderId = order.getId();
-        ordersService.deleteDraftOrder(orderId, TEST_COGNITO_SUB);
+        ordersService.deletePendingOrder(orderId, TEST_COGNITO_SUB);
 
         assertTrue(ordersRepository.findByIdAndUserId(orderId, TEST_COGNITO_SUB).isEmpty());
         assertTrue(paymentsRepository.findByOrderId(orderId).isEmpty());

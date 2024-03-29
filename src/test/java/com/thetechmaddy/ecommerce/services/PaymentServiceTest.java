@@ -14,6 +14,7 @@ import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.repositories.CartItemsRepository;
 import com.thetechmaddy.ecommerce.repositories.CartsRepository;
 import com.thetechmaddy.ecommerce.repositories.OrdersRepository;
+import com.thetechmaddy.ecommerce.repositories.ReservedProductsRepository;
 import com.thetechmaddy.ecommerce.utils.TestUtils.TestOrderRequestOptions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -52,6 +53,9 @@ public class PaymentServiceTest extends BaseIntegrationTest {
 
     @Autowired
     private CartItemsRepository cartItemsRepository;
+
+    @Autowired
+    private ReservedProductsRepository reservedProductsRepository;
 
     private long cartId;
 
@@ -148,6 +152,7 @@ public class PaymentServiceTest extends BaseIntegrationTest {
 
     @AfterEach
     public void clearOrdersAndCartItems() {
+        reservedProductsRepository.deleteAll();
         ordersRepository.deleteAll();
         cartItemsRepository.deleteAll();
         Optional<Cart> cartOptional = cartsRepository.findByUserId(TEST_COGNITO_SUB)

@@ -1,9 +1,9 @@
 package com.thetechmaddy.ecommerce.exceptions;
 
-import org.springframework.http.HttpStatus;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 public class CartNotLockedException extends BusinessException {
     public CartNotLockedException(String message) {
-        super(message, HttpStatus.FORBIDDEN);
+        super(message, UNPROCESSABLE_ENTITY);
     }
 }

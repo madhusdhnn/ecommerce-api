@@ -81,8 +81,8 @@ public class ProductsServiceImpl implements ProductsService {
     }
 
     @Override
-    @Transactional // TODO: This method should be called when order gets completed.
-    public void restoreProducts(long orderId, List<Long> productIds) {
+    @Transactional // TODO: This method should be called when order gets returned /cancelled.
+    public void restoreProductQuantity(long orderId, List<Long> productIds) {
         List<ReservedProduct> reservedProducts = reservedProductsRepository.findAllByOrderIdAndProductIdIn(orderId, productIds);
 
         List<Product> products = new ArrayList<>();

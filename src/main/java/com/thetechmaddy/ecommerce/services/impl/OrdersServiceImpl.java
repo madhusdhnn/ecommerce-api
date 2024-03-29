@@ -10,7 +10,6 @@ import com.thetechmaddy.ecommerce.domains.payments.Payment;
 import com.thetechmaddy.ecommerce.exceptions.DuplicatePendingOrderException;
 import com.thetechmaddy.ecommerce.exceptions.OrderItemsTotalMismatchException;
 import com.thetechmaddy.ecommerce.exceptions.OrderNotFoundException;
-import com.thetechmaddy.ecommerce.models.OrderItemStatus;
 import com.thetechmaddy.ecommerce.models.OrderSummary;
 import com.thetechmaddy.ecommerce.models.calculators.GrossAmountTotalCalculator;
 import com.thetechmaddy.ecommerce.models.calculators.NetAmountTotalCalculator;
@@ -95,7 +94,7 @@ public class OrdersServiceImpl implements OrdersService {
         PaymentInfo paymentInfo = orderRequest.getPaymentInfo();
         ensureCartTotalAndPaymentMatches(paymentInfo, cart);
 
-        Order newOrder = createOrder(paymentInfo.isCashOnDelivery(), userId, cart.getCartItems());
+        Order newOrder = createOrder(userId, cart.getCartItems());
 
         deliveryDetailsService.saveDeliveryInfo(orderRequest.getDeliveryInfo(), newOrder);
         log.info(String.format("Saved delivery information for order: (orderId - %d) and user: (userId - %s)", newOrder.getId(), userId));
@@ -103,13 +102,7 @@ public class OrdersServiceImpl implements OrdersService {
         paymentService.savePaymentInfo(paymentInfo, newOrder);
         log.info(String.format("Saved payment information for order: (orderId - %d) and user: (userId - %s)", newOrder.getId(), userId));
 
-        if (paymentInfo.isCashOnDelivery()) {
-            String unlockReleaseReason = String.format("Order: (orderId - %d) confirmed as it is a CASH_ON_DELIVERY for user: (userId - %s)",
-                    newOrder.getId(), userId);
-            unlockAndClearCart(cart, userId, unlockReleaseReason);
-            reserveProducts(newOrder, cart.getCartItems());
-        }
-
+        reserveProducts(newOrder, cart.getCartItems());
         return newOrder;
     }
 
@@ -120,22 +113,17 @@ public class OrdersServiceImpl implements OrdersService {
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
 
         ensureOrderInPendingStatus(order);
-        ensurePaymentIsSuccess(order.getPayment());
 
-        Cart cart = cartsService.getUserCart(customer.getCognitoSub());
-        reserveProducts(order, cart.getCartItems());
+        Payment payment = order.getPayment();
+        if (!payment.isCashOnDelivery()) {
+            ensurePaymentIsSuccess(payment);
+        }
 
         order.setStatus(CONFIRMED);
         log.info(String.format("Order: (orderId - %d) is confirmed for user: (userId - %s)", order.getId(), customer.getCognitoSub()));
 
         List<OrderItem> orderItems = order.getOrderItems();
         orderItems.forEach(OrderItem::confirmItem);
-
-        ordersRepository.save(order);
-
-        String unlockReleaseReason = String.format("Order: (orderId - %d) confirmed for user: (userId - %s)",
-                orderId, customer.getCognitoSub());
-        unlockAndClearCart(cart, customer.getCognitoSub(), unlockReleaseReason);
 
         return order;
     }
@@ -187,32 +175,31 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     @Transactional
-    public void deleteDraftOrder(long orderId, String userId) {
-        Order order = getOrder(orderId, userId);
-        ensureOrderInPendingStatus(order);
+    public void deletePendingOrder(long orderId, String userId) {
+        Order order = getUserOrderInPendingStatus(userId);
+        if (order == null) {
+            throw new OrderNotFoundException(String.format("Order: (orderId - %d) with status PENDING not found", orderId));
+        }
 
         Cart cart = cartsService.getUserCart(userId);
+
         List<Long> productIds = cart.getCartItems().stream()
                 .map(cartItem -> cartItem.getProduct().getId())
                 .collect(Collectors.toList());
-        productsService.restoreProducts(orderId, productIds);
+        productsService.restoreProductQuantity(orderId, productIds);
 
         ordersRepository.delete(order);
 
-        String unlockReleaseReason = String.format("Draft order: (orderId - %d) deleted by user: (userId - %s)", orderId, userId);
+        String unlockReleaseReason = String.format("Pending order: (orderId - %d) deleted by user: (userId - %s)", orderId, userId);
         cartLockApplierService.releaseLock(cart, unlockReleaseReason);
+
     }
 
-    private void unlockAndClearCart(Cart cart, String userId, String unlockReleaseReason) {
-        cartLockApplierService.releaseLock(cart, unlockReleaseReason);
-        cartsService.clearCart(cart.getId(), userId);
-    }
-
-    private Order createOrder(boolean cashOnDelivery, String userId, List<CartItem> cartItems) {
+    private Order createOrder(String userId, List<CartItem> cartItems) {
         Order.OrderBuilder builder = Order.builder();
 
         builder.userId(userId);
-        builder.status(cashOnDelivery ? CONFIRMED : PENDING);
+        builder.status(PENDING);
 
         NetAmountTotalCalculator netAmountTotalCalculator = new NetAmountTotalCalculator();
         GrossAmountTotalCalculator grossAmountTotalCalculator = new GrossAmountTotalCalculator();
@@ -225,7 +212,7 @@ public class OrdersServiceImpl implements OrdersService {
         List<OrderItem> orderItems = cartItems.stream()
                 .map(cartItemToOrderItemMapper::mapCartItemToOrderItem)
                 .peek(orderItem -> {
-                    orderItem.setStatus(cashOnDelivery ? OrderItemStatus.CONFIRMED : PENDING_ORDER_CONFIRMATION);
+                    orderItem.setStatus(PENDING_ORDER_CONFIRMATION);
                     orderItem.setOrder(order);
                 })
                 .collect(Collectors.toList());

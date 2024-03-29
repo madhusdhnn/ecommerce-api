@@ -89,4 +89,8 @@ public class Payment extends Audit {
     public boolean isProcessing() {
         return PaymentStatus.PROCESSING == this.status;
     }
+
+    public boolean isCashOnDelivery() {
+        return PaymentMode.CASH_ON_DELIVERY == this.paymentMode;
+    }
 }

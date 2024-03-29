@@ -88,9 +88,9 @@ public class OrdersController extends AuthenticationAwareController {
     }
 
     @DeleteMapping("/{orderId}")
-    public ApiResponse<?> deleteDraftOrder(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
-                                           @PathVariable("orderId") long orderId) {
-        ordersService.deleteDraftOrder(orderId, cognitoUser.getCognitoSub());
+    public ApiResponse<?> deletePendingOrder(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
+                                             @PathVariable("orderId") long orderId) {
+        ordersService.deletePendingOrder(orderId, cognitoUser.getCognitoSub());
         return ApiResponse.success();
     }
 }

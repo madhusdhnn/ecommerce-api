@@ -1,9 +1,7 @@
 package com.thetechmaddy.ecommerce;
 
 import com.thetechmaddy.ecommerce.domains.products.Product;
-import com.thetechmaddy.ecommerce.repositories.CartsRepository;
-import com.thetechmaddy.ecommerce.repositories.CategoriesRepository;
-import com.thetechmaddy.ecommerce.repositories.ProductsRepository;
+import com.thetechmaddy.ecommerce.repositories.*;
 import lombok.Getter;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
@@ -34,9 +32,17 @@ public class BaseIntegrationTest {
     @Autowired
     private CartsRepository cartsRepository;
 
+    @Autowired
+    private OrdersRepository ordersRepository;
+
+    @Autowired
+    private ReservedProductsRepository reservedProductsRepository;
+
     @BeforeAll
     public void setup() {
         cartsRepository.deleteAll();
+        reservedProductsRepository.deleteAll();
+        ordersRepository.deleteAll();
         productsRepository.deleteAll();
 
         List<Product> input = List.of(

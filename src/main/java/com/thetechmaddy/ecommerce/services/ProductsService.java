@@ -20,5 +20,5 @@ public interface ProductsService {
 
     void ensureProductHasSufficientQuantity(long productId, int requiredQuantity);
 
-    void restoreProducts(long orderId, List<Long> productIds);
+    void restoreProductQuantity(long orderId, List<Long> productIds);
 }

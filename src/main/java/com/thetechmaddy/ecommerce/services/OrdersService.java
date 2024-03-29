@@ -25,5 +25,5 @@ public interface OrdersService {
 
     void updateDeliveryInfo(long orderId, String userId, DeliveryInfo deliveryInfo);
 
-    void deleteDraftOrder(long orderId, String userId);
+    void deletePendingOrder(long orderId, String userId);
 }
