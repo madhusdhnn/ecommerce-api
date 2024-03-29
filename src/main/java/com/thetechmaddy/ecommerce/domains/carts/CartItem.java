@@ -3,7 +3,8 @@ package com.thetechmaddy.ecommerce.domains.carts;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.Audit;
 import com.thetechmaddy.ecommerce.domains.products.Product;
-import com.thetechmaddy.ecommerce.models.JsonViews;
+import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
+import com.thetechmaddy.ecommerce.models.JsonViews.CheckoutCartResponse;
 import com.thetechmaddy.ecommerce.models.carts.CartItemStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,23 +20,23 @@ public class CartItem extends Audit {
 
     @Id
     @Column(name = "id")
-    @JsonView(JsonViews.CartResponse.class)
+    @JsonView({CartResponse.class, CheckoutCartResponse.class})
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Setter
     @OneToOne(fetch = FetchType.LAZY, targetEntity = Product.class, optional = false)
-    @JsonView(JsonViews.CartResponse.class)
+    @JsonView({CartResponse.class, CheckoutCartResponse.class})
     @JoinColumn(name = "product_id")
     private Product product;
 
     @Setter
-    @JsonView(JsonViews.CartResponse.class)
+    @JsonView({CartResponse.class, CheckoutCartResponse.class})
     @Column(name = "quantity")
     private int quantity;
 
     @Setter
-    @JsonView(JsonViews.CartResponse.class)
+    @JsonView({CartResponse.class, CheckoutCartResponse.class})
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private CartItemStatus status;

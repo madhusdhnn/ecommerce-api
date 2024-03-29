@@ -3,6 +3,7 @@ package com.thetechmaddy.ecommerce.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.models.AppConstants;
+import com.thetechmaddy.ecommerce.models.JsonViews;
 import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
 import com.thetechmaddy.ecommerce.models.carts.CheckoutData;
 import com.thetechmaddy.ecommerce.models.requests.CartItemRequest;
@@ -65,6 +66,7 @@ public class CartsController extends AuthenticationAwareController {
     }
 
     @PutMapping("/{cartId}/checkout")
+    @JsonView(JsonViews.CheckoutCartResponse.class)
     public ApiResponse<CheckoutData> checkoutCart(@RequestAttribute(name = AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
                                                   @PathVariable("cartId") long cartId) {
         CheckoutData checkoutData = this.cartsService.checkoutCart(cartId, cognitoUser.getCognitoSub());

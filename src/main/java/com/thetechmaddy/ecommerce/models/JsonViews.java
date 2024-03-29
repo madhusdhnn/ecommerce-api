@@ -28,4 +28,7 @@ public interface JsonViews {
 
     class GetOrderDetailResponse {
     }
+
+    class CheckoutCartResponse {
+    }
 }

@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thetechmaddy.ecommerce.domains.Audit;
 import com.thetechmaddy.ecommerce.domains.Category;
-import com.thetechmaddy.ecommerce.models.JsonViews.CartResponse;
-import com.thetechmaddy.ecommerce.models.JsonViews.OrderInitiateResponse;
-import com.thetechmaddy.ecommerce.models.JsonViews.ProductDetailResponse;
-import com.thetechmaddy.ecommerce.models.JsonViews.ProductResponse;
+import com.thetechmaddy.ecommerce.models.JsonViews.*;
 import com.thetechmaddy.ecommerce.models.serializers.BigDecimalToDoubleTwoDecimalPlacesNumberSerializer;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,46 +29,46 @@ public class Product extends Audit {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
+    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class, CheckoutCartResponse.class})
     private long id;
 
     @Column(name = "name", nullable = false)
-    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
+    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class, CheckoutCartResponse.class})
     private String name;
 
     @Column(name = "description")
-    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
+    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class, CheckoutCartResponse.class})
     private String description;
 
     @Column(name = "sku_code")
-    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
+    @JsonView(value = {OrderInitiateResponse.class, ProductDetailResponse.class, ProductResponse.class, CartResponse.class, CheckoutCartResponse.class})
     private String skuCode;
 
     @Setter
     @Column(name = "unit_price")
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
-    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
+    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class, CheckoutCartResponse.class})
     private BigDecimal unitPrice;
 
     @Setter
     @Column(name = "gross_amount")
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
-    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
+    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class, CheckoutCartResponse.class})
     private BigDecimal grossAmount;
 
     @Column(name = "tax_percentage")
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
-    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
+    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class, CheckoutCartResponse.class})
     private BigDecimal taxPercentage;
 
     @Setter
     @Column(name = "tax_amount")
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
-    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
+    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class, CheckoutCartResponse.class})
     private BigDecimal taxAmount;
 
     @Setter
-    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class})
+    @JsonView(value = {ProductDetailResponse.class, ProductResponse.class, CartResponse.class, CheckoutCartResponse.class})
     @Column(name = "stock_quantity")
     private int stockQuantity;
 

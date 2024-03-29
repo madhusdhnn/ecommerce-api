@@ -187,7 +187,7 @@ public class CartsServiceImpl implements CartsService {
             cartLockApplierService.acquireLock(cart, lockAcquireReason);
         }
 
-        return new CheckoutData(cartId, cart.getSubTotal(), cart.getTaxTotal(), cart.getGrossTotal());
+        return new CheckoutData(cart.getCartItems(), cart.getSubTotal(), cart.getTaxTotal(), cart.getGrossTotal());
     }
 
     private void calculateAllTotals(Cart cart) {
