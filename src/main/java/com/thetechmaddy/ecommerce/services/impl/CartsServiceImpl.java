@@ -84,6 +84,7 @@ public class CartsServiceImpl implements CartsService {
             cartItem = new CartItem(product, cartItemRequest.getQuantity(), SELECTED, cart);
         }
 
+        // JPA will take care of duplicate list item, by comparing with the primary key
         cart.addProduct(cartItem);
         cartsRepository.save(cart);
 

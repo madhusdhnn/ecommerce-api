@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,7 @@ import static com.thetechmaddy.ecommerce.models.validations.ValidationConstants.
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CognitoUser {
 
     @NotNull(message = "Cognito Sub" + " " + NOT_NULL_MESSAGE_SUFFIX)
