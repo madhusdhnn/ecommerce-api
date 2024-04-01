@@ -16,6 +16,7 @@ import com.thetechmaddy.ecommerce.models.delivery.Customer;
 import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
 import com.thetechmaddy.ecommerce.models.filters.OrderFilters;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
+import com.thetechmaddy.ecommerce.models.payments.PaymentMode;
 import com.thetechmaddy.ecommerce.models.payments.PaymentStatus;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
@@ -116,57 +117,10 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void testNewOrderInitiateCashOnDelivery() {
-        getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
-            cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
-        });
-
-        BigDecimal cartTotal = cartItemsRepository.getGrossTotalForSelectedCartItems(cartId, TEST_COGNITO_SUB);
-
-        TestOrderRequestOptions options = TestOrderRequestOptions.builder()
-                .createDeliveryInfo(true)
-                .createPaymentInfo(true)
-                .cartAmount(cartTotal)
-                .paymentMode(CASH_ON_DELIVERY)
-                .build();
-
-        OrderRequest orderRequest = getOrderRequest(cartId, options);
-
-        cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
-        Order order = ordersService.createNewOrder(TEST_COGNITO_SUB, orderRequest);
-        assertNotNull(order);
-
-        assertEquals(CONFIRMED, order.getStatus());
-        order.getOrderItems().forEach(oi -> assertEquals(OrderItemStatus.CONFIRMED, oi.getStatus()));
-
-        BigDecimal netTotal = order.getOrderItems().stream()
-                .map(OrderItem::getNetAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        assertEquals(netTotal, order.getNetTotal());
-
-        BigDecimal grossTotal = order.getOrderItems().stream()
-                .map(OrderItem::getGrossAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        assertEquals(grossTotal, order.getGrossTotal());
-
-        DeliveryDetails deliveryDetails = order.getDeliveryDetails();
-        assertNotNull(deliveryDetails);
-
-        Payment payment = order.getPayment();
-        assertNotNull(payment);
-        assertEquals(PaymentStatus.PENDING, payment.getStatus());
-
-        assertFalse(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
-        assertEquals(order.getOrderItems().size(), cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB));
-    }
-
-    @Test
     public void testInitiateOrderReturnExisting() {
         assertNull(ordersService.getUserOrderInPendingStatus(TEST_COGNITO_SUB));
 
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
 
         Order actual = ordersService.getUserOrderInPendingStatus(TEST_COGNITO_SUB);
         assertEquals(order.getId(), actual.getId());
@@ -204,7 +158,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testNewOrderInitiateOtherPaymentModes() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
         assertNotNull(order);
 
         assertEquals(PENDING, order.getStatus());
@@ -296,10 +250,29 @@ public class OrdersServiceTest extends BaseIntegrationTest {
     @Test
     @Transactional
     public void testPlaceOrder() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
 
         Payment payment = order.getPayment();
         payment.setStatus(PaymentStatus.SUCCESS);
+        paymentsRepository.save(payment);
+
+        Order placedOrder = ordersService.placeOrder(order.getId(), new CognitoUser(TEST_COGNITO_SUB));
+        assertNotNull(placedOrder);
+        assertEquals(CONFIRMED, placedOrder.getStatus());
+
+        order.getOrderItems().forEach(oi -> assertEquals(OrderItemStatus.CONFIRMED, oi.getStatus()));
+
+        assertFalse(cartsRepository.isUnlocked(cartId, TEST_COGNITO_SUB));
+        assertEquals(order.getOrderItems().size(), cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB));
+    }
+
+    @Test
+    @Transactional
+    public void testPlaceOrderCOD() {
+        Order order = createTestOrderWithCreditCardPaymentMode(CASH_ON_DELIVERY);
+
+        Payment payment = order.getPayment();
+        payment.setStatus(PaymentStatus.PENDING);
         paymentsRepository.save(payment);
 
         Order placedOrder = ordersService.placeOrder(order.getId(), new CognitoUser(TEST_COGNITO_SUB));
@@ -325,7 +298,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testGetAllOrdersWithoutFilters() {
-        createTestOrderWithCreditCardPaymentMode();
+        createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
 
         Paged<OrderSummary> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, null);
         assertNotNull(result);
@@ -342,7 +315,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testGetAllOrdersWithFilters1() {
-        createTestOrderWithCreditCardPaymentMode();
+        createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
 
         Paged<OrderSummary> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().year(2023).build());
         assertNotNull(result);
@@ -354,7 +327,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testGetAllOrdersWithFilters2() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
         order.setCreatedAt(OffsetDateTime.now().minusDays(34));
         ordersRepository.save(order);
 
@@ -368,7 +341,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testGetAllOrdersWithFilters3() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
         order.setCreatedAt(OffsetDateTime.now().minusMonths(4));
         ordersRepository.save(order);
 
@@ -382,7 +355,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testGetAllOrdersWithFilters4() {
-        createTestOrderWithCreditCardPaymentMode();
+        createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
 
         Paged<OrderSummary> result = ordersService.getUserOrders(0, 2, TEST_COGNITO_SUB, OrderFilters.builder().orderStatus(COMPLETED).build());
         assertNotNull(result);
@@ -394,7 +367,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testUpdatePaymentInfoFailed1() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
         order.setStatus(CONFIRMED);
         ordersRepository.save(order);
 
@@ -408,7 +381,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testUpdatePaymentInfoFailed2() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
 
         assertThrows(OrderItemsTotalMismatchException.class,
                 () -> ordersService.updatePaymentInfo(
@@ -420,7 +393,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testUpdatePaymentInfoFailed3() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
 
         Payment payment = order.getPayment();
         payment.setStatus(PaymentStatus.PROCESSING);
@@ -438,7 +411,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testUpdatePaymentInfoFailed4() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
 
         Payment payment = order.getPayment();
         payment.setStatus(PaymentStatus.SUCCESS);
@@ -456,7 +429,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testUpdatePaymentInfoSuccess() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
 
         Payment payment = order.getPayment();
         assertNotNull(payment);
@@ -476,7 +449,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testUpdateDeliveryInfoFailed1() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
         order.setStatus(CONFIRMED);
         ordersRepository.save(order);
 
@@ -490,7 +463,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testUpdateDeliveryInfoSuccess() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
 
         Address shippingAddress = Address.builder()
                 .addressOne("Wall St")
@@ -522,7 +495,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testDeletePendingOrderFailed() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
         order.setStatus(CONFIRMED);
         ordersRepository.save(order);
 
@@ -531,7 +504,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testDeletePendingOrderSuccess() {
-        Order order = createTestOrderWithCreditCardPaymentMode();
+        Order order = createTestOrderWithCreditCardPaymentMode(CREDIT_CARD);
 
         long orderId = order.getId();
         ordersService.deletePendingOrder(orderId, TEST_COGNITO_SUB);
@@ -547,7 +520,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
         assertEquals(4, cartItemsRepository.countByCartIdAndCartUserId(cartId, TEST_COGNITO_SUB));
     }
 
-    private Order createTestOrderWithCreditCardPaymentMode() {
+    private Order createTestOrderWithCreditCardPaymentMode(PaymentMode paymentMode) {
         getTestProducts().stream().filter(Product::isInStock).forEach(product -> {
             cartItemsRepository.saveOnConflictUpdateQuantity(product.getId(), 3, cartId);
         });
@@ -558,7 +531,7 @@ public class OrdersServiceTest extends BaseIntegrationTest {
                 .createDeliveryInfo(true)
                 .createPaymentInfo(true)
                 .cartAmount(cartTotal)
-                .paymentMode(CREDIT_CARD)
+                .paymentMode(paymentMode)
                 .build();
 
         cartsRepository.lockCart(cartId, TEST_COGNITO_SUB);
