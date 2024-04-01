@@ -39,7 +39,7 @@ public class GetOrdersSpecification implements Specification<Order> {
             Path<OffsetDateTime> createdAt = root.get("createdAt");
 
             if (filters.hasYearFilter()) {
-                int year = filters.getYear();
+                Integer year = filters.getYear();
                 OffsetDateTime startOfYear = atStartDayOfYear(year);
                 OffsetDateTime endOfYear = atEndDayOfYear(year);
                 predicates.add(cb.between(createdAt, startOfYear, endOfYear));

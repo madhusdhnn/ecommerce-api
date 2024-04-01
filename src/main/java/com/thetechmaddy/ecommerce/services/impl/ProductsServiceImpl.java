@@ -34,16 +34,16 @@ public class ProductsServiceImpl implements ProductsService {
 
     @Override
     public void reserveProducts(Order order, Map<Long, Integer> productIdQuantityMap) {
-        List<Product> products = productsRepository.findAllById(productIdQuantityMap.keySet());
+        List<Product> productsToReserve = productsRepository.findAllById(productIdQuantityMap.keySet());
 
         List<ReservedProduct> reservedProducts = new ArrayList<>();
-        for (Product product : products) {
+        for (Product product : productsToReserve) {
             int quantityToDecrement = productIdQuantityMap.get(product.getId());
             product.decrementStockQuantity(quantityToDecrement);
             reservedProducts.add(new ReservedProduct(quantityToDecrement, order, product));
         }
 
-        productsRepository.saveAll(products);
+        productsRepository.saveAll(productsToReserve);
         reservedProductsRepository.saveAll(reservedProducts);
     }
 
@@ -82,7 +82,7 @@ public class ProductsServiceImpl implements ProductsService {
 
     @Override
     @Transactional // TODO: This method should be called when order gets returned /cancelled.
-    public void restoreProductQuantity(long orderId, List<Long> productIds) {
+    public void releaseReservedProducts(long orderId, List<Long> productIds) {
         List<ReservedProduct> reservedProducts = reservedProductsRepository.findAllByOrderIdAndProductIdIn(orderId, productIds);
 
         List<Product> products = new ArrayList<>();

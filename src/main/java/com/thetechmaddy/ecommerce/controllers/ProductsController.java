@@ -2,11 +2,13 @@ package com.thetechmaddy.ecommerce.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.products.Product;
+import com.thetechmaddy.ecommerce.models.AppConstants;
 import com.thetechmaddy.ecommerce.models.JsonViews;
 import com.thetechmaddy.ecommerce.models.filters.ProductFilters;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 import com.thetechmaddy.ecommerce.services.ProductsService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +18,8 @@ import java.math.BigDecimal;
 @RestController
 @RequestMapping(value = "/api/products")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class ProductsController extends AuthenticationAwareController {
+@SecurityRequirement(name = AppConstants.SECURITY_SCHEME_NAME)
+public class ProductsController extends BaseController {
 
     private final ProductsService productsService;
 

@@ -81,7 +81,7 @@ public class OrderItem extends Audit {
     @JsonSerialize(using = BigDecimalToDoubleTwoDecimalPlacesNumberSerializer.class)
     private BigDecimal taxPercentage;
 
-    public void confirmItem() {
+    public void markAsConfirmed() {
         this.status = OrderItemStatus.CONFIRMED;
     }
 }

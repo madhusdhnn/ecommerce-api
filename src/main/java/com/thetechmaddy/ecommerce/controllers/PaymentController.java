@@ -2,6 +2,7 @@ package com.thetechmaddy.ecommerce.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.payments.Payment;
+import com.thetechmaddy.ecommerce.models.AppConstants;
 import com.thetechmaddy.ecommerce.models.JsonViews;
 import com.thetechmaddy.ecommerce.models.contexts.PaymentWorkflowContextHolder;
 import com.thetechmaddy.ecommerce.models.payments.PaymentInfo;
@@ -9,6 +10,7 @@ import com.thetechmaddy.ecommerce.models.payments.PaymentMode;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.services.PaymentService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +22,8 @@ import static com.thetechmaddy.ecommerce.models.AppConstants.CURRENT_USER_REQUES
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class PaymentController extends AuthenticationAwareController {
+@SecurityRequirement(name = AppConstants.SECURITY_SCHEME_NAME)
+public class PaymentController extends BaseController {
 
 
     private final PaymentService paymentService;

@@ -18,7 +18,7 @@ import static com.thetechmaddy.ecommerce.models.AppConstants.CURRENT_USER_REQUES
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class UsersController extends AuthenticationAwareController {
+public class UsersController extends BaseController {
 
     private final UsersService usersService;
 

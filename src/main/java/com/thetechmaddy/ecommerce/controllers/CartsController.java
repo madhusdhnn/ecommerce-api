@@ -11,6 +11,7 @@ import com.thetechmaddy.ecommerce.models.requests.CartItemUpdateRequest;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.services.CartsService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/api/carts")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class CartsController extends AuthenticationAwareController {
+@SecurityRequirement(name = AppConstants.SECURITY_SCHEME_NAME)
+public class CartsController extends BaseController {
 
     private final CartsService cartsService;
 

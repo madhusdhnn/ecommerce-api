@@ -2,6 +2,7 @@ package com.thetechmaddy.ecommerce.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.orders.Order;
+import com.thetechmaddy.ecommerce.models.AppConstants;
 import com.thetechmaddy.ecommerce.models.JsonViews;
 import com.thetechmaddy.ecommerce.models.OrderStatus;
 import com.thetechmaddy.ecommerce.models.OrderSummary;
@@ -13,6 +14,7 @@ import com.thetechmaddy.ecommerce.models.requests.OrderRequest;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.models.responses.Paged;
 import com.thetechmaddy.ecommerce.services.OrdersService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +25,8 @@ import static com.thetechmaddy.ecommerce.models.AppConstants.CURRENT_USER_REQUES
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class OrdersController extends AuthenticationAwareController {
+@SecurityRequirement(name = AppConstants.SECURITY_SCHEME_NAME)
+public class OrdersController extends BaseController {
 
     private final OrdersService ordersService;
 

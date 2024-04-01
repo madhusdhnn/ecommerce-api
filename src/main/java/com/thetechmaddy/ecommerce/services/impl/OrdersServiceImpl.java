@@ -123,7 +123,7 @@ public class OrdersServiceImpl implements OrdersService {
         log.info(String.format("Order: (orderId - %d) is confirmed for user: (userId - %s)", order.getId(), customer.getCognitoSub()));
 
         List<OrderItem> orderItems = order.getOrderItems();
-        orderItems.forEach(OrderItem::confirmItem);
+        orderItems.forEach(OrderItem::markAsConfirmed);
 
         return order;
     }
@@ -186,7 +186,8 @@ public class OrdersServiceImpl implements OrdersService {
         List<Long> productIds = cart.getCartItems().stream()
                 .map(cartItem -> cartItem.getProduct().getId())
                 .collect(Collectors.toList());
-        productsService.restoreProductQuantity(orderId, productIds);
+
+        productsService.releaseReservedProducts(orderId, productIds);
 
         ordersRepository.delete(order);
 
