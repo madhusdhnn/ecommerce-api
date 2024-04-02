@@ -2,10 +2,7 @@ package com.thetechmaddy.ecommerce.models.payments;
 
 import com.thetechmaddy.ecommerce.exceptions.PaymentModeRequiredException;
 import com.thetechmaddy.ecommerce.exceptions.PaymentProviderNotImplementedException;
-import com.thetechmaddy.ecommerce.providers.CardPaymentProvider;
-import com.thetechmaddy.ecommerce.providers.NetBankingProvider;
-import com.thetechmaddy.ecommerce.providers.PaymentProvider;
-import com.thetechmaddy.ecommerce.providers.UPIPaymentProvider;
+import com.thetechmaddy.ecommerce.providers.*;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
@@ -36,6 +33,7 @@ public class PaymentProviderFactory {
         providerMap.put(DEBIT_CARD, new CardPaymentProvider());
         providerMap.put(NET_BANKING, new NetBankingProvider());
         providerMap.put(UPI, new UPIPaymentProvider());
+        providerMap.put(CASH_ON_DELIVERY, new CashOnDeliveryProvider());
 
         return providerMap;
     }
