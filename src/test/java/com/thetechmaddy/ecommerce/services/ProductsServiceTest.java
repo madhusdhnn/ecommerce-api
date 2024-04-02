@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import static com.thetechmaddy.ecommerce.utils.ProductUtils.ensureProductHasSufficientQuantity;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -29,13 +30,13 @@ public class ProductsServiceTest extends BaseIntegrationTest {
 
     @Test
     public void testGetSingleProduct_ThrowsProductNotFound() {
-        assertThrows(ProductNotFoundException.class, () -> this.productsService.getProductById(Integer.MAX_VALUE));
+        assertThrows(ProductNotFoundException.class, () -> this.productsService.getProduct(Integer.MAX_VALUE));
     }
 
     @Test
     public void testGetSingleProduct() {
         Product expected = getTestProducts().get(0);
-        Product actual = this.productsService.getProductById(expected.getId());
+        Product actual = this.productsService.getProduct(expected.getId());
         assertEquals(expected.getId(), actual.getId());
         assertEquals(0, expected.getTaxPercentage().compareTo(actual.getTaxPercentage()));
         assertEquals(0, expected.getGrossAmount().compareTo(actual.getGrossAmount()));
@@ -128,7 +129,7 @@ public class ProductsServiceTest extends BaseIntegrationTest {
 
         assertDoesNotThrow(() -> {
             Product product = productOptional.get();
-            this.productsService.ensureProductHasSufficientQuantity(product.getId(), product.getStockQuantity() - 1);
+            ensureProductHasSufficientQuantity(product, product.getStockQuantity() - 1);
         });
 
         Optional<Product> outOfStockProductOptional = getTestProducts().stream().filter(product -> !product.isInStock()).findFirst();
@@ -136,7 +137,7 @@ public class ProductsServiceTest extends BaseIntegrationTest {
 
         assertThrows(InsufficientProductQuantityException.class, () -> {
             Product product = outOfStockProductOptional.get();
-            this.productsService.ensureProductHasSufficientQuantity(product.getId(), 4);
+            ensureProductHasSufficientQuantity(product, 4);
         });
     }
 

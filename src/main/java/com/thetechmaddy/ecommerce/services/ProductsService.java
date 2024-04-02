@@ -12,13 +12,11 @@ public interface ProductsService {
 
     void reserveProducts(Order order, Map<Long, Integer> productIdQuantityMap);
 
-    Product getProductById(long productId);
+    Product getProduct(long productId);
 
     Product checkQuantityAndGetProduct(long productId, int requestedQuantity);
 
     Paged<Product> getAllProducts(Integer page, Integer size, String search, ProductFilters productFilters);
-
-    void ensureProductHasSufficientQuantity(long productId, int requiredQuantity);
 
     void releaseReservedProducts(long orderId, List<Long> productIds);
 }

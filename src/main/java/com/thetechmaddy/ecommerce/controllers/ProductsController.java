@@ -43,7 +43,7 @@ public class ProductsController extends BaseController {
 
     @GetMapping("/{productId}")
     @JsonView(value = JsonViews.ProductDetailResponse.class)
-    public ApiResponse<Product> getProductById(@PathVariable("productId") long productId) {
-        return ApiResponse.success(this.productsService.getProductById(productId));
+    public ApiResponse<Product> getProduct(@PathVariable("productId") long productId) {
+        return ApiResponse.success(this.productsService.getProduct(productId));
     }
 }

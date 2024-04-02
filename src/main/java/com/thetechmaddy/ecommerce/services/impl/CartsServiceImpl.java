@@ -32,6 +32,7 @@ import java.util.Optional;
 import static com.thetechmaddy.ecommerce.models.carts.CartItemStatus.SELECTED;
 import static com.thetechmaddy.ecommerce.models.carts.CartStatus.UN_LOCKED;
 import static com.thetechmaddy.ecommerce.utils.CartUtils.*;
+import static com.thetechmaddy.ecommerce.utils.ProductUtils.ensureProductHasSufficientQuantity;
 
 @Log4j2
 @Primary
@@ -58,7 +59,7 @@ public class CartsServiceImpl implements CartsService {
 
         verifyCartOwner(cart, userId);
 
-        calculateAllTotals(cart);
+        calculateTotals(cart);
         return cart;
     }
 
@@ -104,7 +105,8 @@ public class CartsServiceImpl implements CartsService {
 
             Integer quantity = cartItemUpdateRequest.getQuantity();
             if (quantity != null) {
-                productsService.ensureProductHasSufficientQuantity(productId, cartItemUpdateRequest.getQuantity());
+                Product product = productsService.getProduct(productId);
+                ensureProductHasSufficientQuantity(product, cartItemUpdateRequest.getQuantity());
                 cartItem.setQuantity(quantity);
             }
 
@@ -115,8 +117,8 @@ public class CartsServiceImpl implements CartsService {
 
             cartItemsRepository.save(cartItem);
         } catch (InsufficientProductQuantityException ex) {
-            boolean removed = removeProductFromCart(cartId, productId, userId);
-            if (removed) {
+            int rowsDeleted = cartItemsRepository.removeItem(cartId, productId, userId);
+            if (rowsDeleted == 1) {
                 log.info(String.format("Product: (productId - %d) removed from cart because of insufficient quantity", productId));
             }
             throw ex;
@@ -191,7 +193,7 @@ public class CartsServiceImpl implements CartsService {
         return new CheckoutData(cart.getCartItems(), cart.getSubTotal(), cart.getTaxTotal(), cart.getGrossTotal());
     }
 
-    private void calculateAllTotals(Cart cart) {
+    private void calculateTotals(Cart cart) {
         NetAmountTotalCalculator netAmountTotalCalculator = new NetAmountTotalCalculator();
         GrossAmountTotalCalculator grossAmountTotalCalculator = new GrossAmountTotalCalculator();
         TaxAmountTotalCalculator taxAmountTotalCalculator = new TaxAmountTotalCalculator();

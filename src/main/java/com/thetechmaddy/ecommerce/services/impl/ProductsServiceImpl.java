@@ -48,14 +48,14 @@ public class ProductsServiceImpl implements ProductsService {
     }
 
     @Override
-    public Product getProductById(long productId) {
+    public Product getProduct(long productId) {
         return productsRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(String.format("Product not found with id : %d", productId)));
     }
 
     @Override
     public Product checkQuantityAndGetProduct(long productId, int requiredQuantity) {
-        Product product = getProductById(productId);
+        Product product = getProduct(productId);
         if (product.hasInsufficientQuantity(requiredQuantity)) {
             throw new InsufficientProductQuantityException(productId, product.getStockQuantity(), requiredQuantity);
         }
@@ -69,15 +69,6 @@ public class ProductsServiceImpl implements ProductsService {
 
         Page<Product> products = this.productsRepository.findAll(specification, pageRequest);
         return new Paged<>(products.getContent(), page, products.getTotalElements(), products.getNumberOfElements());
-    }
-
-    @Override
-    public void ensureProductHasSufficientQuantity(long productId, int requiredQuantity) {
-        Product product = getProductById(productId);
-
-        if (product.hasInsufficientQuantity(requiredQuantity)) {
-            throw new InsufficientProductQuantityException(productId, product.getStockQuantity(), requiredQuantity);
-        }
     }
 
     @Override
