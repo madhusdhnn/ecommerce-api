@@ -193,7 +193,6 @@ public class OrdersServiceImpl implements OrdersService {
 
         String unlockReleaseReason = String.format("Pending order: (orderId - %d) deleted by user: (userId - %s)", orderId, userId);
         cartLockApplierService.releaseLock(cart, unlockReleaseReason);
-
     }
 
     private Order createOrder(String userId, List<CartItem> cartItems) {
