@@ -1,9 +1,7 @@
 package com.thetechmaddy.ecommerce.domains.users;
 
 import com.thetechmaddy.ecommerce.domains.Address;
-import com.thetechmaddy.ecommerce.domains.Audit;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,7 +16,7 @@ public class UserAddress extends Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

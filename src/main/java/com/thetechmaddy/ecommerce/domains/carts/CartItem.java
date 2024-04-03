@@ -43,7 +43,7 @@ public class CartItem extends Audit {
 
     @Setter
     @EqualsAndHashCode.Exclude
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = Cart.class)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;
 
