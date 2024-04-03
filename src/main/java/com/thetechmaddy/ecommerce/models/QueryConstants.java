@@ -27,10 +27,6 @@ public class QueryConstants {
                 ON c.id = ci.cart_id
                 WHERE c.id = :cartId AND c.user_id = :userId
             """;
-    public static final String GROSS_TOTAL_FOR_CURRENT_ORDER_QUERY = """
-                SELECT SUM(oi.grossAmount) FROM OrderItem oi JOIN Order o ON o.id = oi.order.id
-                WHERE o.userId = :userId AND o.status = :orderStatus
-            """;
     public static final String GROSS_TOTAL_FOR_SELECTED_CART_ITEMS_QUERY = """
                 SELECT SUM(ci.product.grossAmount * ci.quantity) FROM CartItem ci JOIN Cart c ON c.id = ci.cart.id
                 WHERE c.id = :cartId AND c.userId = :userId AND ci.status = 'SELECTED'
