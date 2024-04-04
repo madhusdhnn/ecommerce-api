@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static com.thetechmaddy.ecommerce.models.validations.ValidationConstants.NAME_MIN_LENGTH_MESSAGE;
+import static com.thetechmaddy.ecommerce.models.validations.ValidationConstants.NAME_MIN_1_LENGTH_MESSAGE;
 import static com.thetechmaddy.ecommerce.models.validations.ValidationConstants.NOT_NULL_MESSAGE_SUFFIX;
 
 @Getter
@@ -16,7 +16,7 @@ import static com.thetechmaddy.ecommerce.models.validations.ValidationConstants.
 public class Customer {
 
     @NotNull(message = "name" + " " + NOT_NULL_MESSAGE_SUFFIX)
-    @Size(min = 1, message = "name" + " " + NAME_MIN_LENGTH_MESSAGE)
+    @Size(min = 1, message = "name" + " " + NAME_MIN_1_LENGTH_MESSAGE)
     private String name;
 
     @Email
