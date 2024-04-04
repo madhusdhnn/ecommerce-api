@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.thetechmaddy.ecommerce.domains.carts.Cart;
 import com.thetechmaddy.ecommerce.domains.carts.CartItem;
 import com.thetechmaddy.ecommerce.domains.orders.Order;
+import com.thetechmaddy.ecommerce.exceptions.UnsupportedBusinessOperationException;
 import com.thetechmaddy.ecommerce.models.*;
 import com.thetechmaddy.ecommerce.models.delivery.DeliveryInfo;
 import com.thetechmaddy.ecommerce.models.filters.OrderFilters;
@@ -23,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.thetechmaddy.ecommerce.models.AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE;
+import static com.thetechmaddy.ecommerce.models.AppConstants.DEFAULT_DELETE_ORDER_STATUS;
+import static com.thetechmaddy.ecommerce.models.OrderStatus.PENDING;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -105,8 +108,14 @@ public class OrdersController extends BaseController {
     }
 
     @DeleteMapping("/{orderId}")
-    public ApiResponse<?> deletePendingOrder(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
-                                             @PathVariable("orderId") long orderId) {
+    public ApiResponse<?> deleteOrder(@RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
+                                      @PathVariable("orderId") long orderId,
+                                      @RequestParam(name = "status", required = false,
+                                              defaultValue = DEFAULT_DELETE_ORDER_STATUS) String deleteOrderStatus) {
+        if (OrderStatus.parse(deleteOrderStatus) != PENDING) {
+            throw new UnsupportedBusinessOperationException("Delete order other than PENDING status not supported");
+        }
+
         ordersService.deletePendingOrder(orderId, cognitoUser.getCognitoSub());
         return ApiResponse.success();
     }

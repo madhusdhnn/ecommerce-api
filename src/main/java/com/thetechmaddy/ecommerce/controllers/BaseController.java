@@ -30,7 +30,8 @@ public class BaseController {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ApiResponse<ErrorResponse>> runtimeException(RuntimeException ex) {
         log.error(ex.getMessage(), ex);
-        var response = ApiResponse.error(new ErrorResponse("Something went wrong!"));
+        Map<String, Object> additionalInfo = Map.of("detail", ex.getMessage());
+        var response = ApiResponse.error(new ErrorResponse("Something went wrong!", additionalInfo));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 

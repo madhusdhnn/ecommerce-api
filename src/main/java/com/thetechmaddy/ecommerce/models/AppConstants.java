@@ -16,4 +16,5 @@ public class AppConstants {
 
     public static final String SECURITY_SCHEME_NAME = "CognitoAuth";
     public static final String INTERNAL_API_KEY_HEADER_NAME = "X-API-Key";
+    public static final String DEFAULT_DELETE_ORDER_STATUS = "PENDING";
 }
