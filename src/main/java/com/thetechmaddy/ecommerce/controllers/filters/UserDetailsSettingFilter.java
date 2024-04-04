@@ -1,7 +1,6 @@
 package com.thetechmaddy.ecommerce.controllers.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thetechmaddy.ecommerce.exceptions.AuthenticationMissingException;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,7 +23,6 @@ import static com.thetechmaddy.ecommerce.models.AppConstants.*;
 import static com.thetechmaddy.ecommerce.models.validations.BeanValidator.withValidation;
 import static com.thetechmaddy.ecommerce.utils.HttpUtils.sendErrorResponse;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Log4j2
 @Component
@@ -42,15 +40,13 @@ public class UserDetailsSettingFilter extends OncePerRequestFilter {
             try {
                 CognitoUser user = buildUserDetailFromToken(token);
                 request.setAttribute(CURRENT_USER_REQUEST_ATTRIBUTE, user);
-                chain.doFilter(request, response);
             } catch (ConstraintViolationException ex) {
                 sendErrorResponse(objectMapper, response, INTERNAL_SERVER_ERROR,
                         new RuntimeException("ConstraintViolation: JWT token has malformed data"));
             }
-        } else {
-            sendErrorResponse(objectMapper, response, UNAUTHORIZED,
-                    new AuthenticationMissingException("Authenticated JWT token not found in the request"));
         }
+
+        chain.doFilter(request, response);
     }
 
     private static CognitoUser buildUserDetailFromToken(JwtAuthenticationToken auth) {
