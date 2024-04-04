@@ -46,7 +46,7 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
-        return http
+        return http.csrf(AbstractHttpConfigurer::disable)
                 .addFilterAfter(userDetailsSettingFilter, BearerTokenAuthenticationFilter.class)
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistryCustomizer())
                 .exceptionHandling(exceptionHandlingConfigurerCustomizer())
