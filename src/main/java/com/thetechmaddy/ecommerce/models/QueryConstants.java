@@ -18,7 +18,6 @@ public class QueryConstants {
                 USING carts c
                 WHERE c.id = :cartId AND c.user_id = :userId AND ci.product_id = :productId
             """;
-    public static final String UPDATE_ORDER_LAST_ACCESS_TIME_QUERY = "UPDATE orders SET updated_at = CURRENT_TIMESTAMP WHERE id = :cartId";
     public static final String IS_CART_UNLOCKED_QUERY = """
                 SELECT EXISTS(SELECT 1 FROM carts WHERE id = :cartId AND user_id = :userId AND status = 'UN_LOCKED')
             """;
