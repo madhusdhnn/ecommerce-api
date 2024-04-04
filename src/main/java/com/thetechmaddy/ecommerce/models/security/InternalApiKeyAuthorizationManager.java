@@ -14,10 +14,11 @@ import java.util.function.Supplier;
 public class InternalApiKeyAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
     private final String internalApiKey;
-    private final InternalApiKeyParser apiKeyParser = new InternalApiKeyParser();
+    private final InternalApiKeyParser apiKeyParser;
 
     public InternalApiKeyAuthorizationManager(String internalApiKey) {
         this.internalApiKey = internalApiKey;
+        this.apiKeyParser = new InternalApiKeyParser();
     }
 
     @Override

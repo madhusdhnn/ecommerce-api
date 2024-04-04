@@ -14,15 +14,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.thetechmaddy.ecommerce.models.AppConstants.INTERNAL_API_KEY_HEADER_NAME;
+
 @RestController
-@RequestMapping("/api/user/provision")
+@RequestMapping("/api/internal")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class UserProvisioningController extends BaseController {
 
     private final UsersService usersService;
 
-    @PostMapping
-    @Parameter(in = ParameterIn.HEADER, name = "X-API-Key", required = true)
+    @PostMapping("/user-provision")
+    @Parameter(in = ParameterIn.HEADER, name = INTERNAL_API_KEY_HEADER_NAME, required = true)
     public ApiResponse<User> provisionUser(@RequestBody @Valid CognitoUser userDetails) {
         return ApiResponse.success(usersService.provisionUser(userDetails));
     }

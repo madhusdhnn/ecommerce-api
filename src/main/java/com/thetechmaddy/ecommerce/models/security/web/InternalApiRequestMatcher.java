@@ -13,7 +13,7 @@ public final class InternalApiRequestMatcher extends AbstractRequestMatcher {
 
     private static List<RequestMatcher> getApisToMatch() {
         return List.of(
-                new AntPathRequestMatcher("/api/user-provisioning")
+                new AntPathRequestMatcher("/api/internal/*")
         );
     }
 }

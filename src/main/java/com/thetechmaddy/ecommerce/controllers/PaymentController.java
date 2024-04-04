@@ -10,6 +10,8 @@ import com.thetechmaddy.ecommerce.models.payments.PaymentMode;
 import com.thetechmaddy.ecommerce.models.requests.CognitoUser;
 import com.thetechmaddy.ecommerce.models.responses.ApiResponse;
 import com.thetechmaddy.ecommerce.services.PaymentService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.thetechmaddy.ecommerce.models.AppConstants.CURRENT_USER_REQUEST_ATTRIBUTE;
+import static com.thetechmaddy.ecommerce.models.AppConstants.PAYMENT_ID_HEADER_NAME;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -35,6 +38,7 @@ public class PaymentController extends BaseController {
 
     @PostMapping("/process")
     @JsonView(value = {JsonViews.ProcessPaymentResponse.class})
+    @Parameter(in = ParameterIn.HEADER, name = PAYMENT_ID_HEADER_NAME, required = true)
     public ApiResponse<Payment> processPayment(
             @RequestAttribute(name = CURRENT_USER_REQUEST_ATTRIBUTE) CognitoUser cognitoUser,
             @RequestBody PaymentInfo paymentInfo
@@ -45,6 +49,7 @@ public class PaymentController extends BaseController {
 
     @GetMapping("/status")
     @JsonView(JsonViews.PaymentStatusResponse.class)
+    @Parameter(in = ParameterIn.HEADER, name = PAYMENT_ID_HEADER_NAME, required = true)
     public ApiResponse<Payment> getPaymentStatus() {
         Long idempotencyId = PaymentWorkflowContextHolder.getContext();
         return ApiResponse.success(paymentService.getStatus(idempotencyId));
