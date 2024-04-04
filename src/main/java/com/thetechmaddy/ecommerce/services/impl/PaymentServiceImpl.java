@@ -66,7 +66,6 @@ public class PaymentServiceImpl implements PaymentService {
             validatePaymentDetailsInputAndPayment(payment, paymentInfo);
 
             payment.setStatus(PROCESSING);
-            payment = paymentsRepository.save(payment);
 
             PaymentProvider paymentProvider = paymentProviderFactory.getPaymentProvider(payment.getPaymentMode());
             PaymentGatewayRequest paymentGatewayRequest = new PaymentGatewayRequest(
@@ -79,8 +78,6 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setTransactionId(gatewayResponse.getTransactionId());
 
             log.info(String.format("Payment: (paymentId - %d) completed with status %s and transactionId - %s", payment.getId(), payment.getStatus(), gatewayResponse.getTransactionId()));
-
-            return paymentsRepository.save(payment);
         }
 
         return payment;

@@ -1,5 +1,7 @@
 package com.thetechmaddy.ecommerce.models;
 
+import java.util.Arrays;
+
 public enum OrderStatus {
 
     /**
@@ -25,5 +27,12 @@ public enum OrderStatus {
     /**
      * Represents order cancellation
      */
-    CANCELLED
+    CANCELLED;
+
+    public static OrderStatus parse(String name) {
+        return Arrays.stream(OrderStatus.values())
+                .filter(orderStatus -> orderStatus.name().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(String.format("Unsupported order status name passed - %s", name)));
+    }
 }

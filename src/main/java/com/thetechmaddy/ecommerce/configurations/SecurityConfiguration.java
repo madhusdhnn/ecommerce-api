@@ -1,7 +1,7 @@
 package com.thetechmaddy.ecommerce.configurations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thetechmaddy.ecommerce.controllers.filters.UserAuthenticationFilter;
+import com.thetechmaddy.ecommerce.controllers.filters.UserDetailsSettingFilter;
 import com.thetechmaddy.ecommerce.models.security.CognitoGroupToGrantedAuthorityConverter;
 import com.thetechmaddy.ecommerce.models.security.InternalApiKeyAuthorizationManager;
 import com.thetechmaddy.ecommerce.models.security.web.AdminRoleApiRequestMatcher;
@@ -41,13 +41,13 @@ public class SecurityConfiguration {
 
     private final ObjectMapper objectMapper;
 
-    private final UserAuthenticationFilter userAuthenticationFilter;
+    private final UserDetailsSettingFilter userDetailsSettingFilter;
     private final CognitoGroupToGrantedAuthorityConverter cognitoGroupToGrantedAuthorityConverter;
 
     @Bean
     public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
-                .addFilterAfter(userAuthenticationFilter, BearerTokenAuthenticationFilter.class)
+                .addFilterAfter(userDetailsSettingFilter, BearerTokenAuthenticationFilter.class)
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistryCustomizer())
                 .exceptionHandling(exceptionHandlingConfigurerCustomizer())
                 .oauth2ResourceServer(oAuth2ResourceServerConfigurerCustomizer())
