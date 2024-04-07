@@ -52,22 +52,3 @@ To seed the local database use the below command in your terminal.
 Project is configured to use Swagger UI for API documentation. Visit the below URL.
 
 `http://localhost:9092/ecommerce/swagger-ui/index.html`
-
-## DevOps
-
-Run the following commands to build and publish the docker image to Amazon ECR
-
-```shell
-docker build  --no-cache -t thetechmaddy/ecommerce-api:latest .
-```
-```shell
-aws ecr get-login-password --region $AWS_REGION --profile $AWS_PROFILE | \
-docker login --username AWS --password-stdin 426464367463.dkr.ecr.us-east-1.amazonaws.com
-```
-```shell
-docker tag thetechmaddy/ecommerce-api:latest \
-426464367463.dkr.ecr.us-east-1.amazonaws.com/ecommerce-api-dev-repo:latest
-```
-```shell
-docker push 426464367463.dkr.ecr.us-east-1.amazonaws.com/ecommerce-api-dev-repo:latest
-```
